@@ -30,34 +30,34 @@
 
 DEBUG = 1
 
-default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-#default_path = "/home/soft/gsharov/application/acquisition_patterns"
-#default_path = "/net/em-support3"
-#reg_xml = 'Images-Disc[0-9]{1}/GridSquare_[0-9]{7}/Data/FoilHole_[0-9]{7}_Data_[0-9]{7}_[0-9]{7}_[0-9]{8}_[0-9]{4,6}.xml'
-#reg_xml = 'FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml'
-#reg_xml = 'k2.xml'
-#reg_xml = 'f3.xml'
-#reg_xml = 'FoilHole_1711113_Data_1709829_1709831_20190803_000431.xml'
-#reg_xml = 'FoilHole_30456232_Data_30455071_30455072_20190530_1902.xml'
-reg_xml = "FoilHole_11636390_Data_11626959_11626960_20190314_0619.xml"
-reg_xml2 = "acquisition_patterns/EpuSession.dm"
-#reg_xml2 = 'EpuSession-F3.xml'
-#reg_xml2 = 'EpuSession-K2.xml'
+#default_path = "/home/azazello/MEGA/application/acquisition_patterns"
+#default_path = "/home/gsharov/soft/application/acquisition_patterns/test"
+
+default_path = "/net/em-support3/Krios1/Gregory"
+movies_path = 'Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc'
+reg_xml = 'FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml'
 reg_mdoc = "frames.mdoc"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
+# scopeID: Cs aberration and scope name
 cs_dict = {
-    '3299': 2.7,  # Krios 1
-    '3413': 2.7,  # Krios 2
-    '3593': 2.7,  # Krios 3
-    '316': 2.25,  # Polara 1
-    '304': 2.25,  # Polara 2
-    '2366': 2.0  # F20
+    '3299': (2.7, 'Krios1'),
+    '3413': (2.7, 'Krios2'),
+    '3593': (2.7, 'Krios3'),
+    '316': (2.25, 'Polara1'),
+    '304': (2.25, 'Polara2'),
+    '2366': (2.0, 'F20')
 }
 
-# SerialEM mdoc params
+# path to raw movies folder on Krios
+kriosDict = {
+    'EF-CCD': '/net/cista1/%sGatan/',
+    'BM-Falcon': '/net/cista1/%sFalcon/'
+}
+
+# SerialEM mdoc params to parse
 paramsList = [
-    'T',
+    'T',  # Microscope ID
     #'TiltAngle',
     'Voltage',
     'Magnification',

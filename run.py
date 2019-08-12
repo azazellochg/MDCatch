@@ -43,11 +43,17 @@ from config import *
 
 '''
 
+Tested with:
+
+ + EPU 2.3.0.79 (K2, F3 in linear/count/SR) on Krios 1
+ + EPU 1.10.0.77 on Krios 2
+ + EPU 2.0.13 on Krios 3
+ - SerialEM 3.7.0, 3.7.5 (K2, K3 in count/SR)
+
+
 TODO:
 
-1) figure out counting vs super-res mode for EPU: ElectronCountingEnabled=True?
-2) add full path to gain / defects file in acqDict
-3) add pattern for movies, guessed from EPU session name or tifs location
+1) Find detector (dict?), beam tilt, vpp from SerialEM - save this values in the script!
 
 '''
 
@@ -180,8 +186,8 @@ class App(QWidget):
         if DEBUG:
             print("\n\nInput params: ",
                   [self.model.getSoftware(),
-                  self.model.getPath(),
-                  self.model.getSize()])
+                   self.model.getPath(),
+                   self.model.getSize()])
 
         matchDict = {'EPU': 'xml',
                      'SerialEM': 'mdoc'}
@@ -194,15 +200,15 @@ class App(QWidget):
 
         if fnList is not None:
             if prog == 'EPU':
-                self.model.parseImgXml(fnList[0])
-                if fnList[1] is not None:
-                    self.model.parseSessionXml(fnList[1])
+                self.model.parseImgXml(fnList)
             else:  # SerialEM
-                self.model.parseImgMdoc(fnList[0])
+                self.model.parseImgMdoc(fnList)
 
             self.model.acqDict['PtclSize'] = self.model.getSize()
-            print("Results: ", self.model.acqDict.items())
             self.model.calcDose()
+            self.model.guessDataDir(fnList)
+            print(self.model.acqDict.items())
+
 
 
 class Model:
@@ -232,7 +238,7 @@ class Model:
         self.software = soft
 
     def guessFn(self, ftype="xml"):
-        img, session = None, None
+        img = None
         regex = reg_xml if ftype == 'xml' else reg_mdoc
 
         if DEBUG:
@@ -247,12 +253,6 @@ class Model:
             if img is not None:
                 break
 
-        if ftype == "xml" and img is not None:
-            #session = os.path.join(img.split("Images-Disc")[0], reg_xml2)
-            session = reg_xml2
-            if not os.path.exists(session):
-                session = None
-
         if img is None:
             App.showDialog("ERROR",
                            "NO %s FILES WERE FOUND!\n\n"
@@ -264,7 +264,7 @@ class Model:
                            % ftype)
             return
 
-        return [img, session]
+        return img
 
     def parseImgXml(self, fn):
         tree = ET.parse(fn)
@@ -281,12 +281,30 @@ class Model:
 
             if self.acqDict['detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
                 self.acqDict['NumSubFrames'] = int(root[6][0][2][2][3][1][0].text)
+
+                # check if counting is enabled, check if super-res is enabled
+                if root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
+                    if root[6][0][2][2][0][1].text == 'true':
+                        if root[6][0][2][2][2][0].text == 'SuperResolutionFactor':
+                            sr = int(root[6][0][2][2][2][1].text)  # 1 - counting, 2 - super-res
+                            self.acqDict['mode'] = 'Counting' if sr == 1 else 'Super-resolution'
+                    else:
+                        self.acqDict['mode'] = 'Linear'
+
             else:
                 # count number of b:DoseFractionDefinition occurrences for Falcon 3
                 if root[6][0][2][2][5][0].text == 'FractionationSettings':
                     self.acqDict['NumSubFrames'] = len(list(root[6][0][2][2][5][1][0]))
                 elif root[6][0][2][2][3][0].text == 'FractionationSettings':
                     self.acqDict['NumSubFrames'] = len(list(root[6][0][2][2][3][1][0]))
+                # check if counting is enabled
+                if root[6][0][2][2][2][0].text == 'ElectronCountingEnabled' or \
+                        root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
+                    if root[6][0][2][2][2][1].text == 'true' or \
+                            root[6][0][2][2][0][1].text == 'true':
+                        self.acqDict['mode'] = 'Counting'
+                    else:
+                        self.acqDict['mode'] = 'Linear'
 
         if root[6][2][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}AccelerationVoltage':
             self.acqDict['Voltage'] = int(root[6][2][0].text)
@@ -296,7 +314,7 @@ class Model:
 
             value = str(self.acqDict['microscopeID'])
             if value in cs_dict:
-                self.acqDict['Cs'] = cs_dict[value]
+                self.acqDict['Cs'] = cs_dict[value][0]
 
         if root[6][4][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}BeamTilt':
             self.acqDict['beamTiltX'] = float(root[6][4][3][0].text)
@@ -315,15 +333,8 @@ class Model:
                 except IndexError:
                     break
 
-    def parseSessionXml(self, fn):
-        tree = ET.parse(fn)
-        root = tree.getroot()
-
-        if root[7].tag == '{http://schemas.datacontract.org/2004/07/Applications.Epu.Persistence}DoseFractionsOutputFormat':
-            self.acqDict['movieType'] = root[7].text
-
-        elif root[4].tag == '{http://schemas.datacontract.org/2004/07/Fei.Applications.Epu.Persistence}DoseFractionsOutputFormat':
-            self.acqDict['movieType'] = root[4].text
+        if 'BinaryResult.Detector' in self.acqDict:
+            self.acqDict.pop('BinaryResult.Detector')
 
     def parseImgMdoc(self, fn):
         with open(fn, 'r') as fname:
@@ -343,7 +354,7 @@ class Model:
                 self.acqDict['microscopeID'] = value
                 self.acqDict.pop('T')
                 if value in cs_dict:
-                    self.acqDict['Cs'] = cs_dict[value]
+                    self.acqDict['Cs'] = cs_dict[value][0]
 
             self.acqDict['Dose'] = float(self.acqDict.pop('ExposureDose')) / math.pow(10, -20)
             self.acqDict['AppliedDefocus'] = float(self.acqDict.pop('TargetDefocus')) * math.pow(10, -6)
@@ -368,8 +379,42 @@ class Model:
             if exp and pix:
                 dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/px/s
 
-        print("Extra output: dose per frame (e/A^2) = ", dose_per_frame,
+        print("Output: dose per frame (e/A^2) = ", dose_per_frame,
               "\ndose on camera (e/ubpx/s) = ", dose_on_camera)
+
+    def guessDataDir(self, fnList):
+        # guess folder name with movies on cista1, gain and defects for Krios
+        movieDir, gainFn, defFn = None, None, None
+
+        if self.getSoftware() == 'EPU':
+            scope = cs_dict[str(self.acqDict['microscopeID'])][1]
+            camera = self.acqDict['detector']
+
+            if 'Krios' in scope:
+                p1 = kriosDict[camera] % scope
+                session = os.path.basename(self.getPath())
+
+                if camera == 'EF-CCD':
+                    # get gain file
+                    movieDir = os.path.join(p1, "DoseFractions", session, movies_path)
+                    f1 = fnList.replace('.xml', '-gain-ref.MRC')
+                    f2 = f1.split('Images-Disc')[1]
+                    gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
+                else:
+                    movieDir = os.path.join(p1, session, movies_path)
+
+            if movieDir is not None:
+                self.acqDict['movie_path'] = movieDir
+
+        else:  # SerialEM
+            movieDir = self.getPath()
+            gainFn = os.path.join(movieDir, self.acqDict['GainReference'])
+            defFn = os.path.join(movieDir, self.acqDict['DefectFile'])
+
+        # populate dict
+        self.acqDict['movieDir'] = movieDir
+        self.acqDict['gainFile'] = gainFn
+        self.acqDict['defectsFile'] = defFn
 
 
 if __name__ == '__main__':
