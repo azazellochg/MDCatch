@@ -31,9 +31,8 @@
 DEBUG = 1
 
 #default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-#default_path = "/home/gsharov/soft/application/acquisition_patterns/test"
-
-default_path = "/net/em-support3/Krios1/Gregory"
+default_path = "/home/gsharov/soft/application/acquisition_patterns"
+#default_path = "/net/em-support3/Krios1/Gregory"
 movies_path = 'Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc'
 reg_xml = 'FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml'
 reg_mdoc = "frames.mdoc"

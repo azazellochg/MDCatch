@@ -45,21 +45,22 @@ from config import *
 
 Tested with:
 
- + EPU 2.3.0.79 (K2, F3 in linear/count/SR) on Krios 1
- + EPU 1.10.0.77 on Krios 2
- + EPU 2.0.13 on Krios 3
- - SerialEM 3.7.0, 3.7.5 (K2, K3 in count/SR)
-
+ - EPU 2.3.0.79
+ - EPU 1.10.0.77
+ - EPU 2.0.13
+ - SerialEM 3.7.0, 3.7.5
 
 TODO:
 
-1) Find detector (dict?), beam tilt, vpp from SerialEM - save this values in the script!
+1) Parse detector name, beam tilt, PhasePlateUsed from SerialEM - set this in the script!
+2) Show user values found to edit?
+3) Add help button for Path
 
 '''
 
 
 class App(QWidget):
-    """ GUI & validator """
+    """ GUI and validator """
     def __init__(self):
         super().__init__()
         self.title = 'MDCatch v0.4'
@@ -232,7 +233,8 @@ class Model:
         self.ptclSize = size
 
     def getSoftware(self):
-        return self.software
+        # some weird Qt bug adds &
+        return str(self.software).strip('&')
 
     def setSoftware(self, soft):
         self.software = soft
@@ -356,6 +358,8 @@ class Model:
                 if value in cs_dict:
                     self.acqDict['Cs'] = cs_dict[value][0]
 
+            self.acqDict['mode'] = 'Counting' if self.acqDict['Binning'] == '1' else 'Super-resolution'
+            self.acqDict.pop('Binning')
             self.acqDict['Dose'] = float(self.acqDict.pop('ExposureDose')) / math.pow(10, -20)
             self.acqDict['AppliedDefocus'] = float(self.acqDict.pop('TargetDefocus')) * math.pow(10, -6)
             self.acqDict['Voltage'] = int(self.acqDict['Voltage']) * 1000
@@ -380,7 +384,7 @@ class Model:
                 dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/px/s
 
         print("Output: dose per frame (e/A^2) = ", dose_per_frame,
-              "\ndose on camera (e/ubpx/s) = ", dose_on_camera)
+              "\n dose on camera (e/ubpx/s) = ", dose_on_camera)
 
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios
@@ -413,8 +417,8 @@ class Model:
 
         # populate dict
         self.acqDict['movieDir'] = movieDir
-        self.acqDict['gainFile'] = gainFn
-        self.acqDict['defectsFile'] = defFn
+        self.acqDict['GainReference'] = gainFn
+        self.acqDict['DefectFile'] = defFn
 
 
 if __name__ == '__main__':
