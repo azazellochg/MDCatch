@@ -31,11 +31,12 @@
 DEBUG = 1
 
 #default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-default_path = "/home/gsharov/soft/application/acquisition_patterns"
-#default_path = "/net/em-support3/Krios1/Gregory"
-movies_path = 'Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc'
-reg_xml = 'FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml'
-reg_mdoc = "frames.mdoc"
+#default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
+default_path = "/net/em-support3/Krios1/Gregory"
+
+movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
+reg_xml = "FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml"
+reg_mdoc = ".{1,}\.tif\.mdoc"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # scopeID: Cs aberration and scope name
@@ -68,5 +69,11 @@ paramsList = [
     'NumSubFrames',
     #'DateTime',
     'DefectFile',
-    'GainReference'
+    'GainReference',
+
+# still todo:
+    'BeamTiltX',
+    'BeamTiltY',
+    'PhasePlateUsed',
+    'Detector'
 ]

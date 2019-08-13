@@ -42,20 +42,26 @@ from config import *
 
 
 '''
-
+The app returns self.acqDict with all metadata.
 Tested with:
 
- - EPU 2.3.0.79
- - EPU 1.10.0.77
- - EPU 2.0.13
+ - EPU 1.10.0.77, 2.3.0.79, 2.0.13
  - SerialEM 3.7.0, 3.7.5
 
+Units:
+ - Dose, e/A^2 - total dose
+ - DoseOnCamera, e/ubpx/s
+ - DosePerFrame, e/A^2/
+ - PixelSpacing, A
+ - Voltage, keV
+ - Defocus, um
+ - Cs, mm
+ - ExposureTime, s
+
 TODO:
-
-1) Parse detector name, beam tilt, PhasePlateUsed from SerialEM - set this in the script!
-2) Show user values found to edit?
-3) Add help button for Path
-
+1) Find detector name, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
+2) Validation of path etc
+3) Help for Path
 '''
 
 
@@ -63,7 +69,7 @@ class App(QWidget):
     """ GUI and validator """
     def __init__(self):
         super().__init__()
-        self.title = 'MDCatch v0.4'
+        self.title = 'MDCatch v0.4 - metadata parser'
         self.left = 10
         self.top = 10
         self.width = 640
@@ -113,8 +119,8 @@ class App(QWidget):
 
     def addSoftware(self, name):
         self.addLabel(name, 0, 0)
-        self.addRadioButton('EPU', 0, 1, default=True)
-        self.addRadioButton('SerialEM', 0, 2)
+        self.addRadioButton("EPU", 0, 1, default=True)
+        self.addRadioButton("SerialEM", 0, 2)
 
     def addPtclSize(self, label, size='200'):
         self.addLabel(label, 2, 0)
@@ -190,14 +196,14 @@ class App(QWidget):
                    self.model.getPath(),
                    self.model.getSize()])
 
-        matchDict = {'EPU': 'xml',
-                     'SerialEM': 'mdoc'}
+        matchDict = {"EPU": 'xml',
+                     "SerialEM": 'mdoc'}
 
         prog = self.model.getSoftware()
         fnList = self.model.guessFn(matchDict[prog])
 
         if DEBUG:
-            print("Files found: ", fnList)
+            print("\nFiles found: %s\n" % fnList)
 
         if fnList is not None:
             if prog == 'EPU':
@@ -208,8 +214,9 @@ class App(QWidget):
             self.model.acqDict['PtclSize'] = self.model.getSize()
             self.model.calcDose()
             self.model.guessDataDir(fnList)
-            print(self.model.acqDict.items())
-
+            for k, v in self.model.acqDict.items():
+                print(k, v)
+            sys.exit(0)
 
 
 class Model:
@@ -233,8 +240,7 @@ class Model:
         self.ptclSize = size
 
     def getSoftware(self):
-        # some weird Qt bug adds &
-        return str(self.software).strip('&')
+        return self.software
 
     def setSoftware(self, soft):
         self.software = soft
@@ -244,7 +250,7 @@ class Model:
         regex = reg_xml if ftype == 'xml' else reg_mdoc
 
         if DEBUG:
-            print("Using regex: ", regex)
+            print("\nUsing regex: ", regex)
 
         for root, _, files in os.walk(self.getPath()):
             for f in files:
@@ -272,16 +278,13 @@ class Model:
         tree = ET.parse(fn)
         root = tree.getroot()
 
-        if root[5][1].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}pixelSize':
-            self.acqDict['PixelSpacing'] = float(root[5][1][0][0].text)
-
         if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
             self.acqDict['ExposureTime'] = float(root[6][0][2][4].text)
 
         if root[6][0][2][6].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}Name':
-            self.acqDict['detector'] = root[6][0][2][6].text
+            self.acqDict['Detector'] = root[6][0][2][6].text
 
-            if self.acqDict['detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
+            if self.acqDict['Detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
                 self.acqDict['NumSubFrames'] = int(root[6][0][2][2][3][1][0].text)
 
                 # check if counting is enabled, check if super-res is enabled
@@ -289,9 +292,9 @@ class Model:
                     if root[6][0][2][2][0][1].text == 'true':
                         if root[6][0][2][2][2][0].text == 'SuperResolutionFactor':
                             sr = int(root[6][0][2][2][2][1].text)  # 1 - counting, 2 - super-res
-                            self.acqDict['mode'] = 'Counting' if sr == 1 else 'Super-resolution'
+                            self.acqDict['Mode'] = 'Counting' if sr == 1 else 'Super-resolution'
                     else:
-                        self.acqDict['mode'] = 'Linear'
+                        self.acqDict['Mode'] = 'Linear'
 
             else:
                 # count number of b:DoseFractionDefinition occurrences for Falcon 3
@@ -304,17 +307,22 @@ class Model:
                         root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
                     if root[6][0][2][2][2][1].text == 'true' or \
                             root[6][0][2][2][0][1].text == 'true':
-                        self.acqDict['mode'] = 'Counting'
+                        self.acqDict['Mode'] = 'Counting'
                     else:
-                        self.acqDict['mode'] = 'Linear'
+                        self.acqDict['Mode'] = 'Linear'
+
+        if root[5][1].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}pixelSize':
+            self.acqDict['PixelSpacing'] = float(root[5][1][0][0].text) * math.pow(10, 10)
+            if self.acqDict['Mode'] == 'Super-resolution':
+                self.acqDict['PixelSpacing'] /= 2.0
 
         if root[6][2][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}AccelerationVoltage':
-            self.acqDict['Voltage'] = int(root[6][2][0].text)
+            self.acqDict['Voltage'] = int(root[6][2][0].text) / 1000
 
         if root[6][3][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}InstrumentID':
-            self.acqDict['microscopeID'] = int(root[6][3][3].text)
+            self.acqDict['MicroscopeID'] = int(root[6][3][3].text)
 
-            value = str(self.acqDict['microscopeID'])
+            value = str(self.acqDict['MicroscopeID'])
             if value in cs_dict:
                 self.acqDict['Cs'] = cs_dict[value][0]
 
@@ -337,6 +345,10 @@ class Model:
 
         if 'BinaryResult.Detector' in self.acqDict:
             self.acqDict.pop('BinaryResult.Detector')
+        if 'AppliedDefocus' in self.acqDict:
+            self.acqDict['AppliedDefocus'] = float(self.acqDict['AppliedDefocus']) * math.pow(10, 6)
+        if 'Dose' in self.acqDict:
+            self.acqDict['Dose'] = float(self.acqDict['Dose']) / math.pow(10, 20)
 
     def parseImgMdoc(self, fn):
         with open(fn, 'r') as fname:
@@ -353,17 +365,17 @@ class Model:
             match = re.search("D[0-9]{3,4}", self.acqDict['T'])
             if match:
                 value = match.group().replace('D', '')
-                self.acqDict['microscopeID'] = value
+                self.acqDict['MicroscopeID'] = value
                 self.acqDict.pop('T')
                 if value in cs_dict:
                     self.acqDict['Cs'] = cs_dict[value][0]
 
-            self.acqDict['mode'] = 'Counting' if self.acqDict['Binning'] == '1' else 'Super-resolution'
+            self.acqDict['Dose'] = float(self.acqDict.pop('ExposureDose'))
+            self.acqDict['AppliedDefocus'] = float(self.acqDict.pop('TargetDefocus'))
+            self.acqDict['Voltage'] = int(self.acqDict['Voltage'])
+            self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing'])
+            self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
             self.acqDict.pop('Binning')
-            self.acqDict['Dose'] = float(self.acqDict.pop('ExposureDose')) / math.pow(10, -20)
-            self.acqDict['AppliedDefocus'] = float(self.acqDict.pop('TargetDefocus')) * math.pow(10, -6)
-            self.acqDict['Voltage'] = int(self.acqDict['Voltage']) * 1000
-            self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing']) * math.pow(10, -10)
         except KeyError:
             pass
 
@@ -371,28 +383,28 @@ class Model:
         # calculate dose
         dose_per_frame, dose_on_camera = 0, 0
         numFr = int(self.acqDict['NumSubFrames'])
-        dose_total = float(self.acqDict['Dose'])  # e/m^2
+        dose_total = float(self.acqDict['Dose'])  # e/A^2
         exp = float(self.acqDict['ExposureTime'])  # s
-        if 'Binning' in self.acqDict and self.acqDict['Binning'] == '0.5':
-            pix = 2 * float(self.acqDict['PixelSpacing'])  # m
+        if self.acqDict['Mode'] == 'Super-resolution':
+            pix = 2 * float(self.acqDict['PixelSpacing'])  # A
         else:
-            pix = float(self.acqDict['PixelSpacing'])  # m
+            pix = float(self.acqDict['PixelSpacing'])  # A
 
         if numFr and dose_total:
-            dose_per_frame = dose_total / math.pow(10, 20) / numFr  # e/A^2/frame
+            dose_per_frame = dose_total / numFr  # e/A^2/frame
             if exp and pix:
-                dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/px/s
+                dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
 
-        print("Output: dose per frame (e/A^2) = ", dose_per_frame,
-              "\n dose on camera (e/ubpx/s) = ", dose_on_camera)
+        self.acqDict['DosePerFrame'] = dose_per_frame
+        self.acqDict['DoseOnCamera'] = dose_on_camera
 
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios
         movieDir, gainFn, defFn = None, None, None
 
         if self.getSoftware() == 'EPU':
-            scope = cs_dict[str(self.acqDict['microscopeID'])][1]
-            camera = self.acqDict['detector']
+            scope = cs_dict[str(self.acqDict['MicroscopeID'])][1]
+            camera = self.acqDict['Detector']
 
             if 'Krios' in scope:
                 p1 = kriosDict[camera] % scope
@@ -407,16 +419,13 @@ class Model:
                 else:
                     movieDir = os.path.join(p1, session, movies_path)
 
-            if movieDir is not None:
-                self.acqDict['movie_path'] = movieDir
-
         else:  # SerialEM
-            movieDir = self.getPath()
-            gainFn = os.path.join(movieDir, self.acqDict['GainReference'])
-            defFn = os.path.join(movieDir, self.acqDict['DefectFile'])
+            movieDir = os.path.join(self.getPath(), "*.tif")
+            gainFn = os.path.join(self.getPath(), self.acqDict['GainReference'])
+            defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
 
         # populate dict
-        self.acqDict['movieDir'] = movieDir
+        self.acqDict['MoviePath'] = movieDir
         self.acqDict['GainReference'] = gainFn
         self.acqDict['DefectFile'] = defFn
 
