@@ -38,6 +38,7 @@ class Parser:
         self.path = None
         self.software = None
         self.ptclSize = None
+        self.fn = None
         self.acqDict = dict()
 
     def setPath(self, path):
@@ -57,6 +58,12 @@ class Parser:
 
     def setSoftware(self, soft):
         self.software = soft
+
+    def setFn(self, fn):
+        self.fn = fn
+
+    def getFn(self):
+        return self.fn
 
     def guessFn(self, ftype="xml"):
         img = None
