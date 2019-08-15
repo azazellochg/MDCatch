@@ -26,7 +26,7 @@
 
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox, QVBoxLayout,
-                             QRadioButton, QPushButton, QWizard,
+                             QRadioButton, QPushButton, QWizard, QGroupBox,
                              QLineEdit, QFileDialog, QApplication, QWizardPage)
 from PyQt5.QtCore import Qt
 
@@ -66,7 +66,7 @@ class App(QWizard):
         super(App, self).__init__(parent)
         self.title = 'MDCatch v0.5 - metadata parser'
         self.width = 640
-        self.height = 180
+        self.height = 280
         self.initUI()
 
     def initUI(self):
@@ -166,7 +166,7 @@ class Page1(QWizardPage):
         return
 
     def validatePage(self):
-        # Next pressed
+        # Next is pressed, returns True or False
         App.model.setSize(self.size.text())
         if App.model.getSoftware() is None:
             App.model.setSoftware('EPU')
@@ -199,9 +199,12 @@ class Page2(QWizardPage):
     def __init__(self, parent=None):
         super(Page2, self).__init__(parent)
         self.mainLayout = QGridLayout()
+        self.mainLayout.addWidget(self.group1(), 0, 0)
+        self.mainLayout.addWidget(self.group2(), 0, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
+        # executed before showing page 2
         prog = App.model.getSoftware()
         fnList = App.model.getFn()
 
@@ -213,16 +216,105 @@ class Page2(QWizardPage):
         App.model.acqDict['PtclSize'] = App.model.getSize()
         App.model.calcDose()
         App.model.guessDataDir(fnList)
-        for k, v in App.model.acqDict.items():
-            print(k, v)
 
-        self.label1 = QLabel()
-        self.label1.setText(prog)
-        self.mainLayout.addWidget(self.label1)
+        if DEBUG:
+            for k, v in App.model.acqDict.items():
+                print(k, v)
 
-        self.label2 = QLabel()
-        self.label2.setText(App.model.acqDict['Detector'])
-        self.mainLayout.addWidget(self.label2)
+        self.setSubTitle("Found the following metadata from %s session:" % prog)
+
+        scopeID = str(App.model.acqDict['MicroscopeID'])
+        time = round(float(App.model.acqDict['ExposureTime']), 3)
+        dosepf = round(App.model.acqDict['DosePerFrame'], 2)
+        px = round(App.model.acqDict['PixelSpacing'], 3)
+
+        self.name.setText(cs_dict[scopeID][1])
+        self.kv.setText(str(App.model.acqDict['Voltage']))
+        self.cs.setText(str(App.model.acqDict['Cs']))
+        self.mag.setText(str(App.model.acqDict['Magnification']))
+        self.vpp.setText(str(App.model.acqDict['PhasePlateUsed']))
+
+        self.name2.setText(str(App.model.acqDict['Detector']))
+        self.mode.setText(str(App.model.acqDict['Mode']))
+        self.time.setText(str(time))
+        self.frames.setText(str(App.model.acqDict['NumSubFrames']))
+        self.dosepf.setText(str(dosepf))
+        self.px.setText(str(px))
+        self.gain.setText(str(App.model.acqDict['GainReference']))
+        self.defects.setText(str(App.model.acqDict['DefectFile']))
+
+    def group1(self):
+        groupBox = QGroupBox("Microscope")
+
+        name = QLabel("Name")
+        kv = QLabel("Voltage")
+        cs = QLabel("Cs")
+        mag = QLabel("Magnification")
+        vpp = QLabel("Phase plate")
+
+        self.name = QLabel()
+        self.kv = QLabel()
+        self.cs = QLabel()
+        self.mag = QLabel()
+        self.vpp = QLabel()
+
+        vbox = QGridLayout()
+        vbox.addWidget(name, 0, 0)
+        vbox.addWidget(self.name, 0, 1)
+        vbox.addWidget(kv, 1, 0)
+        vbox.addWidget(self.kv, 1, 1)
+        vbox.addWidget(cs, 2, 0)
+        vbox.addWidget(self.cs, 2, 1)
+        vbox.addWidget(mag, 3, 0)
+        vbox.addWidget(self.mag, 3, 1)
+        vbox.addWidget(vpp, 4, 0)
+        vbox.addWidget(self.vpp, 4, 1)
+        groupBox.setLayout(vbox)
+
+        return groupBox
+
+    def group2(self):
+        groupBox = QGroupBox("Detector")
+
+        name2 = QLabel("Name")
+        mode = QLabel("Mode")
+        time = QLabel("Exposure time, s")
+        frames = QLabel("Frames")
+        dosepf = QLabel("Dose per frame, e/A²")
+        px = QLabel("Pixel size, A")
+        gain = QLabel("Gain reference")
+        defects = QLabel("Defects file")
+
+        self.name2 = QLabel()
+        self.mode = QLabel()
+        self.time = QLabel()
+        self.frames = QLabel()
+        self.dosepf = QLabel()
+        self.px = QLabel()
+        self.gain = QLabel()
+        self.defects = QLabel()
+
+        vbox = QGridLayout()
+        vbox.addWidget(name2, 0, 0)
+        vbox.addWidget(self.name2, 0, 1)
+        vbox.addWidget(mode, 1, 0)
+        vbox.addWidget(self.mode, 1, 1)
+        vbox.addWidget(time, 2, 0)
+        vbox.addWidget(self.time, 2, 1)
+        vbox.addWidget(frames, 3, 0)
+        vbox.addWidget(self.frames, 3, 1)
+        vbox.addWidget(dosepf, 4, 0)
+        vbox.addWidget(self.dosepf, 4, 1)
+        vbox.addWidget(px, 5, 0)
+        vbox.addWidget(self.px, 5, 1)
+        vbox.addWidget(gain, 6, 0)
+        vbox.addWidget(self.gain, 6, 1)
+        vbox.addWidget(defects, 7, 0)
+        vbox.addWidget(self.defects, 7, 1)
+
+        groupBox.setLayout(vbox)
+
+        return groupBox
 
 
 if __name__ == '__main__':
