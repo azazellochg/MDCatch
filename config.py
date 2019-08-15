@@ -38,6 +38,9 @@ reg_xml = "FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xm
 reg_mdoc = ".{1,}\.tif\.mdoc"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
+matchDict = {"EPU": 'xml',
+             "SerialEM": 'mdoc'}
+
 # scopeID: Cs aberration and scope name
 cs_dict = {
     '3299': (2.7, 'Krios1'),

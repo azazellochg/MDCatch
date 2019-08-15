@@ -73,7 +73,7 @@ class App(QWizard):
         self.page1 = Page1()
         self.addPage(self.page1)
         self.addPage(Page2(self))
-        self.button(QWizard.NextButton).clicked.connect(self.page1.runApp)
+        #self.button(QWizard.NextButton).clicked.connect(self.page2.runApp)
         self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
         self.setWindowTitle(self.title)
         self.resize(self.width, self.height)
@@ -165,7 +165,7 @@ class Page1(QWizardPage):
         App.showDialog("Help", help_message, 'help')
         return
 
-    def runApp(self):
+    def validatePage(self):
         # Next pressed
         App.model.setSize(self.size.text())
         if App.model.getSoftware() is None:
@@ -179,28 +179,16 @@ class Page1(QWizardPage):
                    App.model.getPath(),
                    App.model.getSize()])
 
-        matchDict = {"EPU": 'xml',
-                     "SerialEM": 'mdoc'}
-
         prog = App.model.getSoftware()
         fnList = App.model.guessFn(matchDict[prog])
+
         if fnList is None:
             App.showDialog("ERROR", error_message % matchDict[prog])
-
-        if DEBUG:
-            print("\nFiles found: %s\n" % fnList)
-
-        if fnList is not None:
-            if prog == 'EPU':
-                App.model.parseImgXml(fnList)
-            else:  # SerialEM
-                App.model.parseImgMdoc(fnList)
-
-            App.model.acqDict['PtclSize'] = App.model.getSize()
-            App.model.calcDose()
-            App.model.guessDataDir(fnList)
-            for k, v in App.model.acqDict.items():
-                print(k, v)
+            return False
+        else:
+            print("\nFiles found: %s\n" % fnList) if DEBUG else ""
+            App.model.setFn(fnList)
+            return True
 
     def reset(self):
         # Back pressed
@@ -211,13 +199,30 @@ class Page2(QWizardPage):
     def __init__(self, parent=None):
         super(Page2, self).__init__(parent)
         self.mainLayout = QGridLayout()
-        self.renderPage2()
         self.setLayout(self.mainLayout)
 
-    def renderPage2(self):
+    def initializePage(self):
+        prog = App.model.getSoftware()
+        fnList = App.model.getFn()
+
+        if prog == 'EPU':
+            App.model.parseImgXml(fnList)
+        else:  # SerialEM
+            App.model.parseImgMdoc(fnList)
+
+        App.model.acqDict['PtclSize'] = App.model.getSize()
+        App.model.calcDose()
+        App.model.guessDataDir(fnList)
+        for k, v in App.model.acqDict.items():
+            print(k, v)
+
         self.label1 = QLabel()
-        self.label1.setText("test")
+        self.label1.setText(prog)
         self.mainLayout.addWidget(self.label1)
+
+        self.label2 = QLabel()
+        self.label2.setText(App.model.acqDict['Detector'])
+        self.mainLayout.addWidget(self.label2)
 
 
 if __name__ == '__main__':
