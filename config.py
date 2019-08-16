@@ -75,10 +75,10 @@ paramsList = [
     'GainReference',
 
 # still todo:
-    'BeamTiltX',
-    'BeamTiltY',
-    'PhasePlateUsed',
-    'Detector'
+    #'BeamTiltX',
+    #'BeamTiltY',
+    #'PhasePlateUsed',
+    #'Detector'
 ]
 
 help_message = """Select the following folder:\n\n

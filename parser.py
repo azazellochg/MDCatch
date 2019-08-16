@@ -88,24 +88,24 @@ class Parser:
         root = tree.getroot()
         # default values
         self.acqDict['Mode'] = 'Linear'
-        self.acqDict['NumSubFrames'] = 0
-        self.acqDict['Dose'] = 0
+        self.acqDict['NumSubFrames'] = '0'
+        self.acqDict['Dose'] = '0'
 
         if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
-            self.acqDict['ExposureTime'] = float(root[6][0][2][4].text)
+            self.acqDict['ExposureTime'] = root[6][0][2][4].text
 
         if root[6][0][2][6].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}Name':
             self.acqDict['Detector'] = root[6][0][2][6].text
 
         if self.acqDict['Detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
-            self.acqDict['NumSubFrames'] = int(root[6][0][2][2][3][1][0].text)
+            self.acqDict['NumSubFrames'] = root[6][0][2][2][3][1][0].text
 
             # check if counting is enabled, check if super-res is enabled
             if root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
                 if root[6][0][2][2][0][1].text == 'true':
                     if root[6][0][2][2][2][0].text == 'SuperResolutionFactor':
-                        sr = int(root[6][0][2][2][2][1].text)  # 1 - counting, 2 - super-res
-                        self.acqDict['Mode'] = 'Counting' if sr == 1 else 'Super-resolution'
+                        sr = root[6][0][2][2][2][1].text  # 1 - counting, 2 - super-res
+                        self.acqDict['Mode'] = 'Counting' if sr == '1' else 'Super-resolution'
 
         else:
             # count number of b:DoseFractionDefinition occurrences for Falcon 3
@@ -130,18 +130,18 @@ class Parser:
             self.acqDict['Voltage'] = int(root[6][2][0].text) / 1000
 
         if root[6][3][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}InstrumentID':
-            self.acqDict['MicroscopeID'] = int(root[6][3][3].text)
+            self.acqDict['MicroscopeID'] = root[6][3][3].text
 
-            value = str(self.acqDict['MicroscopeID'])
+            value = self.acqDict['MicroscopeID']
             if value in cs_dict:
                 self.acqDict['Cs'] = cs_dict[value][0]
 
         if root[6][4][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}BeamTilt':
-            self.acqDict['BeamTiltX'] = float(root[6][4][3][0].text)
-            self.acqDict['BeamTiltY'] = float(root[6][4][3][1].text)
+            self.acqDict['BeamTiltX'] = root[6][4][3][0].text
+            self.acqDict['BeamTiltY'] = root[6][4][3][1].text
 
         if root[6][4][28][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}NominalMagnification':
-            self.acqDict['Magnification'] = int(root[6][4][28][0].text)
+            self.acqDict['Magnification'] = root[6][4][28][0].text
 
         # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus etc.
         if root[2].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}CustomData':
@@ -160,7 +160,15 @@ class Parser:
         if 'Dose' in self.acqDict:
             self.acqDict['Dose'] = float(self.acqDict['Dose']) / math.pow(10, 20)
 
+        # convert all to str
+        for key in self.acqDict:
+            self.acqDict[key] = str(self.acqDict[key])
+
     def parseImgMdoc(self, fn):
+        # set default values
+        self.acqDict['PhasePlateUsed'] = 'false'
+        self.acqDict['Detector'] = 'EF-CCD'
+
         with open(fn, 'r') as fname:
             regex = re.compile(mdocPattern)
 
@@ -178,12 +186,12 @@ class Parser:
                 self.acqDict['MicroscopeID'] = value
                 self.acqDict.pop('T')
                 if value in cs_dict:
-                    self.acqDict['Cs'] = cs_dict[value][0]
+                    self.acqDict['Cs'] = str(cs_dict[value][0])
 
-            self.acqDict['Dose'] = float(self.acqDict.pop('ExposureDose'))
-            self.acqDict['AppliedDefocus'] = float(self.acqDict.pop('TargetDefocus'))
-            self.acqDict['Voltage'] = int(self.acqDict['Voltage'])
-            self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing'])
+            self.acqDict['Dose'] = self.acqDict.pop('ExposureDose')
+            self.acqDict['AppliedDefocus'] = self.acqDict.pop('TargetDefocus')
+            self.acqDict['Voltage'] = self.acqDict['Voltage']
+            self.acqDict['PixelSpacing'] = self.acqDict['PixelSpacing']
             self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
             self.acqDict.pop('Binning')
         except KeyError:
@@ -205,15 +213,15 @@ class Parser:
             if exp and pix:
                 dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
 
-        self.acqDict['DosePerFrame'] = dose_per_frame
-        self.acqDict['DoseOnCamera'] = dose_on_camera
+        self.acqDict['DosePerFrame'] = str(dose_per_frame)
+        self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios
-        movieDir, gainFn, defFn = None, None, None
+        movieDir, gainFn, defFn = 'None', 'None', 'None'
 
         if self.getSoftware() == 'EPU':
-            scope = cs_dict[str(self.acqDict['MicroscopeID'])][1]
+            scope = cs_dict[self.acqDict['MicroscopeID']][1]
             camera = self.acqDict['Detector']
 
             if 'Krios' in scope:

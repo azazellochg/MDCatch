@@ -25,11 +25,12 @@
 # **************************************************************************
 
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox, QVBoxLayout,
-                             QRadioButton, QPushButton, QWizard, QGroupBox,
+from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox, QHBoxLayout, QVBoxLayout,
+                             QRadioButton, QPushButton, QWizard, QGroupBox, QSizePolicy,
                              QLineEdit, QFileDialog, QApplication, QWizardPage)
 from PyQt5.QtCore import Qt
 
+import os
 import sys
 from config import *
 from parser import Parser
@@ -56,6 +57,7 @@ TODO:
 1) Get detector, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
 2) Validation of path etc
 3) Reduce size of PtclSize path and Help button
+4) vpp, pix and dose can be edited by user
 '''
 
 
@@ -73,7 +75,6 @@ class App(QWizard):
         self.page1 = Page1()
         self.addPage(self.page1)
         self.addPage(Page2(self))
-        #self.button(QWizard.NextButton).clicked.connect(self.page2.runApp)
         self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
         self.setWindowTitle(self.title)
         self.resize(self.width, self.height)
@@ -96,52 +97,71 @@ class App(QWizard):
 class Page1(QWizardPage):
     def __init__(self, parent=None):
         super(Page1, self).__init__(parent)
+        self.setSubTitle("Input parameters")
         self.mainLayout = QGridLayout()
-        self.renderPage1()
+        self.mainLayout.addLayout(self.group1(), 0, 0)
+        self.mainLayout.addLayout(self.group2(), 0, 1)
+        self.setLayout(self.mainLayout)
 
-    def renderPage1(self):
-        b1 = QLabel('Software')
-        self.mainLayout.addWidget(b1, 0, 0)
+    def group1(self):
+        vbox = QVBoxLayout()
+        label1 = QLabel('Software')
+        label2 = QLabel('Path')
+        label3 = QLabel('Particle diameter (A)')
+        vbox.addWidget(label1)
+        vbox.addWidget(label2)
+        vbox.addWidget(label3)
 
-        self.addRadioButton("EPU", 0, 1, default=True)
-        self.addRadioButton("SerialEM", 0, 2)
+        return vbox
 
-        b2 = QLabel('Path')
-        self.mainLayout.addWidget(b2, 1, 0)
+    def group2(self):
+        grid = QVBoxLayout()
 
+        hbox1 = QHBoxLayout()
+        hbox1.setAlignment(Qt.AlignLeft)
+        b1 = self.addRadioButton("EPU", default=True)
+        b2 = self.addRadioButton("SerialEM")
+        hbox1.addWidget(b1)
+        hbox1.addWidget(b2)
+        grid.addLayout(hbox1)
+
+        hbox2 = QHBoxLayout()
         self.path = QLineEdit()
         self.path.setReadOnly(True)
         self.path.setText(default_path)
-        self.mainLayout.addWidget(self.path, 1, 1, 1, 2)
 
         b3 = QPushButton('Browse')
         b3.clicked.connect(self.browseSlot)
-        self.mainLayout.addWidget(b3, 1, 3)
+        b4 = QPushButton('?')
+        b4.setFixedSize(20, 20)
+        b4.clicked.connect(self.helpSlot)
 
-        b4 = QLabel('Particle diameter (A)')
-        self.mainLayout.addWidget(b4, 2, 0)
+        hbox2.addWidget(self.path)
+        hbox2.addWidget(b3)
+        hbox2.addWidget(b4)
+        grid.addLayout(hbox2)
 
         self.size = QLineEdit()
         self.size.setValidator(QIntValidator())
         self.size.setMaxLength(4)
         self.size.setText('200')
         self.size.setAlignment(Qt.AlignRight)
-        self.mainLayout.addWidget(self.size, 2, 1, 1, 1)
+        self.size.setFixedSize(60, 20)
+        grid.addWidget(self.size)
 
-        b5 = QPushButton('Help')
-        b5.clicked.connect(self.helpSlot)
-        self.mainLayout.addWidget(b5, 3, 0)
+        return grid
 
-        self.setLayout(self.mainLayout)
-
-    def addRadioButton(self, choice, r, c, rows=1, cols=1, default=False):
+    def addRadioButton(self, choice, default=False):
         rb = QRadioButton(choice)
         if default:
             rb.setChecked(True)
 
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        rb.setSizePolicy(sizePolicy)
+
         rb.toggled.connect(lambda: self.btnstate(rb))
 
-        self.mainLayout.addWidget(rb, r, c, rows, cols)
+        return rb
 
     def btnstate(self, bt):
         if bt.isChecked():
@@ -205,6 +225,7 @@ class Page2(QWizardPage):
 
     def initializePage(self):
         # executed before showing page 2
+        acqDict = App.model.acqDict
         prog = App.model.getSoftware()
         fnList = App.model.getFn()
 
@@ -213,7 +234,7 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
-        App.model.acqDict['PtclSize'] = App.model.getSize()
+        acqDict['PtclSize'] = App.model.getSize()
         App.model.calcDose()
         App.model.guessDataDir(fnList)
 
@@ -223,25 +244,25 @@ class Page2(QWizardPage):
 
         self.setSubTitle("Found the following metadata from %s session:" % prog)
 
-        scopeID = str(App.model.acqDict['MicroscopeID'])
-        time = round(float(App.model.acqDict['ExposureTime']), 3)
-        dosepf = round(App.model.acqDict['DosePerFrame'], 2)
-        px = round(App.model.acqDict['PixelSpacing'], 3)
+        scopeID = acqDict['MicroscopeID']
+        time = round(float(acqDict['ExposureTime']), 3)
+        dosepf = round(float(acqDict['DosePerFrame']), 2)
+        px = round(float(acqDict['PixelSpacing']), 3)
 
         self.name.setText(cs_dict[scopeID][1])
-        self.kv.setText(str(App.model.acqDict['Voltage']))
-        self.cs.setText(str(App.model.acqDict['Cs']))
-        self.mag.setText(str(App.model.acqDict['Magnification']))
-        self.vpp.setText(str(App.model.acqDict['PhasePlateUsed']))
+        self.kv.setText(acqDict['Voltage'])
+        self.cs.setText(acqDict['Cs'])
+        self.mag.setText(acqDict['Magnification'])
+        self.vpp.setText(acqDict['PhasePlateUsed'])
 
-        self.name2.setText(str(App.model.acqDict['Detector']))
-        self.mode.setText(str(App.model.acqDict['Mode']))
+        self.name2.setText(acqDict['Detector'])
+        self.mode.setText(acqDict['Mode'])
         self.time.setText(str(time))
-        self.frames.setText(str(App.model.acqDict['NumSubFrames']))
+        self.frames.setText(acqDict['NumSubFrames'])
         self.dosepf.setText(str(dosepf))
         self.px.setText(str(px))
-        self.gain.setText(str(App.model.acqDict['GainReference']))
-        self.defects.setText(str(App.model.acqDict['DefectFile']))
+        self.gain.setText(os.path.basename(acqDict['GainReference']))
+        self.defects.setText(os.path.basename(acqDict['DefectFile']))
 
     def group1(self):
         groupBox = QGroupBox("Microscope")
@@ -259,16 +280,14 @@ class Page2(QWizardPage):
         self.vpp = QLabel()
 
         vbox = QGridLayout()
-        vbox.addWidget(name, 0, 0)
-        vbox.addWidget(self.name, 0, 1)
-        vbox.addWidget(kv, 1, 0)
-        vbox.addWidget(self.kv, 1, 1)
-        vbox.addWidget(cs, 2, 0)
-        vbox.addWidget(self.cs, 2, 1)
-        vbox.addWidget(mag, 3, 0)
-        vbox.addWidget(self.mag, 3, 1)
-        vbox.addWidget(vpp, 4, 0)
-        vbox.addWidget(self.vpp, 4, 1)
+        for num, i in enumerate([name, kv, cs, mag, vpp]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.name, self.kv,
+                                 self.cs, self.mag,
+                                 self.vpp]):
+            vbox.addWidget(i, num, 1)
+
         groupBox.setLayout(vbox)
 
         return groupBox
@@ -295,22 +314,15 @@ class Page2(QWizardPage):
         self.defects = QLabel()
 
         vbox = QGridLayout()
-        vbox.addWidget(name2, 0, 0)
-        vbox.addWidget(self.name2, 0, 1)
-        vbox.addWidget(mode, 1, 0)
-        vbox.addWidget(self.mode, 1, 1)
-        vbox.addWidget(time, 2, 0)
-        vbox.addWidget(self.time, 2, 1)
-        vbox.addWidget(frames, 3, 0)
-        vbox.addWidget(self.frames, 3, 1)
-        vbox.addWidget(dosepf, 4, 0)
-        vbox.addWidget(self.dosepf, 4, 1)
-        vbox.addWidget(px, 5, 0)
-        vbox.addWidget(self.px, 5, 1)
-        vbox.addWidget(gain, 6, 0)
-        vbox.addWidget(self.gain, 6, 1)
-        vbox.addWidget(defects, 7, 0)
-        vbox.addWidget(self.defects, 7, 1)
+        for num, i in enumerate([name2, mode, time, frames,
+                                 dosepf, px, gain, defects]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.name2, self.mode,
+                                 self.time, self.frames,
+                                 self.dosepf, self.px,
+                                 self.gain, self.defects]):
+            vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
 
