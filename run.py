@@ -25,13 +25,16 @@
 # **************************************************************************
 
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox, QHBoxLayout, QVBoxLayout,
-                             QRadioButton, QPushButton, QWizard, QGroupBox, QSizePolicy,
-                             QLineEdit, QFileDialog, QApplication, QWizardPage)
+from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
+                             QHBoxLayout, QVBoxLayout, QRadioButton,
+                             QPushButton, QWizard, QGroupBox,
+                             QSizePolicy, QLineEdit, QFileDialog,
+                             QComboBox, QApplication, QWizardPage)
 from PyQt5.QtCore import Qt
 
 import os
 import sys
+
 from config import *
 from parser import Parser
 
@@ -56,8 +59,7 @@ Units:
 TODO:
 1) Get detector, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
 2) Validation of path etc
-3) Reduce size of PtclSize path and Help button
-4) vpp, pix and dose can be edited by user
+3) vpp, pix and dose can be edited by user
 '''
 
 
@@ -74,8 +76,10 @@ class App(QWizard):
     def initUI(self):
         self.page1 = Page1()
         self.addPage(self.page1)
-        self.addPage(Page2(self))
+        self.page2 = Page2()
+        self.addPage(self.page2)
         self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
+        self.button(QWizard.FinishButton).clicked.connect(self.page2.onFinish)
         self.setWindowTitle(self.title)
         self.resize(self.width, self.height)
 
@@ -238,10 +242,6 @@ class Page2(QWizardPage):
         App.model.calcDose()
         App.model.guessDataDir(fnList)
 
-        if DEBUG:
-            for k, v in App.model.acqDict.items():
-                print(k, v)
-
         self.setSubTitle("Found the following metadata from %s session:" % prog)
 
         scopeID = acqDict['MicroscopeID']
@@ -253,7 +253,12 @@ class Page2(QWizardPage):
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
         self.mag.setText(acqDict['Magnification'])
-        self.vpp.setText(acqDict['PhasePlateUsed'])
+
+        vpp = acqDict['PhasePlateUsed']
+        if vpp == 'true':
+            self.vpp.setCurrentIndex(0)
+        else:
+            self.vpp.setCurrentIndex(1)
 
         self.name2.setText(acqDict['Detector'])
         self.mode.setText(acqDict['Mode'])
@@ -277,7 +282,11 @@ class Page2(QWizardPage):
         self.kv = QLabel()
         self.cs = QLabel()
         self.mag = QLabel()
-        self.vpp = QLabel()
+
+        self.vpp = QComboBox()
+        vpp_values = ['true', 'false']
+        self.vpp.addItems(vpp_values)
+        self.vpp.setFixedSize(60, 20)
 
         vbox = QGridLayout()
         for num, i in enumerate([name, kv, cs, mag, vpp]):
@@ -308,10 +317,18 @@ class Page2(QWizardPage):
         self.mode = QLabel()
         self.time = QLabel()
         self.frames = QLabel()
-        self.dosepf = QLabel()
-        self.px = QLabel()
         self.gain = QLabel()
         self.defects = QLabel()
+
+        self.dosepf = QLineEdit()
+        self.dosepf.setFixedSize(50, 20)
+        self.dosepf.setMaxLength(4)
+        self.dosepf.setAlignment(Qt.AlignRight)
+
+        self.px = QLineEdit()
+        self.px.setFixedSize(50, 20)
+        self.px.setMaxLength(4)
+        self.px.setAlignment(Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name2, mode, time, frames,
@@ -327,6 +344,16 @@ class Page2(QWizardPage):
         groupBox.setLayout(vbox)
 
         return groupBox
+
+    def onFinish(self):
+        # Finish pressed
+        App.model.acqDict['DosePerFrame'] = self.dosepf.text()
+        App.model.acqDict['PixelSpacing'] = self.px.text()
+        App.model.acqDict['PhasePlateUsed'] = self.vpp.currentText()
+
+        if DEBUG:
+            for k, v in App.model.acqDict.items():
+                print(k, v)
 
 
 if __name__ == '__main__':
