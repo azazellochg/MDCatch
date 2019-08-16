@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # **************************************************************************
 # *
 # * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk) [1]
@@ -26,19 +24,19 @@
 # *
 # **************************************************************************
 
-from PyQt5.QtGui import QFont, QIntValidator
-from PyQt5.QtWidgets import (QWidget, QGridLayout, QLabel, QMessageBox,
-                             QComboBox, QRadioButton, QPushButton,
-                             QLineEdit, QFileDialog, QApplication)
+from PyQt5.QtGui import QIntValidator
+from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
+                             QHBoxLayout, QVBoxLayout, QRadioButton,
+                             QPushButton, QWizard, QGroupBox,
+                             QSizePolicy, QLineEdit, QFileDialog,
+                             QComboBox, QApplication, QWizardPage)
 from PyQt5.QtCore import Qt
 
-import sys
-import re
 import os
-import math
-import xml.etree.cElementTree as ET
+import sys
 
 from config import *
+from parser import Parser
 
 
 '''
@@ -59,122 +57,39 @@ Units:
  - ExposureTime, s
 
 TODO:
-1) Find detector name, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
+1) Get detector, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
 2) Validation of path etc
-3) Help for Path
+3) vpp, pix and dose can be edited by user
 '''
 
 
-class App(QWidget):
-    """ GUI and validator """
-    def __init__(self):
-        super().__init__()
-        self.title = 'MDCatch v0.4 - metadata parser'
-        self.left = 10
-        self.top = 10
+class App(QWizard):
+    model = Parser()
+
+    def __init__(self, parent=None):
+        super(App, self).__init__(parent)
+        self.title = 'MDCatch v0.5 - metadata parser'
         self.width = 640
-        self.height = 180
-        self.model = Model()
-        self.mainLayout = QGridLayout()
+        self.height = 280
         self.initUI()
 
     def initUI(self):
+        self.page1 = Page1()
+        self.addPage(self.page1)
+        self.page2 = Page2()
+        self.addPage(self.page2)
+        self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
+        self.button(QWizard.FinishButton).clicked.connect(self.page2.onFinish)
         self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-
-        self.addSoftware('Software')
-        self.addDirBrowser('Path')
-        self.addPtclSize('Particle diameter (A)', '200')
-        self.addRunButton('RUN!', 3, 0, 75, True)
-
-        self.setLayout(self.mainLayout)
-        self.show()
-
-    def addLabel(self, name, r, c):
-        lb = QLabel(name)
-        self.mainLayout.addWidget(lb, r, c, 1, 1)
-
-    def addScope(self, keys, name, r, c, rows=1, cols=1):
-        self.cb = QComboBox()
-        self.cb.addItems(keys)
-
-        cbLabel = QLabel(name)
-        cbLabel.setBuddy(self.cb)
-
-        self.mainLayout.addWidget(cbLabel, r, c, rows, cols)
-        self.mainLayout.addWidget(self.cb, r, c+1, rows, cols)
-
-    def addRadioButton(self, choice, r, c, rows=1, cols=1, default=False):
-        rb = QRadioButton(choice)
-        if default:
-            rb.setChecked(True)
-
-        rb.toggled.connect(lambda: self.btnstate(rb))
-
-        self.mainLayout.addWidget(rb, r, c, rows, cols)
-
-    def btnstate(self, bt):
-        if bt.isChecked():
-            self.model.setSoftware(bt.text())
-
-    def addSoftware(self, name):
-        self.addLabel(name, 0, 0)
-        self.addRadioButton("EPU", 0, 1, default=True)
-        self.addRadioButton("SerialEM", 0, 2)
-
-    def addPtclSize(self, label, size='200'):
-        self.addLabel(label, 2, 0)
-        self.le = QLineEdit()
-        self.le.setValidator(QIntValidator())
-        self.le.setMaxLength(4)
-        self.le.setText(size)
-        self.le.setAlignment(Qt.AlignRight)
-
-        self.mainLayout.addWidget(self.le, 2, 1, 1, 1)
-
-    def addRunButton(self, name, r, c, weight, bold=False):
-        bt = QPushButton(name)
-
-        font = QFont()
-        font.setBold(bold)
-        font.setWeight(weight)
-        bt.setFont(font)
-
-        bt.clicked.connect(self.runApp)
-        bt.setDefault(True)
-
-        self.mainLayout.addWidget(bt, r, c)
-
-    def addDirBrowser(self, name):
-        self.addLabel(name, 1, 0)
-
-        self.lineEdit = QLineEdit()
-        self.lineEdit.setReadOnly(True)
-        self.lineEdit.setText(default_path)
-
-        bt = QPushButton('Browse')
-        bt.clicked.connect(self.browseSlot)
-
-        self.mainLayout.addWidget(self.lineEdit, 1, 1, 1, 2)
-        self.mainLayout.addWidget(bt, 1, 3)
-
-    def browseSlot(self):
-        # called when user pressed Browse
-        path = QFileDialog.getExistingDirectory(self, "Select Directory",
-                                                default_path,
-                                                QFileDialog.ShowDirsOnly)
-        if path:
-            self.model.setPath(path)
-            self.refreshPath()
-
-    def refreshPath(self):
-        # update line widget with selected path
-        self.lineEdit.setText(self.model.getPath())
+        self.resize(self.width, self.height)
 
     @staticmethod
-    def showDialog(title, text, extra=None):
+    def showDialog(title, text, mtype='error', extra=None):
         msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
+        if mtype == 'error':
+            msg.setIcon(QMessageBox.Critical)
+        else:
+            msg.setIcon(QMessageBox.Information)
         msg.setWindowTitle(title)
         msg.setText(text)
         if extra is not None:
@@ -182,256 +97,268 @@ class App(QWidget):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-    def runApp(self):
-        # RUN pressed
-        self.model.setSize(self.le.text())
-        if self.model.getSoftware() is None:
-            self.model.setSoftware('EPU')
-        if self.model.getPath() is None:
-            self.model.setPath(default_path)
+
+class Page1(QWizardPage):
+    def __init__(self, parent=None):
+        super(Page1, self).__init__(parent)
+        self.setSubTitle("Input parameters")
+        self.mainLayout = QGridLayout()
+        self.mainLayout.addLayout(self.group1(), 0, 0)
+        self.mainLayout.addLayout(self.group2(), 0, 1)
+        self.setLayout(self.mainLayout)
+
+    def group1(self):
+        vbox = QVBoxLayout()
+        label1 = QLabel('Software')
+        label2 = QLabel('Path')
+        label3 = QLabel('Particle diameter (A)')
+        vbox.addWidget(label1)
+        vbox.addWidget(label2)
+        vbox.addWidget(label3)
+
+        return vbox
+
+    def group2(self):
+        grid = QVBoxLayout()
+
+        hbox1 = QHBoxLayout()
+        hbox1.setAlignment(Qt.AlignLeft)
+        b1 = self.addRadioButton("EPU", default=True)
+        b2 = self.addRadioButton("SerialEM")
+        hbox1.addWidget(b1)
+        hbox1.addWidget(b2)
+        grid.addLayout(hbox1)
+
+        hbox2 = QHBoxLayout()
+        self.path = QLineEdit()
+        self.path.setReadOnly(True)
+        self.path.setText(default_path)
+
+        b3 = QPushButton('Browse')
+        b3.clicked.connect(self.browseSlot)
+        b4 = QPushButton('?')
+        b4.setFixedSize(20, 20)
+        b4.clicked.connect(self.helpSlot)
+
+        hbox2.addWidget(self.path)
+        hbox2.addWidget(b3)
+        hbox2.addWidget(b4)
+        grid.addLayout(hbox2)
+
+        self.size = QLineEdit()
+        self.size.setValidator(QIntValidator())
+        self.size.setMaxLength(4)
+        self.size.setText('200')
+        self.size.setAlignment(Qt.AlignRight)
+        self.size.setFixedSize(60, 20)
+        grid.addWidget(self.size)
+
+        return grid
+
+    def addRadioButton(self, choice, default=False):
+        rb = QRadioButton(choice)
+        if default:
+            rb.setChecked(True)
+
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        rb.setSizePolicy(sizePolicy)
+
+        rb.toggled.connect(lambda: self.btnstate(rb))
+
+        return rb
+
+    def btnstate(self, bt):
+        if bt.isChecked():
+            App.model.setSoftware(bt.text())
+
+    def browseSlot(self):
+        # called when user pressed Browse
+        path = QFileDialog.getExistingDirectory(self, "Select Directory",
+                                                default_path,
+                                                QFileDialog.ShowDirsOnly)
+        if path:
+            App.model.setPath(path)
+            self.refreshPath()
+
+    def refreshPath(self):
+        # update line widget with selected path
+        self.path.setText(App.model.getPath())
+
+    def helpSlot(self):
+        # called when pressed ?
+        App.showDialog("Help", help_message, 'help')
+        return
+
+    def validatePage(self):
+        # Next is pressed, returns True or False
+        App.model.setSize(self.size.text())
+        if App.model.getSoftware() is None:
+            App.model.setSoftware('EPU')
+        if App.model.getPath() is None:
+            App.model.setPath(default_path)
 
         if DEBUG:
             print("\n\nInput params: ",
-                  [self.model.getSoftware(),
-                   self.model.getPath(),
-                   self.model.getSize()])
+                  [App.model.getSoftware(),
+                   App.model.getPath(),
+                   App.model.getSize()])
 
-        matchDict = {"EPU": 'xml',
-                     "SerialEM": 'mdoc'}
+        prog = App.model.getSoftware()
+        fnList = App.model.guessFn(matchDict[prog])
 
-        prog = self.model.getSoftware()
-        fnList = self.model.guessFn(matchDict[prog])
-
-        if DEBUG:
-            print("\nFiles found: %s\n" % fnList)
-
-        if fnList is not None:
-            if prog == 'EPU':
-                self.model.parseImgXml(fnList)
-            else:  # SerialEM
-                self.model.parseImgMdoc(fnList)
-
-            self.model.acqDict['PtclSize'] = self.model.getSize()
-            self.model.calcDose()
-            self.model.guessDataDir(fnList)
-            for k, v in self.model.acqDict.items():
-                print(k, v)
-            sys.exit(0)
-
-
-class Model:
-    """ XML / MDOC parser """
-    def __init__(self):
-        self.path = None
-        self.software = None
-        self.ptclSize = None
-        self.acqDict = dict()
-
-    def setPath(self, path):
-        self.path = path
-
-    def getPath(self):
-        return self.path
-
-    def getSize(self):
-        return self.ptclSize
-
-    def setSize(self, size):
-        self.ptclSize = size
-
-    def getSoftware(self):
-        return self.software
-
-    def setSoftware(self, soft):
-        self.software = soft
-
-    def guessFn(self, ftype="xml"):
-        img = None
-        regex = reg_xml if ftype == 'xml' else reg_mdoc
-
-        if DEBUG:
-            print("\nUsing regex: ", regex)
-
-        for root, _, files in os.walk(self.getPath()):
-            for f in files:
-                m = re.compile(regex).match(f)
-                if m is not None:
-                    img = os.path.join(root, f)
-                    break
-            if img is not None:
-                break
-
-        if img is None:
-            App.showDialog("ERROR",
-                           "NO %s FILES WERE FOUND!\n\n"
-                           "Please make sure that you selected correct folder:\n"
-                           "   1) For EPU session it will be the folder on "
-                           "/net/em-support3/ with Images-DiscX folder inside.\n"
-                           "   2) For SerialEM session it will be the folder "
-                           "on /net/cista1/ that contains tif and mdoc files inside.\n"
-                           % ftype)
-            return
-
-        return img
-
-    def parseImgXml(self, fn):
-        tree = ET.parse(fn)
-        root = tree.getroot()
-
-        if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
-            self.acqDict['ExposureTime'] = float(root[6][0][2][4].text)
-
-        if root[6][0][2][6].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}Name':
-            self.acqDict['Detector'] = root[6][0][2][6].text
-
-            if self.acqDict['Detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
-                self.acqDict['NumSubFrames'] = int(root[6][0][2][2][3][1][0].text)
-
-                # check if counting is enabled, check if super-res is enabled
-                if root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
-                    if root[6][0][2][2][0][1].text == 'true':
-                        if root[6][0][2][2][2][0].text == 'SuperResolutionFactor':
-                            sr = int(root[6][0][2][2][2][1].text)  # 1 - counting, 2 - super-res
-                            self.acqDict['Mode'] = 'Counting' if sr == 1 else 'Super-resolution'
-                    else:
-                        self.acqDict['Mode'] = 'Linear'
-
-            else:
-                # count number of b:DoseFractionDefinition occurrences for Falcon 3
-                if root[6][0][2][2][5][0].text == 'FractionationSettings':
-                    self.acqDict['NumSubFrames'] = len(list(root[6][0][2][2][5][1][0]))
-                elif root[6][0][2][2][3][0].text == 'FractionationSettings':
-                    self.acqDict['NumSubFrames'] = len(list(root[6][0][2][2][3][1][0]))
-                # check if counting is enabled
-                if root[6][0][2][2][2][0].text == 'ElectronCountingEnabled' or \
-                        root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
-                    if root[6][0][2][2][2][1].text == 'true' or \
-                            root[6][0][2][2][0][1].text == 'true':
-                        self.acqDict['Mode'] = 'Counting'
-                    else:
-                        self.acqDict['Mode'] = 'Linear'
-
-        if root[5][1].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}pixelSize':
-            self.acqDict['PixelSpacing'] = float(root[5][1][0][0].text) * math.pow(10, 10)
-            if self.acqDict['Mode'] == 'Super-resolution':
-                self.acqDict['PixelSpacing'] /= 2.0
-
-        if root[6][2][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}AccelerationVoltage':
-            self.acqDict['Voltage'] = int(root[6][2][0].text) / 1000
-
-        if root[6][3][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}InstrumentID':
-            self.acqDict['MicroscopeID'] = int(root[6][3][3].text)
-
-            value = str(self.acqDict['MicroscopeID'])
-            if value in cs_dict:
-                self.acqDict['Cs'] = cs_dict[value][0]
-
-        if root[6][4][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}BeamTilt':
-            self.acqDict['beamTiltX'] = float(root[6][4][3][0].text)
-            self.acqDict['beamTiltY'] = float(root[6][4][3][1].text)
-
-        if root[6][4][28][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}NominalMagnification':
-            self.acqDict['Magnification'] = int(root[6][4][28][0].text)
-
-        # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus etc.
-        if root[2].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}CustomData':
-            i = 0
-            while i < 8:
-                try:
-                    self.acqDict[root[2][i][0].text] = root[2][i][1].text
-                    i += 1
-                except IndexError:
-                    break
-
-        if 'BinaryResult.Detector' in self.acqDict:
-            self.acqDict.pop('BinaryResult.Detector')
-        if 'AppliedDefocus' in self.acqDict:
-            self.acqDict['AppliedDefocus'] = float(self.acqDict['AppliedDefocus']) * math.pow(10, 6)
-        if 'Dose' in self.acqDict:
-            self.acqDict['Dose'] = float(self.acqDict['Dose']) / math.pow(10, 20)
-
-    def parseImgMdoc(self, fn):
-        with open(fn, 'r') as fname:
-            regex = re.compile(mdocPattern)
-
-            for line in fname:
-                match = regex.match(line)
-                if match and match.groupdict()['var'] in paramsList:
-                    key = match.groupdict()['var']
-                    self.acqDict[key] = match.groupdict()['value'].strip()
-
-        try:
-            # rename a few keys to match EPU
-            match = re.search("D[0-9]{3,4}", self.acqDict['T'])
-            if match:
-                value = match.group().replace('D', '')
-                self.acqDict['MicroscopeID'] = value
-                self.acqDict.pop('T')
-                if value in cs_dict:
-                    self.acqDict['Cs'] = cs_dict[value][0]
-
-            self.acqDict['Dose'] = float(self.acqDict.pop('ExposureDose'))
-            self.acqDict['AppliedDefocus'] = float(self.acqDict.pop('TargetDefocus'))
-            self.acqDict['Voltage'] = int(self.acqDict['Voltage'])
-            self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing'])
-            self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
-            self.acqDict.pop('Binning')
-        except KeyError:
-            pass
-
-    def calcDose(self):
-        # calculate dose
-        dose_per_frame, dose_on_camera = 0, 0
-        numFr = int(self.acqDict['NumSubFrames'])
-        dose_total = float(self.acqDict['Dose'])  # e/A^2
-        exp = float(self.acqDict['ExposureTime'])  # s
-        if self.acqDict['Mode'] == 'Super-resolution':
-            pix = 2 * float(self.acqDict['PixelSpacing'])  # A
+        if fnList is None:
+            App.showDialog("ERROR", error_message % matchDict[prog])
+            return False
         else:
-            pix = float(self.acqDict['PixelSpacing'])  # A
+            print("\nFiles found: %s\n" % fnList) if DEBUG else ""
+            App.model.setFn(fnList)
+            return True
 
-        if numFr and dose_total:
-            dose_per_frame = dose_total / numFr  # e/A^2/frame
-            if exp and pix:
-                dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
+    def reset(self):
+        # Back pressed
+        App.model.acqDict.clear()
 
-        self.acqDict['DosePerFrame'] = dose_per_frame
-        self.acqDict['DoseOnCamera'] = dose_on_camera
 
-    def guessDataDir(self, fnList):
-        # guess folder name with movies on cista1, gain and defects for Krios
-        movieDir, gainFn, defFn = None, None, None
+class Page2(QWizardPage):
+    def __init__(self, parent=None):
+        super(Page2, self).__init__(parent)
+        self.mainLayout = QGridLayout()
+        self.mainLayout.addWidget(self.group1(), 0, 0)
+        self.mainLayout.addWidget(self.group2(), 0, 1)
+        self.setLayout(self.mainLayout)
 
-        if self.getSoftware() == 'EPU':
-            scope = cs_dict[str(self.acqDict['MicroscopeID'])][1]
-            camera = self.acqDict['Detector']
+    def initializePage(self):
+        # executed before showing page 2
+        acqDict = App.model.acqDict
+        prog = App.model.getSoftware()
+        fnList = App.model.getFn()
 
-            if 'Krios' in scope:
-                p1 = kriosDict[camera] % scope
-                session = os.path.basename(self.getPath())
-
-                if camera == 'EF-CCD':
-                    # get gain file
-                    movieDir = os.path.join(p1, "DoseFractions", session, movies_path)
-                    f1 = fnList.replace('.xml', '-gain-ref.MRC')
-                    f2 = f1.split('Images-Disc')[1]
-                    gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
-                else:
-                    movieDir = os.path.join(p1, session, movies_path)
-
+        if prog == 'EPU':
+            App.model.parseImgXml(fnList)
         else:  # SerialEM
-            movieDir = os.path.join(self.getPath(), "*.tif")
-            gainFn = os.path.join(self.getPath(), self.acqDict['GainReference'])
-            defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
+            App.model.parseImgMdoc(fnList)
 
-        # populate dict
-        self.acqDict['MoviePath'] = movieDir
-        self.acqDict['GainReference'] = gainFn
-        self.acqDict['DefectFile'] = defFn
+        acqDict['PtclSize'] = App.model.getSize()
+        App.model.calcDose()
+        App.model.guessDataDir(fnList)
+
+        self.setSubTitle("Found the following metadata from %s session:" % prog)
+
+        scopeID = acqDict['MicroscopeID']
+        time = round(float(acqDict['ExposureTime']), 3)
+        dosepf = round(float(acqDict['DosePerFrame']), 2)
+        px = round(float(acqDict['PixelSpacing']), 3)
+
+        self.name.setText(cs_dict[scopeID][1])
+        self.kv.setText(acqDict['Voltage'])
+        self.cs.setText(acqDict['Cs'])
+        self.mag.setText(acqDict['Magnification'])
+
+        vpp = acqDict['PhasePlateUsed']
+        if vpp == 'true':
+            self.vpp.setCurrentIndex(0)
+        else:
+            self.vpp.setCurrentIndex(1)
+
+        self.name2.setText(acqDict['Detector'])
+        self.mode.setText(acqDict['Mode'])
+        self.time.setText(str(time))
+        self.frames.setText(acqDict['NumSubFrames'])
+        self.dosepf.setText(str(dosepf))
+        self.px.setText(str(px))
+        self.gain.setText(os.path.basename(acqDict['GainReference']))
+        self.defects.setText(os.path.basename(acqDict['DefectFile']))
+
+    def group1(self):
+        groupBox = QGroupBox("Microscope")
+
+        name = QLabel("Name")
+        kv = QLabel("Voltage")
+        cs = QLabel("Cs")
+        mag = QLabel("Magnification")
+        vpp = QLabel("Phase plate")
+
+        self.name = QLabel()
+        self.kv = QLabel()
+        self.cs = QLabel()
+        self.mag = QLabel()
+
+        self.vpp = QComboBox()
+        vpp_values = ['true', 'false']
+        self.vpp.addItems(vpp_values)
+        self.vpp.setFixedSize(60, 20)
+
+        vbox = QGridLayout()
+        for num, i in enumerate([name, kv, cs, mag, vpp]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.name, self.kv,
+                                 self.cs, self.mag,
+                                 self.vpp]):
+            vbox.addWidget(i, num, 1)
+
+        groupBox.setLayout(vbox)
+
+        return groupBox
+
+    def group2(self):
+        groupBox = QGroupBox("Detector")
+
+        name2 = QLabel("Name")
+        mode = QLabel("Mode")
+        time = QLabel("Exposure time, s")
+        frames = QLabel("Frames")
+        dosepf = QLabel("Dose per frame, e/A²")
+        px = QLabel("Pixel size, A")
+        gain = QLabel("Gain reference")
+        defects = QLabel("Defects file")
+
+        self.name2 = QLabel()
+        self.mode = QLabel()
+        self.time = QLabel()
+        self.frames = QLabel()
+        self.gain = QLabel()
+        self.defects = QLabel()
+
+        self.dosepf = QLineEdit()
+        self.dosepf.setFixedSize(50, 20)
+        self.dosepf.setMaxLength(4)
+        self.dosepf.setAlignment(Qt.AlignRight)
+
+        self.px = QLineEdit()
+        self.px.setFixedSize(50, 20)
+        self.px.setMaxLength(4)
+        self.px.setAlignment(Qt.AlignRight)
+
+        vbox = QGridLayout()
+        for num, i in enumerate([name2, mode, time, frames,
+                                 dosepf, px, gain, defects]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.name2, self.mode,
+                                 self.time, self.frames,
+                                 self.dosepf, self.px,
+                                 self.gain, self.defects]):
+            vbox.addWidget(i, num, 1)
+
+        groupBox.setLayout(vbox)
+
+        return groupBox
+
+    def onFinish(self):
+        # Finish pressed
+        App.model.acqDict['DosePerFrame'] = self.dosepf.text()
+        App.model.acqDict['PixelSpacing'] = self.px.text()
+        App.model.acqDict['PhasePlateUsed'] = self.vpp.currentText()
+
+        if DEBUG:
+            for k, v in App.model.acqDict.items():
+                print(k, v)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
-    ex = App()
+    wizard = App()
+    wizard.show()
     sys.exit(app.exec_())

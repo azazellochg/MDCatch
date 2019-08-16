@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # **************************************************************************
 # *
 # * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk) [1]
@@ -31,13 +29,17 @@
 DEBUG = 1
 
 #default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-#default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
-default_path = "/net/em-support3/Krios1/Gregory"
+default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
+#default_path = "/net/em-support3/Krios1/Gregory"
 
 movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
 reg_xml = "FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml"
+#reg_xml = "polara1.xml"
 reg_mdoc = ".{1,}\.tif\.mdoc"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
+
+matchDict = {"EPU": 'xml',
+             "SerialEM": 'mdoc'}
 
 # scopeID: Cs aberration and scope name
 cs_dict = {
@@ -49,10 +51,11 @@ cs_dict = {
     '2366': (2.0, 'F20')
 }
 
-# path to raw movies folder on Krios
-kriosDict = {
+# path to raw movies folder on Krios etc
+pathDict = {
     'EF-CCD': '/net/cista1/%sGatan/',
-    'BM-Falcon': '/net/cista1/%sFalcon/'
+    'BM-Falcon': '/net/cista1/%sFalcon/',
+    'Polara1': '/net/cista1/Polara1/',
 }
 
 # SerialEM mdoc params to parse
@@ -72,8 +75,22 @@ paramsList = [
     'GainReference',
 
 # still todo:
-    'BeamTiltX',
-    'BeamTiltY',
-    'PhasePlateUsed',
-    'Detector'
+    #'BeamTiltX',
+    #'BeamTiltY',
+    #'PhasePlateUsed',
+    #'Detector'
 ]
+
+help_message = """Select the following folder:\n\n
+   1) For EPU session it will be the folder on 
+/net/em-support3/ with Images-DiscX folder inside.\n
+   2) For SerialEM session it will be the folder 
+on /net/cista1/ that contains tif and mdoc files inside.\n"""
+
+error_message = """NO %s FILES WERE FOUND!\n\n
+Please make sure that you selected correct folder:\n
+   1) For EPU session it will be the folder on 
+/net/em-support3/ with Images-DiscX folder inside.\n
+   2) For SerialEM session it will be the folder 
+on /net/cista1/ that contains tif and mdoc files inside.\n"""
+
