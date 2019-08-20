@@ -29,11 +29,13 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
                              QPushButton, QWizard, QGroupBox,
                              QSizePolicy, QLineEdit, QFileDialog,
-                             QComboBox, QApplication, QWizardPage)
+                             QComboBox, QApplication, QWizardPage,
+                             QCheckBox)
 from PyQt5.QtCore import Qt
 
 import os
 import sys
+import subprocess
 
 from config import *
 from parser import Parser
@@ -58,8 +60,8 @@ Units:
 
 TODO:
 1) Get detector, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
-2) Validation of path etc
-3) vpp, pix and dose can be edited by user
+2) Validation of path?
+3) Fix file path for relion? Where do we launch this?
 '''
 
 
@@ -68,7 +70,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.5 - metadata parser'
+        self.title = 'MDCatch v0.6 - metadata parser'
         self.width = 640
         self.height = 280
         self.initUI()
@@ -225,6 +227,7 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
+        self.mainLayout.addWidget(self.relionBox(), 1, 0)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -345,6 +348,12 @@ class Page2(QWizardPage):
 
         return groupBox
 
+    def relionBox(self):
+        self.setRln = QCheckBox("Setup Relion scheduler")
+        self.setRln.setChecked(True)
+
+        return self.setRln
+
     def onFinish(self):
         # Finish pressed
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
@@ -354,6 +363,44 @@ class Page2(QWizardPage):
         if DEBUG:
             for k, v in App.model.acqDict.items():
                 print(k, v)
+
+        if self.setRln.isChecked():
+            self.setupSchedule(App.model.acqDict)
+
+    def setupSchedule(self, paramDict):
+        fnDir = os.path.join(schedule_dir, 'preprocess')
+        bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
+        vpp = 1 if paramDict['PhasePlateUsed'] == 'true' else 0
+        # set box_size = PtclSize + 10%
+        box_size = round(int(paramDict['PtclSize']) / float(paramDict['PixelSpacing']) * 1.1, 0)
+
+        mapDict = {'Cs': paramDict['Cs'],
+                   'dose_rate': paramDict['DosePerFrame'],
+                   'mask_diam': paramDict['PtclSize'],
+                   'angpix': paramDict['PixelSpacing'],
+                   'voltage': paramDict['Voltage'],
+                   'motioncorr_bin': bin,
+                   'box_size': box_size,
+                   'is_VPP': vpp,
+                   'gainref': paramDict['GainReference'],
+                   'movies_wildcard': paramDict['MoviePath'],
+                   'mtf_file': paramDict['MTF']}
+
+        cmdList = list()
+
+        for key in mapDict:
+            if key != 'gainref' or mapDict['gainref'] != 'None':  # do not add empty gainref
+                cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
+                    fnDir, key, str(mapDict[key]))
+                cmdList.append(cmd)
+
+        if DEBUG:
+            for cmd in cmdList:
+                print(cmd)
+
+        cmd = '\n'.join([line for line in cmdList])
+        proc = subprocess.check_output(cmd, shell=True)
+        proc.wait()
 
 
 if __name__ == '__main__':

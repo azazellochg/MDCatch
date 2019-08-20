@@ -31,10 +31,10 @@ DEBUG = 1
 #default_path = "/home/azazello/MEGA/application/acquisition_patterns"
 default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
 #default_path = "/net/em-support3/Krios1/Gregory"
+schedule_dir = "Schedules"
 
 movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
 reg_xml = "FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml"
-#reg_xml = "polara1.xml"
 reg_mdoc = ".{1,}\.tif\.mdoc"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
@@ -49,6 +49,15 @@ cs_dict = {
     '316': (2.25, 'Polara1'),
     '304': (2.25, 'Polara2'),
     '2366': (2.0, 'F20')
+}
+
+# path to MTF files for Relion (300 kV only)
+
+mtf_dict = {
+    'Falcon3-count': '/beegfs3/otfp/MTFs/mtf_falcon3EC_300kV.star',
+    'Falcon3-linear': '/beegfs3/otfp/MTFs/mtf_falcon2_300kV.star',
+    'K2': '/beegfs3/otfp/MTFs/mtf_k2_300kV.star',
+    'K3': '/beegfs3/otfp/MTFs/mtf_K3_300kv_nocds.star'
 }
 
 # path to raw movies folder on Krios etc

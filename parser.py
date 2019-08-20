@@ -219,11 +219,11 @@ class Parser:
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios
         movieDir, gainFn, defFn = 'None', 'None', 'None'
+        self.acqDict['MTF'] = ''
+        camera = self.acqDict['Detector']
+        scope = cs_dict[self.acqDict['MicroscopeID']][1]
 
         if self.getSoftware() == 'EPU':
-            scope = cs_dict[self.acqDict['MicroscopeID']][1]
-            camera = self.acqDict['Detector']
-
             if 'Krios' in scope:
                 p1 = pathDict[camera] % scope
                 session = os.path.basename(self.getPath())
@@ -234,16 +234,42 @@ class Parser:
                     f1 = fnList.replace('.xml', '-gain-ref.MRC')
                     f2 = f1.split('Images-Disc')[1]
                     gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
+
+                    # get MTF file for Gatan
+                    if 'Krios3' in scope:
+                        self.acqDict['MTF'] = mtf_dict['K3']
+                    else:
+                        self.acqDict['MTF'] = mtf_dict['K2']
                 else:
                     movieDir = os.path.join(p1, session, movies_path)
 
+                    # get MTF file for Falcon
+                    if self.acqDict['Mode'] == 'Linear':
+                        self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
+                    else:
+                        self.acqDict['MTF'] = mtf_dict['Falcon3-count']
+
             elif 'Polara1' in scope:
                 movieDir = pathDict[scope]
+                self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
 
         else:  # SerialEM
             movieDir = os.path.join(self.getPath(), "*.tif")
             gainFn = os.path.join(self.getPath(), self.acqDict['GainReference'])
             defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
+
+            if camera == 'EF-CCD':
+                # get MTF file for Gatan
+                if 'Krios3' or 'Polara2' in scope:
+                    self.acqDict['MTF'] = mtf_dict['K3']
+                else:
+                    self.acqDict['MTF'] = mtf_dict['K2']
+            else:
+                # get MTF file for Falcon
+                if self.acqDict['Mode'] == 'Linear':
+                    self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
+                else:
+                    self.acqDict['MTF'] = mtf_dict['Falcon3-count']
 
         # populate dict
         self.acqDict['MoviePath'] = movieDir
