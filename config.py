@@ -51,6 +51,15 @@ cs_dict = {
     '2366': (2.0, 'F20')
 }
 
+# path to MTF files for Relion (300 kV only)
+
+mtf_dict = {
+    'Falcon3-count': '/beegfs3/otfp/MTFs/mtf_falcon3EC_300kV.star',
+    'Falcon3-linear': '/beegfs3/otfp/MTFs/mtf_falcon2_300kV.star',
+    'K2': '/beegfs3/otfp/MTFs/mtf_k2_300kV.star',
+    'K3': '/beegfs3/otfp/MTFs/mtf_K3_300kv_nocds.star'
+}
+
 # path to raw movies folder on Krios etc
 pathDict = {
     'EF-CCD': '/net/cista1/%sGatan/',

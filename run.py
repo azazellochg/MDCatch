@@ -35,6 +35,7 @@ from PyQt5.QtCore import Qt
 
 import os
 import sys
+import subprocess
 
 from config import *
 from parser import Parser
@@ -383,7 +384,7 @@ class Page2(QWizardPage):
                    'is_VPP': vpp,
                    'gainref': paramDict['GainReference'],
                    'movies_wildcard': paramDict['MoviePath'],
-                   'mtf_file': '?'}
+                   'mtf_file': paramDict['MTF']}
 
         cmdList = list()
 
@@ -396,6 +397,10 @@ class Page2(QWizardPage):
         if DEBUG:
             for cmd in cmdList:
                 print(cmd)
+
+        cmd = '\n'.join([line for line in cmdList])
+        proc = subprocess.check_output(cmd, shell=True)
+        proc.wait()
 
 
 if __name__ == '__main__':
