@@ -370,7 +370,8 @@ class Page2(QWizardPage):
     def setupSchedule(self, paramDict):
         fnDir = os.path.join(schedule_dir, 'preprocess')
         bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-        vpp = 1 if paramDict['PhasePlateUsed'] == 'true' else 0
+        vpp = True if paramDict['PhasePlateUsed'] == 'true' else False
+        gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
         # set box_size = PtclSize + 10%
         box_size = round(int(paramDict['PtclSize']) / float(paramDict['PixelSpacing']) * 1.1, 0)
 
@@ -382,17 +383,17 @@ class Page2(QWizardPage):
                    'motioncorr_bin': bin,
                    'box_size': box_size,
                    'is_VPP': vpp,
-                   'gainref': paramDict['GainReference'],
-                   'movies_wildcard': paramDict['MoviePath'],
+                   'gainref': gain,
+                   'movies_wildcard': '"%s"' % paramDict['MoviePath'],
                    'mtf_file': paramDict['MTF']}
 
         cmdList = list()
 
         for key in mapDict:
-            if key != 'gainref' or mapDict['gainref'] != 'None':  # do not add empty gainref
-                cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
-                    fnDir, key, str(mapDict[key]))
-                cmdList.append(cmd)
+            cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
+                fnDir, key, str(mapDict[key]))
+            cmdList.append(cmd)
+        cmdList.append('relion_scheduler --schedule %s --run ' % fnDir)
 
         if DEBUG:
             for cmd in cmdList:
