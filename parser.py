@@ -72,6 +72,11 @@ class Parser:
         if DEBUG:
             print("\nUsing regex: ", regex)
 
+        # check if Images-DicsX exists in the path
+        if ftype == 'xml':
+            if not (os.path.exists('Images-Disc1') or os.path.exists('Images-Disc2')):
+                return None
+
         for root, _, files in os.walk(self.getPath()):
             for f in files:
                 m = re.compile(regex).match(f)
@@ -90,6 +95,7 @@ class Parser:
         self.acqDict['Mode'] = 'Linear'
         self.acqDict['NumSubFrames'] = '0'
         self.acqDict['Dose'] = '0'
+        self.acqDict['OpticalGroup'] = 'opticsGroup1'
 
         if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
             self.acqDict['ExposureTime'] = root[6][0][2][4].text
@@ -168,6 +174,7 @@ class Parser:
         # set default values
         self.acqDict['PhasePlateUsed'] = 'false'
         self.acqDict['Detector'] = 'EF-CCD'
+        self.acqDict['OpticalGroup'] = 'opticsGroup1'
 
         with open(fn, 'r') as fname:
             regex = re.compile(mdocPattern)
@@ -190,9 +197,8 @@ class Parser:
 
             self.acqDict['Dose'] = self.acqDict.pop('ExposureDose')
             self.acqDict['AppliedDefocus'] = self.acqDict.pop('TargetDefocus')
-            self.acqDict['Voltage'] = self.acqDict['Voltage']
-            self.acqDict['PixelSpacing'] = self.acqDict['PixelSpacing']
             self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
+            self.acqDict['PhasePlateUsed'] = self.acqDict.pop('PhasePlateInserted')
             self.acqDict.pop('Binning')
         except KeyError:
             pass

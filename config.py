@@ -52,7 +52,6 @@ cs_dict = {
 }
 
 # path to MTF files for Relion (300 kV only)
-
 mtf_dict = {
     'Falcon3-count': '/beegfs3/otfp/MTFs/mtf_falcon3EC_300kV.star',
     'Falcon3-linear': '/beegfs3/otfp/MTFs/mtf_falcon2_300kV.star',
@@ -82,12 +81,10 @@ paramsList = [
     #'DateTime',
     'DefectFile',
     'GainReference',
-
-# still todo:
-    #'BeamTiltX',
-    #'BeamTiltY',
-    #'PhasePlateUsed',
-    #'Detector'
+    'OpticalGroup',
+    'PhasePlateInserted',
+    'BeamTiltCompensation',
+    'Beamtilt'
 ]
 
 help_message = """Select the following folder:\n\n

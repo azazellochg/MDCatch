@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # **************************************************************************
 # *
 # * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk) [1]
@@ -46,7 +47,7 @@ The app returns self.acqDict with all metadata.
 Tested with:
 
  - EPU 1.10.0.77, 2.3.0.79, 2.0.13
- - SerialEM 3.7.0, 3.7.5
+ - SerialEM 3.7, 3.8
 
 Units:
  - Dose, e/A^2 - total dose
@@ -58,10 +59,6 @@ Units:
  - Cs, mm
  - ExposureTime, s
 
-TODO:
-1) Get detector, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
-2) Validation of path?
-3) Fix file path for relion? Where do we launch this?
 '''
 
 
@@ -83,6 +80,8 @@ class App(QWizard):
         self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
         self.button(QWizard.FinishButton).clicked.connect(self.page2.onFinish)
         self.setWindowTitle(self.title)
+        self.setWindowFlags(self.windowFlags() | Qt.CustomizeWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.resize(self.width, self.height)
 
     @staticmethod
@@ -258,7 +257,7 @@ class Page2(QWizardPage):
         self.mag.setText(acqDict['Magnification'])
 
         vpp = acqDict['PhasePlateUsed']
-        if vpp == 'true':
+        if vpp in ['true', 'True']:
             self.vpp.setCurrentIndex(0)
         else:
             self.vpp.setCurrentIndex(1)
@@ -370,7 +369,7 @@ class Page2(QWizardPage):
     def setupSchedule(self, paramDict):
         fnDir = os.path.join(schedule_dir, 'preprocess')
         bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-        vpp = True if paramDict['PhasePlateUsed'] == 'true' else False
+        vpp = True if paramDict['PhasePlateUsed'] in ['true', 'True'] else False
         gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
         # set box_size = PtclSize + 10%
         box_size = round(int(paramDict['PtclSize']) / float(paramDict['PixelSpacing']) * 1.1, 0)
@@ -385,7 +384,8 @@ class Page2(QWizardPage):
                    'is_VPP': vpp,
                    'gainref': gain,
                    'movies_wildcard': '"%s"' % paramDict['MoviePath'],
-                   'mtf_file': paramDict['MTF']}
+                   'mtf_file': paramDict['MTF'],
+                   'optics_group': paramDict['OpticalGroup']}
 
         cmdList = list()
 
