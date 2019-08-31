@@ -40,6 +40,12 @@ class Parser:
         self.ptclSize = None
         self.fn = None
         self.acqDict = dict()
+        # set default values
+        self.acqDict['Mode'] = 'Linear'
+        self.acqDict['NumSubFrames'] = '0'
+        self.acqDict['Dose'] = '0'
+        self.acqDict['OpticalGroup'] = 'opticsGroup1'
+        self.acqDict['PhasePlateUsed'] = 'false'
 
     def setPath(self, path):
         self.path = path
@@ -72,6 +78,11 @@ class Parser:
         if DEBUG:
             print("\nUsing regex: ", regex)
 
+        # check if Images-DicsX exists in the path
+        if ftype == 'xml':
+            if not (os.path.exists(os.path.join(self.getPath(), 'Images-Disc1'))):
+                return None
+
         for root, _, files in os.walk(self.getPath()):
             for f in files:
                 m = re.compile(regex).match(f)
@@ -86,10 +97,6 @@ class Parser:
     def parseImgXml(self, fn):
         tree = ET.parse(fn)
         root = tree.getroot()
-        # default values
-        self.acqDict['Mode'] = 'Linear'
-        self.acqDict['NumSubFrames'] = '0'
-        self.acqDict['Dose'] = '0'
 
         if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
             self.acqDict['ExposureTime'] = root[6][0][2][4].text
@@ -111,9 +118,9 @@ class Parser:
             # count number of b:DoseFractionDefinition occurrences for Falcon 3
             if len(list(root[6][0][2][2])) > 2:
                 if root[6][0][2][2][5][0].text == 'FractionationSettings':
-                    self.acqDict['NumSubFrames'] = len(list(root[6][0][2][2][5][1][0]))
+                    self.acqDict['NumSubFrames'] = str(len(list(root[6][0][2][2][5][1][0])))
                 elif root[6][0][2][2][3][0].text == 'FractionationSettings':
-                    self.acqDict['NumSubFrames'] = len(list(root[6][0][2][2][3][1][0]))
+                    self.acqDict['NumSubFrames'] = str(len(list(root[6][0][2][2][3][1][0])))
                 # check if counting is enabled
                 if root[6][0][2][2][2][0].text == 'ElectronCountingEnabled' or \
                         root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
@@ -122,12 +129,12 @@ class Parser:
                         self.acqDict['Mode'] = 'Counting'
 
         if root[5][1].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}pixelSize':
-            self.acqDict['PixelSpacing'] = float(root[5][1][0][0].text) * math.pow(10, 10)
+            self.acqDict['PixelSpacing'] = str(float(root[5][1][0][0].text) * math.pow(10, 10))
             if self.acqDict['Mode'] == 'Super-resolution':
                 self.acqDict['PixelSpacing'] /= 2.0
 
         if root[6][2][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}AccelerationVoltage':
-            self.acqDict['Voltage'] = int(root[6][2][0].text) / 1000
+            self.acqDict['Voltage'] = str(int(root[6][2][0].text) / 1000)
 
         if root[6][3][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}InstrumentID':
             self.acqDict['MicroscopeID'] = root[6][3][3].text
@@ -156,17 +163,16 @@ class Parser:
         if 'BinaryResult.Detector' in self.acqDict:
             self.acqDict.pop('BinaryResult.Detector')
         if 'AppliedDefocus' in self.acqDict:
-            self.acqDict['AppliedDefocus'] = float(self.acqDict['AppliedDefocus']) * math.pow(10, 6)
+            self.acqDict['AppliedDefocus'] = str(float(self.acqDict['AppliedDefocus']) * math.pow(10, 6))
         if 'Dose' in self.acqDict:
-            self.acqDict['Dose'] = float(self.acqDict['Dose']) / math.pow(10, 20)
+            self.acqDict['Dose'] = str(float(self.acqDict['Dose']) / math.pow(10, 20))
 
         # convert all to str
         for key in self.acqDict:
             self.acqDict[key] = str(self.acqDict[key])
 
     def parseImgMdoc(self, fn):
-        # set default values
-        self.acqDict['PhasePlateUsed'] = 'false'
+        # SerialEM is used only for K2/K3 cameras
         self.acqDict['Detector'] = 'EF-CCD'
 
         with open(fn, 'r') as fname:
@@ -180,6 +186,7 @@ class Parser:
 
         try:
             # rename a few keys to match EPU
+            # T = SerialEM: Acquired on Tecnai Polara D304
             match = re.search("D[0-9]{3,4}", self.acqDict['T'])
             if match:
                 value = match.group().replace('D', '')
@@ -190,15 +197,14 @@ class Parser:
 
             self.acqDict['Dose'] = self.acqDict.pop('ExposureDose')
             self.acqDict['AppliedDefocus'] = self.acqDict.pop('TargetDefocus')
-            self.acqDict['Voltage'] = self.acqDict['Voltage']
-            self.acqDict['PixelSpacing'] = self.acqDict['PixelSpacing']
             self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
+            self.acqDict['PhasePlateUsed'] = self.acqDict.pop('PhasePlateInserted')
             self.acqDict.pop('Binning')
         except KeyError:
             pass
 
     def calcDose(self):
-        # calculate dose
+        # calculate dose rate per unbinned px
         dose_per_frame, dose_on_camera = 0, 0
         numFr = int(self.acqDict['NumSubFrames'])
         dose_total = float(self.acqDict['Dose'])  # e/A^2
@@ -218,6 +224,7 @@ class Parser:
 
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios
+        # the code below is LMB-specific
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         self.acqDict['MTF'] = ''
         camera = self.acqDict['Detector']
@@ -230,8 +237,8 @@ class Parser:
 
                 if camera == 'EF-CCD':
                     # get gain file
-                    movieDir = os.path.join(p1, "DoseFractions", session, movies_path)
-                    f1 = fnList.replace('.xml', '-gain-ref.MRC')
+                    movieDir = os.path.join(p1, "DoseFractions", session, epu_movies_path)
+                    f1 = fnList.replace('.xml', '-gain-ref.MRC')  # TODO: check if gain is always named this way
                     f2 = f1.split('Images-Disc')[1]
                     gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
 
@@ -241,7 +248,7 @@ class Parser:
                     else:
                         self.acqDict['MTF'] = mtf_dict['K2']
                 else:
-                    movieDir = os.path.join(p1, session, movies_path)
+                    movieDir = os.path.join(p1, session, epu_movies_path)
 
                     # get MTF file for Falcon
                     if self.acqDict['Mode'] == 'Linear':
@@ -256,7 +263,8 @@ class Parser:
         else:  # SerialEM
             movieDir = os.path.join(self.getPath(), "*.tif")
             gainFn = os.path.join(self.getPath(), self.acqDict['GainReference'])
-            defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
+            if 'DefectFile' in self.acqDict:
+                defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
 
             if camera == 'EF-CCD':
                 # get MTF file for Gatan

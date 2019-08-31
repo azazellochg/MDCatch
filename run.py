@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # **************************************************************************
 # *
 # * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk) [1]
@@ -29,16 +30,12 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
                              QPushButton, QWizard, QGroupBox,
                              QSizePolicy, QLineEdit, QFileDialog,
-                             QComboBox, QApplication, QWizardPage,
-                             QCheckBox)
+                             QComboBox, QApplication, QWizardPage)
 from PyQt5.QtCore import Qt
-
-import os
 import sys
-import subprocess
 
-from config import *
 from parser import Parser
+from schedule import *
 
 
 '''
@@ -46,7 +43,7 @@ The app returns self.acqDict with all metadata.
 Tested with:
 
  - EPU 1.10.0.77, 2.3.0.79, 2.0.13
- - SerialEM 3.7.0, 3.7.5
+ - SerialEM 3.7, 3.8
 
 Units:
  - Dose, e/A^2 - total dose
@@ -58,10 +55,6 @@ Units:
  - Cs, mm
  - ExposureTime, s
 
-TODO:
-1) Get detector, beam tilt, vpp from SerialEM - add "AddToNextFrameStackMdoc key value" before R in SerialEM script
-2) Validation of path?
-3) Fix file path for relion? Where do we launch this?
 '''
 
 
@@ -70,7 +63,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.6 - metadata parser'
+        self.title = 'MDCatch v0.7 - metadata parser'
         self.width = 640
         self.height = 280
         self.initUI()
@@ -83,6 +76,8 @@ class App(QWizard):
         self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
         self.button(QWizard.FinishButton).clicked.connect(self.page2.onFinish)
         self.setWindowTitle(self.title)
+        self.setWindowFlags(self.windowFlags() | Qt.CustomizeWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.resize(self.width, self.height)
 
     @staticmethod
@@ -150,7 +145,7 @@ class Page1(QWizardPage):
         self.size = QLineEdit()
         self.size.setValidator(QIntValidator())
         self.size.setMaxLength(4)
-        self.size.setText('200')
+        self.size.setText(part_size)
         self.size.setAlignment(Qt.AlignRight)
         self.size.setFixedSize(60, 20)
         grid.addWidget(self.size)
@@ -227,7 +222,8 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
-        self.mainLayout.addWidget(self.relionBox(), 1, 0)
+        self.mainLayout.addWidget(self.relionBt(), 1, 0)
+        self.mainLayout.addWidget(self.scipionBt(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -258,7 +254,7 @@ class Page2(QWizardPage):
         self.mag.setText(acqDict['Magnification'])
 
         vpp = acqDict['PhasePlateUsed']
-        if vpp == 'true':
+        if vpp in ['true', 'True']:
             self.vpp.setCurrentIndex(0)
         else:
             self.vpp.setCurrentIndex(1)
@@ -348,11 +344,16 @@ class Page2(QWizardPage):
 
         return groupBox
 
-    def relionBox(self):
-        self.setRln = QCheckBox("Setup Relion scheduler")
+    def relionBt(self):
+        self.setRln = QRadioButton("Start Relion scheduler")
         self.setRln.setChecked(True)
 
         return self.setRln
+
+    def scipionBt(self):
+        self.setScp = QRadioButton("Start Scipion project")
+
+        return self.setScp
 
     def onFinish(self):
         # Finish pressed
@@ -365,42 +366,9 @@ class Page2(QWizardPage):
                 print(k, v)
 
         if self.setRln.isChecked():
-            self.setupSchedule(App.model.acqDict)
-
-    def setupSchedule(self, paramDict):
-        fnDir = os.path.join(schedule_dir, 'preprocess')
-        bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-        vpp = 1 if paramDict['PhasePlateUsed'] == 'true' else 0
-        # set box_size = PtclSize + 10%
-        box_size = round(int(paramDict['PtclSize']) / float(paramDict['PixelSpacing']) * 1.1, 0)
-
-        mapDict = {'Cs': paramDict['Cs'],
-                   'dose_rate': paramDict['DosePerFrame'],
-                   'mask_diam': paramDict['PtclSize'],
-                   'angpix': paramDict['PixelSpacing'],
-                   'voltage': paramDict['Voltage'],
-                   'motioncorr_bin': bin,
-                   'box_size': box_size,
-                   'is_VPP': vpp,
-                   'gainref': paramDict['GainReference'],
-                   'movies_wildcard': paramDict['MoviePath'],
-                   'mtf_file': paramDict['MTF']}
-
-        cmdList = list()
-
-        for key in mapDict:
-            if key != 'gainref' or mapDict['gainref'] != 'None':  # do not add empty gainref
-                cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
-                    fnDir, key, str(mapDict[key]))
-                cmdList.append(cmd)
-
-        if DEBUG:
-            for cmd in cmdList:
-                print(cmd)
-
-        cmd = '\n'.join([line for line in cmdList])
-        proc = subprocess.check_output(cmd, shell=True)
-        proc.wait()
+            setupRelion(App.model.acqDict)
+        else:
+            setupScipion(App.model.acqDict)
 
 
 if __name__ == '__main__':
