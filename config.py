@@ -28,18 +28,23 @@
 
 DEBUG = 1
 
-#default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
+default_path = "/home/azazello/MEGA/application/acquisition_patterns"
+#default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
 #default_path = "/net/em-support3/Krios1/Gregory"
 schedule_dir = "Schedules"
+template_json = "template.json"
+output_json = "workflow.json"
 
-movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
+epu_movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
 reg_xml = "FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml"
 reg_mdoc = ".{1,}\.tif\.mdoc"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 matchDict = {"EPU": 'xml',
              "SerialEM": 'mdoc'}
+
+# default particle diameter (has to be a string)
+part_size = '200'
 
 # scopeID: Cs aberration and scope name
 cs_dict = {
@@ -81,8 +86,10 @@ paramsList = [
     #'DateTime',
     'DefectFile',
     'GainReference',
+
+    # params below are added to mdoc using "AddToNextFrameStackMdoc key value"
     'OpticalGroup',
-    'PhasePlateInserted',
+    'PhasePlateInserted',  # later renamed to PhasePlateUsed in parser.py
     'BeamTiltCompensation',
     'Beamtilt'
 ]
@@ -99,4 +106,3 @@ Please make sure that you selected correct folder:\n
 /net/em-support3/ with Images-DiscX folder inside.\n
    2) For SerialEM session it will be the folder 
 on /net/cista1/ that contains tif and mdoc files inside.\n"""
-
