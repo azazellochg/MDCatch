@@ -246,7 +246,7 @@ class Page2(QWizardPage):
         scopeID = acqDict['MicroscopeID']
         time = round(float(acqDict['ExposureTime']), 3)
         dosepf = round(float(acqDict['DosePerFrame']), 2)
-        px = round(float(acqDict['PixelSpacing']), 3)
+        px = round(float(acqDict['PixelSpacing']), 4)
 
         self.name.setText(cs_dict[scopeID][1])
         self.kv.setText(acqDict['Voltage'])
@@ -326,7 +326,7 @@ class Page2(QWizardPage):
 
         self.px = QLineEdit()
         self.px.setFixedSize(50, 20)
-        self.px.setMaxLength(4)
+        self.px.setMaxLength(5)
         self.px.setAlignment(Qt.AlignRight)
 
         vbox = QGridLayout()
