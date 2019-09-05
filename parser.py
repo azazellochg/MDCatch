@@ -243,7 +243,7 @@ class Parser:
                     gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
 
                     # get MTF file for Gatan
-                    if 'Krios3' in scope:
+                    if scope == 'Krios3':
                         self.acqDict['MTF'] = mtf_dict['K3']
                     else:
                         self.acqDict['MTF'] = mtf_dict['K2']
@@ -256,7 +256,7 @@ class Parser:
                     else:
                         self.acqDict['MTF'] = mtf_dict['Falcon3-count']
 
-            elif 'Polara1' in scope:
+            elif scope == 'Polara1':
                 movieDir = pathDict[scope]
                 self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
 
@@ -268,7 +268,7 @@ class Parser:
 
             if camera == 'EF-CCD':
                 # get MTF file for Gatan
-                if 'Krios3' or 'Polara2' in scope:
+                if scope in ['Krios3', 'Polara2']:
                     self.acqDict['MTF'] = mtf_dict['K3']
                 else:
                     self.acqDict['MTF'] = mtf_dict['K2']

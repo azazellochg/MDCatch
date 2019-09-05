@@ -326,7 +326,7 @@ class Page2(QWizardPage):
 
         self.px = QLineEdit()
         self.px.setFixedSize(50, 20)
-        self.px.setMaxLength(4)
+        self.px.setMaxLength(5)
         self.px.setAlignment(Qt.AlignRight)
 
         vbox = QGridLayout()
