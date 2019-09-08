@@ -134,7 +134,7 @@ class Page1(QWizardPage):
         b3 = QPushButton('Browse')
         b3.clicked.connect(self.browseSlot)
         b4 = QPushButton('?')
-        b4.setFixedSize(20, 20)
+        b4.setFixedSize(20, 25)
         b4.clicked.connect(self.helpSlot)
 
         hbox2.addWidget(self.path)
@@ -170,8 +170,9 @@ class Page1(QWizardPage):
 
     def browseSlot(self):
         # called when user pressed Browse
+        folder = default_path if self.path.text() is None else self.path.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
-                                                default_path,
+                                                folder,
                                                 QFileDialog.ShowDirsOnly)
         if path:
             App.model.setPath(path)
@@ -214,6 +215,7 @@ class Page1(QWizardPage):
     def reset(self):
         # Back pressed
         App.model.acqDict.clear()
+        App.model.__init__()
 
 
 class Page2(QWizardPage):
@@ -351,7 +353,7 @@ class Page2(QWizardPage):
         return self.setRln
 
     def scipionBt(self):
-        self.setScp = QRadioButton("Start Scipion project")
+        self.setScp = QRadioButton("Start Scipion workflow")
 
         return self.setScp
 
