@@ -4,6 +4,7 @@ It parses EPU xml and SerialEM mdoc files, associated with a data collection ses
 
 * To run: python3 run.py
 * Parameters: edit config.py
+* If you want to use Relion 3.1 scheduling you will need Schedules folder with a predefined template. For Scipion, template.json is used as a starting point. Both Relion or Scipion should be in PATH so the app can launch them.
 * Extra: header.py can parse tif movie header directly, without libtiff. At the moment it's not used by the app.
 
 If you don't have PyQt5 in your system python3 and then run:
