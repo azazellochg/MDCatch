@@ -104,9 +104,8 @@ venv.bak/
 .mypy_cache/
 
 # other stuff
+*~
 examples/
 Schedules/
-venv/
 .idea/
-*~
 workflow.json

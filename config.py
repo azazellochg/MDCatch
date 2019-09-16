@@ -28,9 +28,9 @@
 
 DEBUG = 1
 
-default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-#default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
-#default_path = "/net/em-support3/Krios1/Gregory"
+default_path = "/home/azazello/soft/MDCatch/examples"
+#default_path = "/home/gsharov/soft/MDCatch/examples"
+#default_path = "/net/em-support3/"
 schedule_dir = "Schedules"
 template_json = "template.json"
 output_json = "workflow.json"
