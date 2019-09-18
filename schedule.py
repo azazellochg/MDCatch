@@ -39,24 +39,24 @@ def precalculateVars(paramDict):
     vpp = True if paramDict['PhasePlateUsed'] in ['true', 'True'] else False
     gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-    # set box_size = PtclSize + 15%
-    box = int(paramDict['PtclSize']) / float(paramDict['PixelSpacing']) * 1.15
-    # make box size even
-    box_size = math.ceil(box / 2.) * 2
 
-    return bin, vpp, gain, defect, box_size
+    return bin, vpp, gain, defect
 
 
 def setupRelion(paramDict):
     fnDir = os.path.join(schedule_dir, 'preprocess')
-    bin, vpp, gain, defect, box_size = precalculateVars(paramDict)
+    bin, vpp, gain, defect = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
-               'mask_diam': paramDict['PtclSize'],
+               'LOG_mind': paramDict['PtclSizeShort'],
+               'LOG_maxd': paramDict['PtclSizeLong'],
+               'boxsize_logpick': paramDict['BoxSizeSmall'],
+               'mask_diam': paramDict['MaskSize'],
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
-               'box_size': box_size,
+               'box_size': paramDict['BoxSize'],
+               'do_until_ctf': paramDict['NoCl2D'],
                'is_VPP': vpp,
                'gainref': gain,
                'movies_wildcard': '"%s"' % paramDict['MoviePath'],
@@ -81,7 +81,7 @@ def setupRelion(paramDict):
 
 
 def setupScipion(paramDict):
-    bin, vpp, gain, defect, box_size = precalculateVars(paramDict)
+    bin, vpp, gain, defect = precalculateVars(paramDict)
     f = open(template_json, 'r')
     protocolsList = json.load(f)
     protNames = dict()

@@ -23,7 +23,7 @@
         "scannedPixelSize": 7.0,
         "doseInitial": 0.0,
         "dosePerFrame": 1.0,
-        "gainFile": "ololo.mrc",
+        "gainFile": "gain.mrc",
         "darkFile": null,
         "dataStreaming": true,
         "timeout": 72000,

@@ -25,12 +25,11 @@
 # *
 # **************************************************************************
 
-from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
-                             QPushButton, QWizard, QGroupBox,
+                             QPushButton, QWizard, QGroupBox, QSpinBox,
                              QSizePolicy, QLineEdit, QFileDialog,
-                             QComboBox, QApplication, QWizardPage)
+                             QCheckBox, QApplication, QWizardPage)
 from PyQt5.QtCore import Qt
 import sys
 
@@ -118,6 +117,7 @@ class Page1(QWizardPage):
     def group2(self):
         grid = QVBoxLayout()
 
+        # software type
         hbox1 = QHBoxLayout()
         hbox1.setAlignment(Qt.AlignLeft)
         b1 = self.addRadioButton("EPU", default=True)
@@ -126,6 +126,7 @@ class Page1(QWizardPage):
         hbox1.addWidget(b2)
         grid.addLayout(hbox1)
 
+        # path box
         hbox2 = QHBoxLayout()
         self.path = QLineEdit()
         self.path.setReadOnly(True)
@@ -142,13 +143,28 @@ class Page1(QWizardPage):
         hbox2.addWidget(b4)
         grid.addLayout(hbox2)
 
-        self.size = QLineEdit()
-        self.size.setValidator(QIntValidator())
-        self.size.setMaxLength(4)
-        self.size.setText(part_size)
-        self.size.setAlignment(Qt.AlignRight)
-        self.size.setFixedSize(60, 20)
-        grid.addWidget(self.size)
+        # size box
+        hbox3 = QHBoxLayout()
+        labelSizeMin = QLabel('from')
+        hbox3.addWidget(labelSizeMin)
+
+        self.size_short = QSpinBox()
+        self.size_short.setRange(1, 999)
+        self.size_short.setValue(part_size_short)
+        self.size_short.setFixedSize(60, 25)
+        hbox3.addWidget(self.size_short)
+
+        labelSizeMax = QLabel('to')
+        hbox3.addWidget(labelSizeMax)
+
+        self.size_long = QSpinBox()
+        self.size_long.setRange(1, 999)
+        self.size_long.setValue(part_size_long)
+        self.size_long.setFixedSize(60, 25)
+        hbox3.addWidget(self.size_long)
+        hbox3.setAlignment(Qt.AlignLeft)
+
+        grid.addLayout(hbox3)
 
         return grid
 
@@ -189,7 +205,8 @@ class Page1(QWizardPage):
 
     def validatePage(self):
         # Next is pressed, returns True or False
-        App.model.setSize(self.size.text())
+        App.model.setSizeShort(self.size_short.text())
+        App.model.setSizeLong(self.size_long.text())
         if App.model.getSoftware() is None:
             App.model.setSoftware('EPU')
         if App.model.getPath() is None:
@@ -199,7 +216,8 @@ class Page1(QWizardPage):
             print("\n\nInput params: ",
                   [App.model.getSoftware(),
                    App.model.getPath(),
-                   App.model.getSize()])
+                   App.model.getSizeShort(),
+                   App.model.getSizeLong()])
 
         prog = App.model.getSoftware()
         fnList = App.model.guessFn(matchDict[prog])
@@ -224,8 +242,8 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
-        self.mainLayout.addWidget(self.relionBt(), 1, 0)
-        self.mainLayout.addWidget(self.scipionBt(), 1, 1)
+        self.mainLayout.addWidget(self.group3(), 1, 0)
+        self.mainLayout.addWidget(self.group4(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -239,8 +257,10 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
-        acqDict['PtclSize'] = App.model.getSize()
+        acqDict['PtclSizeShort'] = App.model.getSizeShort()
+        acqDict['PtclSizeLong'] = App.model.getSizeLong()
         App.model.calcDose()
+        App.model.calcBox()
         App.model.guessDataDir(fnList)
 
         self.setSubTitle("Found the following metadata from %s session:" % prog)
@@ -253,13 +273,12 @@ class Page2(QWizardPage):
         self.name.setText(cs_dict[scopeID][1])
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
-        self.mag.setText(acqDict['Magnification'])
 
         vpp = acqDict['PhasePlateUsed']
         if vpp in ['true', 'True']:
-            self.vpp.setCurrentIndex(0)
+            self.vpp.setChecked(True)
         else:
-            self.vpp.setCurrentIndex(1)
+            self.vpp.setChecked(False)
 
         self.name2.setText(acqDict['Detector'])
         self.mode.setText(acqDict['Mode'])
@@ -274,28 +293,21 @@ class Page2(QWizardPage):
         groupBox = QGroupBox("Microscope")
 
         name = QLabel("Name")
-        kv = QLabel("Voltage")
-        cs = QLabel("Cs")
-        mag = QLabel("Magnification")
+        kv = QLabel("Voltage (kV)")
+        cs = QLabel("Cs (mm)")
         vpp = QLabel("Phase plate")
 
         self.name = QLabel()
         self.kv = QLabel()
         self.cs = QLabel()
-        self.mag = QLabel()
-
-        self.vpp = QComboBox()
-        vpp_values = ['true', 'false']
-        self.vpp.addItems(vpp_values)
-        self.vpp.setFixedSize(60, 20)
+        self.vpp = QCheckBox()
 
         vbox = QGridLayout()
-        for num, i in enumerate([name, kv, cs, mag, vpp]):
+        for num, i in enumerate([name, kv, cs, vpp]):
             vbox.addWidget(i, num, 0)
 
         for num, i in enumerate([self.name, self.kv,
-                                 self.cs, self.mag,
-                                 self.vpp]):
+                                 self.cs, self.vpp]):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
@@ -307,10 +319,10 @@ class Page2(QWizardPage):
 
         name2 = QLabel("Name")
         mode = QLabel("Mode")
-        time = QLabel("Exposure time, s")
+        time = QLabel("Exposure time (s)")
         frames = QLabel("Frames")
-        dosepf = QLabel("Dose per frame, e/A²")
-        px = QLabel("Pixel size, A")
+        dosepf = QLabel("Dose per frame (e/A²)")
+        px = QLabel("Pixel size (A)")
         gain = QLabel("Gain reference")
         defects = QLabel("Defects file")
 
@@ -346,6 +358,34 @@ class Page2(QWizardPage):
 
         return groupBox
 
+    def group3(self):
+        groupBox = QGroupBox("Preprocessing")
+
+        self.runCtf = QRadioButton("Stop after CTF estimation?")
+        self.runCl2d = QRadioButton("Do 2D classification?")
+        self.runCl2d.setChecked(True)
+
+        hbox = QGridLayout()
+        hbox.addWidget(self.runCtf, 0, 0)
+        hbox.addWidget(self.runCl2d, 1, 0)
+        groupBox.setLayout(hbox)
+
+        return groupBox
+
+    def group4(self):
+        groupBox = QGroupBox("Pipeline")
+
+        self.setRln = QRadioButton("Start Relion scheduler?")
+        self.setRln.setChecked(True)
+        self.setScp = QRadioButton("Start Scipion workflow?")
+
+        hbox = QGridLayout()
+        hbox.addWidget(self.setRln, 0, 0)
+        hbox.addWidget(self.setScp, 1, 0)
+        groupBox.setLayout(hbox)
+
+        return groupBox
+
     def relionBt(self):
         self.setRln = QRadioButton("Start Relion scheduler")
         self.setRln.setChecked(True)
@@ -361,7 +401,8 @@ class Page2(QWizardPage):
         # Finish pressed
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
-        App.model.acqDict['PhasePlateUsed'] = self.vpp.currentText()
+        App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
+        App.model.acqDict['NoCl2D'] = self.runCtf.isChecked()
 
         if DEBUG:
             for k, v in App.model.acqDict.items():

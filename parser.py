@@ -37,7 +37,8 @@ class Parser:
     def __init__(self):
         self.path = None
         self.software = None
-        self.ptclSize = None
+        self.ptclSizeShort = None
+        self.ptclSizeLong = None
         self.fn = None
         self.acqDict = dict()
         # set default values
@@ -46,6 +47,7 @@ class Parser:
         self.acqDict['Dose'] = '0'
         self.acqDict['OpticalGroup'] = 'opticsGroup1'
         self.acqDict['PhasePlateUsed'] = 'false'
+        self.acqDict['NoCl2D'] = 'false'
 
     def setPath(self, path):
         self.path = path
@@ -53,11 +55,17 @@ class Parser:
     def getPath(self):
         return self.path
 
-    def getSize(self):
-        return self.ptclSize
+    def getSizeShort(self):
+        return self.ptclSizeShort
 
-    def setSize(self, size):
-        self.ptclSize = size
+    def setSizeShort(self, size):
+        self.ptclSizeShort = size
+
+    def getSizeLong(self):
+        return self.ptclSizeLong
+
+    def setSizeLong(self, size):
+        self.ptclSizeLong = size
 
     def getSoftware(self):
         return self.software
@@ -80,7 +88,9 @@ class Parser:
 
         # check if Images-DicsX exists in the path
         if ftype == 'xml':
-            if not (os.path.exists(os.path.join(self.getPath(), 'Images-Disc1'))):
+            check1 = os.path.exists(os.path.join(self.getPath(), 'Images-Disc1'))
+            check2 = os.path.exists(os.path.join(self.getPath(), 'Images-Disc2'))
+            if not check1 and not check2:
                 return None
 
         for root, _, files in os.walk(self.getPath()):
@@ -97,11 +107,13 @@ class Parser:
     def parseImgXml(self, fn):
         tree = ET.parse(fn)
         root = tree.getroot()
+        # schema depends on EPU version
+        schema = '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}'
 
-        if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
+        if root[6][0][2][4].tag == '%sExposureTime' % schema:
             self.acqDict['ExposureTime'] = root[6][0][2][4].text
 
-        if root[6][0][2][6].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}Name':
+        if root[6][0][2][6].tag == '%sName' % schema:
             self.acqDict['Detector'] = root[6][0][2][6].text
 
         if self.acqDict['Detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
@@ -128,30 +140,30 @@ class Parser:
                             root[6][0][2][2][0][1].text == 'true':
                         self.acqDict['Mode'] = 'Counting'
 
-        if root[5][1].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}pixelSize':
+        if root[5][1].tag == '%spixelSize' % schema:
             self.acqDict['PixelSpacing'] = str(float(root[5][1][0][0].text) * math.pow(10, 10))
             if self.acqDict['Mode'] == 'Super-resolution':
                 self.acqDict['PixelSpacing'] /= 2.0
 
-        if root[6][2][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}AccelerationVoltage':
+        if root[6][2][0].tag == '%sAccelerationVoltage' % schema:
             self.acqDict['Voltage'] = str(int(root[6][2][0].text) / 1000)
 
-        if root[6][3][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}InstrumentID':
+        if root[6][3][3].tag == '%sInstrumentID' % schema:
             self.acqDict['MicroscopeID'] = root[6][3][3].text
 
             value = self.acqDict['MicroscopeID']
             if value in cs_dict:
                 self.acqDict['Cs'] = cs_dict[value][0]
 
-        if root[6][4][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}BeamTilt':
+        if root[6][4][3].tag == '%sBeamTilt' % schema:
             self.acqDict['BeamTiltX'] = root[6][4][3][0].text
             self.acqDict['BeamTiltY'] = root[6][4][3][1].text
 
-        if root[6][4][28][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}NominalMagnification':
+        if root[6][4][28][0].tag == '%sNominalMagnification' % schema:
             self.acqDict['Magnification'] = root[6][4][28][0].text
 
         # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus etc.
-        if root[2].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}CustomData':
+        if root[2].tag == '%sCustomData' % schema:
             i = 0
             while i < 8:
                 try:
@@ -221,6 +233,38 @@ class Parser:
 
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
+
+    def calcBox(self):
+        # calculate box, mask, downsample
+        minSize = self.acqDict['PtclSizeShort']
+        maxSize = self.acqDict['PtclSizeLong']
+        ptclSizeAng = max(minSize, maxSize)
+        # use +10% for mask size
+        self.acqDict['MaskSize'] = 1.1 * float(ptclSizeAng)
+
+        angpix = float(self.acqDict['PixelSpacing'])
+        if self.acqDict['Mode'] == 'Super-resolution':
+            angpix = angpix * 2
+        ptclSizePx = float(ptclSizeAng) / angpix
+        # use +20% for box size, make it even
+        boxSize = 1.2 * ptclSizePx
+        self.acqDict['BoxSize'] = math.ceil(boxSize / 2.) * 2
+
+        # from relion_it.py script
+        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
+        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+                    360, 384, 400, 420, 450, 480, 512, 640, 768,
+                    896, 1024):
+            # Don't go larger than the original box
+            if box > boxSize:
+                self.acqDict['BoxSizeSmall'] = boxSize
+                break
+            # If Nyquist freq. is better than 8.5 A, use this
+            # downscaled box, otherwise continue to next size up
+            small_box_angpix = angpix * boxSize / box
+            if small_box_angpix < 4.25:
+                self.acqDict['BoxSizeSmall'] = box
+                break
 
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios

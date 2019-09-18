@@ -43,8 +43,9 @@ mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 matchDict = {"EPU": 'xml',
              "SerialEM": 'mdoc'}
 
-# default particle diameter (has to be a string)
-part_size = '200'
+# default particle diameter
+part_size_short = 150
+part_size_long = 180
 
 # scopeID: Cs aberration and scope name
 cs_dict = {
