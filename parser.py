@@ -240,7 +240,7 @@ class Parser:
         maxSize = self.acqDict['PtclSizeLong']
         ptclSizeAng = max(minSize, maxSize)
         # use +10% for mask size
-        self.acqDict['MaskSize'] = 1.1 * float(ptclSizeAng)
+        self.acqDict['MaskSize'] = str(1.1 * float(ptclSizeAng))
 
         angpix = float(self.acqDict['PixelSpacing'])
         if self.acqDict['Mode'] == 'Super-resolution':
@@ -248,7 +248,7 @@ class Parser:
         ptclSizePx = float(ptclSizeAng) / angpix
         # use +20% for box size, make it even
         boxSize = 1.2 * ptclSizePx
-        self.acqDict['BoxSize'] = math.ceil(boxSize / 2.) * 2
+        self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
 
         # from relion_it.py script
         # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
@@ -257,13 +257,13 @@ class Parser:
                     896, 1024):
             # Don't go larger than the original box
             if box > boxSize:
-                self.acqDict['BoxSizeSmall'] = boxSize
+                self.acqDict['BoxSizeSmall'] = str(boxSize)
                 break
             # If Nyquist freq. is better than 8.5 A, use this
             # downscaled box, otherwise continue to next size up
             small_box_angpix = angpix * boxSize / box
             if small_box_angpix < 4.25:
-                self.acqDict['BoxSizeSmall'] = box
+                self.acqDict['BoxSizeSmall'] = str(box)
                 break
 
     def guessDataDir(self, fnList):

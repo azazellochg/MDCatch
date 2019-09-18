@@ -62,9 +62,9 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.7 - metadata parser'
+        self.title = 'MDCatch v0.8 - metadata parser'
         self.width = 640
-        self.height = 280
+        self.height = 480
         self.initUI()
 
     def initUI(self):
@@ -244,6 +244,8 @@ class Page2(QWizardPage):
         self.mainLayout.addWidget(self.group2(), 0, 1)
         self.mainLayout.addWidget(self.group3(), 1, 0)
         self.mainLayout.addWidget(self.group4(), 1, 1)
+        self.mainLayout.addWidget(self.relionBt(), 2, 0)
+        self.mainLayout.addWidget(self.scipionBt(), 2, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -273,6 +275,7 @@ class Page2(QWizardPage):
         self.name.setText(cs_dict[scopeID][1])
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
+        self.px.setText(str(px))
 
         vpp = acqDict['PhasePlateUsed']
         if vpp in ['true', 'True']:
@@ -285,9 +288,12 @@ class Page2(QWizardPage):
         self.time.setText(str(time))
         self.frames.setText(acqDict['NumSubFrames'])
         self.dosepf.setText(str(dosepf))
-        self.px.setText(str(px))
         self.gain.setText(os.path.basename(acqDict['GainReference']))
         self.defects.setText(os.path.basename(acqDict['DefectFile']))
+
+        self.box.setText(acqDict['BoxSize'])
+        self.mask.setText(acqDict['MaskSize'])
+        self.box2.setText(acqDict['BoxSizeSmall'])
 
     def group1(self):
         groupBox = QGroupBox("Microscope")
@@ -296,18 +302,24 @@ class Page2(QWizardPage):
         kv = QLabel("Voltage (kV)")
         cs = QLabel("Cs (mm)")
         vpp = QLabel("Phase plate")
+        px = QLabel("Pixel size (A)")
 
         self.name = QLabel()
         self.kv = QLabel()
         self.cs = QLabel()
         self.vpp = QCheckBox()
 
+        self.px = QLineEdit()
+        self.px.setFixedSize(50, 20)
+        self.px.setMaxLength(5)
+        self.px.setAlignment(Qt.AlignRight)
+
         vbox = QGridLayout()
-        for num, i in enumerate([name, kv, cs, vpp]):
+        for num, i in enumerate([name, kv, cs, px, vpp]):
             vbox.addWidget(i, num, 0)
 
         for num, i in enumerate([self.name, self.kv,
-                                 self.cs, self.vpp]):
+                                 self.cs, self.px, self.vpp]):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
@@ -322,7 +334,6 @@ class Page2(QWizardPage):
         time = QLabel("Exposure time (s)")
         frames = QLabel("Frames")
         dosepf = QLabel("Dose per frame (e/A²)")
-        px = QLabel("Pixel size (A)")
         gain = QLabel("Gain reference")
         defects = QLabel("Defects file")
 
@@ -338,20 +349,15 @@ class Page2(QWizardPage):
         self.dosepf.setMaxLength(4)
         self.dosepf.setAlignment(Qt.AlignRight)
 
-        self.px = QLineEdit()
-        self.px.setFixedSize(50, 20)
-        self.px.setMaxLength(5)
-        self.px.setAlignment(Qt.AlignRight)
-
         vbox = QGridLayout()
         for num, i in enumerate([name2, mode, time, frames,
-                                 dosepf, px, gain, defects]):
+                                 dosepf, gain, defects]):
             vbox.addWidget(i, num, 0)
 
         for num, i in enumerate([self.name2, self.mode,
                                  self.time, self.frames,
-                                 self.dosepf, self.px,
-                                 self.gain, self.defects]):
+                                 self.dosepf, self.gain,
+                                 self.defects]):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
@@ -359,6 +365,40 @@ class Page2(QWizardPage):
         return groupBox
 
     def group3(self):
+        groupBox = QGroupBox("Particle")
+
+        box = QLabel("Box size (px)")
+        mask = QLabel("Mask size (A)")
+        box2 = QLabel("Downscale to (px)")
+
+        self.box = QLineEdit()
+        self.box.setFixedSize(50, 20)
+        self.box.setMaxLength(5)
+        self.box.setAlignment(Qt.AlignRight)
+
+        self.mask = QLineEdit()
+        self.mask.setFixedSize(50, 20)
+        self.mask.setMaxLength(5)
+        self.mask.setAlignment(Qt.AlignRight)
+
+        self.box2 = QLineEdit()
+        self.box2.setFixedSize(50, 20)
+        self.box2.setMaxLength(5)
+        self.box2.setAlignment(Qt.AlignRight)
+
+        vbox = QGridLayout()
+        for num, i in enumerate([box, mask, box2]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.box, self.mask,
+                                 self.box2]):
+            vbox.addWidget(i, num, 1)
+
+        groupBox.setLayout(vbox)
+
+        return groupBox
+
+    def group4(self):
         groupBox = QGroupBox("Preprocessing")
 
         self.runCtf = QRadioButton("Stop after CTF estimation?")
@@ -368,20 +408,6 @@ class Page2(QWizardPage):
         hbox = QGridLayout()
         hbox.addWidget(self.runCtf, 0, 0)
         hbox.addWidget(self.runCl2d, 1, 0)
-        groupBox.setLayout(hbox)
-
-        return groupBox
-
-    def group4(self):
-        groupBox = QGroupBox("Pipeline")
-
-        self.setRln = QRadioButton("Start Relion scheduler?")
-        self.setRln.setChecked(True)
-        self.setScp = QRadioButton("Start Scipion workflow?")
-
-        hbox = QGridLayout()
-        hbox.addWidget(self.setRln, 0, 0)
-        hbox.addWidget(self.setScp, 1, 0)
         groupBox.setLayout(hbox)
 
         return groupBox
@@ -398,15 +424,19 @@ class Page2(QWizardPage):
         return self.setScp
 
     def onFinish(self):
-        # Finish pressed
+        # Finish pressed, we need to update all editable vars
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
         App.model.acqDict['NoCl2D'] = self.runCtf.isChecked()
+        App.model.acqDict['BoxSize'] = self.box.text()
+        App.model.acqDict['MaskSize'] = self.mask.text()
+        App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
             for k, v in App.model.acqDict.items():
                 print(k, v)
+            print('\n')
 
         if self.setRln.isChecked():
             setupRelion(App.model.acqDict)

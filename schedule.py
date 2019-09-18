@@ -25,7 +25,6 @@
 # **************************************************************************
 
 import os
-import math
 import subprocess
 import json
 from datetime import datetime
@@ -65,6 +64,19 @@ def setupRelion(paramDict):
 
     cmdList = list()
 
+    # Relion checks
+    if not os.path.exists(fnDir):
+        print("ERROR: Schedules folder not found, you can't launch Relion!")
+        exit(1)
+
+    try:
+        subprocess.check_output(["which", "relion_scheduler"],
+                                stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print("ERROR: Relion not found in PATH!")
+        exit(1)
+
+    # Run scheduler
     for key in mapDict:
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
             fnDir, key, str(mapDict[key]))
@@ -118,6 +130,13 @@ def setupScipion(paramDict):
     jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
     f.write(jsonStr)
     f.close()
+
+    try:
+        subprocess.check_output(["which", "scipion"],
+                                stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print("ERROR: Scipion not found in PATH!")
+        exit(1)
 
     # projectName = scopeName_date
     scope = cs_dict[paramDict['MicroscopeID']][1]
