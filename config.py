@@ -31,7 +31,7 @@ DEBUG = 1
 default_path = "/home/azazello/soft/MDCatch/examples"
 #default_path = "/home/gsharov/soft/MDCatch/examples"
 #default_path = "/net/em-support3/"
-schedule_dir = "Schedules"
+schedule_dir = "/home/azazello/soft/MDCatch/Schedules"
 template_json = "template.json"
 output_json = "workflow.json"
 

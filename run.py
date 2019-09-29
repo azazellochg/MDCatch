@@ -29,7 +29,8 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
                              QPushButton, QWizard, QGroupBox, QSpinBox,
                              QSizePolicy, QLineEdit, QFileDialog,
-                             QCheckBox, QApplication, QWizardPage)
+                             QCheckBox, QApplication, QWizardPage,
+                             QButtonGroup, QWidget)
 from PyQt5.QtCore import Qt
 import sys
 
@@ -108,9 +109,13 @@ class Page1(QWizardPage):
         label1 = QLabel('Software')
         label2 = QLabel('Path')
         label3 = QLabel('Particle diameter (A)')
+        label4 = QLabel('Run pipeline in')
+        self.label5 = QLabel('Relion project folder')
         vbox.addWidget(label1)
         vbox.addWidget(label2)
         vbox.addWidget(label3)
+        vbox.addWidget(label4)
+        vbox.addWidget(self.label5)
 
         return vbox
 
@@ -120,25 +125,31 @@ class Page1(QWizardPage):
         # software type
         hbox1 = QHBoxLayout()
         hbox1.setAlignment(Qt.AlignLeft)
+        btgroup1 = QButtonGroup()
+
         b1 = self.addRadioButton("EPU", default=True)
         b2 = self.addRadioButton("SerialEM")
+
+        btgroup1.addButton(b1)
+        btgroup1.addButton(b2)
+        btgroup1.buttonClicked.connect(lambda: self.updSoftware(btgroup1))
         hbox1.addWidget(b1)
         hbox1.addWidget(b2)
         grid.addLayout(hbox1)
 
         # path box
         hbox2 = QHBoxLayout()
-        self.path = QLineEdit()
-        self.path.setReadOnly(True)
-        self.path.setText(default_path)
+        self.rawPath = QLineEdit()
+        self.rawPath.setReadOnly(True)
+        self.rawPath.setText(default_path)
 
         b3 = QPushButton('Browse')
-        b3.clicked.connect(self.browseSlot)
+        b3.clicked.connect(lambda: self.browseSlot(self.rawPath))
         b4 = QPushButton('?')
         b4.setFixedSize(20, 25)
         b4.clicked.connect(self.helpSlot)
 
-        hbox2.addWidget(self.path)
+        hbox2.addWidget(self.rawPath)
         hbox2.addWidget(b3)
         hbox2.addWidget(b4)
         grid.addLayout(hbox2)
@@ -149,7 +160,7 @@ class Page1(QWizardPage):
         hbox3.addWidget(labelSizeMin)
 
         self.size_short = QSpinBox()
-        self.size_short.setRange(1, 999)
+        self.size_short.setRange(10, 9999)
         self.size_short.setValue(part_size_short)
         self.size_short.setFixedSize(60, 25)
         hbox3.addWidget(self.size_short)
@@ -158,45 +169,73 @@ class Page1(QWizardPage):
         hbox3.addWidget(labelSizeMax)
 
         self.size_long = QSpinBox()
-        self.size_long.setRange(1, 999)
+        self.size_long.setRange(10, 9999)
         self.size_long.setValue(part_size_long)
         self.size_long.setFixedSize(60, 25)
         hbox3.addWidget(self.size_long)
         hbox3.setAlignment(Qt.AlignLeft)
-
         grid.addLayout(hbox3)
+
+        # pipeline
+        hbox4 = QHBoxLayout()
+        hbox4.setAlignment(Qt.AlignLeft)
+        btgroup2 = QButtonGroup()
+
+        b5 = self.addRadioButton("Relion", default=True)
+        b6 = self.addRadioButton("Scipion")
+
+        btgroup2.addButton(b5)
+        btgroup2.addButton(b6)
+        btgroup2.buttonClicked.connect(lambda: self.updPipeline(btgroup2))
+        hbox4.addWidget(b5)
+        hbox4.addWidget(b6)
+        grid.addLayout(hbox4)
+
+        # path box in a separate widget that can be hidden
+        hbox5 = QHBoxLayout()
+        self.prjpath = QLineEdit()
+        self.prjpath.setReadOnly(True)
+        self.prjpath.setText(os.getcwd())
+
+        self.b7 = QPushButton('Browse')
+        self.b7.clicked.connect(lambda: self.browseSlot(self.prjpath))
+
+        hbox5.addWidget(self.prjpath)
+        hbox5.addWidget(self.b7)
+        grid.addLayout(hbox5)
 
         return grid
 
-    def addRadioButton(self, choice, default=False):
-        rb = QRadioButton(choice)
-        if default:
-            rb.setChecked(True)
+    def updSoftware(self, btgroup):
+        bt = btgroup.checkedButton()
+        App.model.setSoftware(bt.text())
 
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
-        rb.setSizePolicy(sizePolicy)
+    def updPipeline(self, btgroup):
+        bt = btgroup.checkedButton()
+        App.model.setPipeline(bt.text())
+        # show/hide relion project path
+        self.label5.setVisible(bt.text() == 'Relion')
+        self.prjpath.setVisible(bt.text() == 'Relion')
+        self.b7.setVisible(bt.text() == 'Relion')
 
-        rb.toggled.connect(lambda: self.btnstate(rb))
-
-        return rb
-
-    def btnstate(self, bt):
-        if bt.isChecked():
-            App.model.setSoftware(bt.text())
-
-    def browseSlot(self):
-        # called when user pressed Browse
-        folder = default_path if self.path.text() is None else self.path.text()
+    def browseSlot(self, var):
+        # called when a user press Browse
+        default = os.getcwd() if var == self.prjpath else default_path
+        folder = default if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,
                                                 QFileDialog.ShowDirsOnly)
         if path:
-            App.model.setPath(path)
-            self.refreshPath()
+            self.refreshPath(var, path)
 
-    def refreshPath(self):
+    def refreshPath(self, var, path):
         # update line widget with selected path
-        self.path.setText(App.model.getPath())
+        if var == self.rawPath:
+            App.model.setRawPath(path)
+            self.rawPath.setText(App.model.getRawPath())
+        elif var == self.prjpath:
+            App.model.setPrjPath(path)
+            self.prjpath.setText(App.model.getPrjPath())
 
     def helpSlot(self):
         # called when pressed ?
@@ -205,19 +244,16 @@ class Page1(QWizardPage):
 
     def validatePage(self):
         # Next is pressed, returns True or False
-        App.model.setSizeShort(self.size_short.text())
-        App.model.setSizeLong(self.size_long.text())
-        if App.model.getSoftware() is None:
-            App.model.setSoftware('EPU')
-        if App.model.getPath() is None:
-            App.model.setPath(default_path)
+        App.model.setSizes(self.size_short.text(), self.size_long.text())
+        if App.model.getRawPath() is None:
+            App.model.setRawPath(default_path)
 
         if DEBUG:
             print("\n\nInput params: ",
                   [App.model.getSoftware(),
-                   App.model.getPath(),
-                   App.model.getSizeShort(),
-                   App.model.getSizeLong()])
+                   App.model.getRawPath(),
+                   App.model.getSizes(),
+                   App.model.getPipeline()])
 
         prog = App.model.getSoftware()
         fnList = App.model.guessFn(matchDict[prog])
@@ -235,6 +271,16 @@ class Page1(QWizardPage):
         App.model.acqDict.clear()
         App.model.__init__()
 
+    def addRadioButton(self, choice, default=False):
+        rb = QRadioButton(choice)
+        if default:
+            rb.setChecked(True)
+
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        rb.setSizePolicy(sizePolicy)
+
+        return rb
+
 
 class Page2(QWizardPage):
     def __init__(self, parent=None):
@@ -244,8 +290,6 @@ class Page2(QWizardPage):
         self.mainLayout.addWidget(self.group2(), 0, 1)
         self.mainLayout.addWidget(self.group3(), 1, 0)
         self.mainLayout.addWidget(self.group4(), 1, 1)
-        self.mainLayout.addWidget(self.relionBt(), 2, 0)
-        self.mainLayout.addWidget(self.scipionBt(), 2, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -259,8 +303,7 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
-        acqDict['PtclSizeShort'] = App.model.getSizeShort()
-        acqDict['PtclSizeLong'] = App.model.getSizeLong()
+        acqDict['PtclSizeShort'], acqDict['PtclSizeLong'] = App.model.getSizes()
         App.model.calcDose()
         App.model.calcBox()
         App.model.guessDataDir(fnList)
@@ -290,7 +333,6 @@ class Page2(QWizardPage):
         self.dosepf.setText(str(dosepf))
         self.gain.setText(os.path.basename(acqDict['GainReference']))
         self.defects.setText(os.path.basename(acqDict['DefectFile']))
-
         self.box.setText(acqDict['BoxSize'])
         self.mask.setText(acqDict['MaskSize'])
         self.box2.setText(acqDict['BoxSizeSmall'])
@@ -308,11 +350,7 @@ class Page2(QWizardPage):
         self.kv = QLabel()
         self.cs = QLabel()
         self.vpp = QCheckBox()
-
-        self.px = QLineEdit()
-        self.px.setFixedSize(50, 20)
-        self.px.setMaxLength(5)
-        self.px.setAlignment(Qt.AlignRight)
+        self.px = self.addLine(50, 20, 5, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name, kv, cs, px, vpp]):
@@ -343,11 +381,7 @@ class Page2(QWizardPage):
         self.frames = QLabel()
         self.gain = QLabel()
         self.defects = QLabel()
-
-        self.dosepf = QLineEdit()
-        self.dosepf.setFixedSize(50, 20)
-        self.dosepf.setMaxLength(4)
-        self.dosepf.setAlignment(Qt.AlignRight)
+        self.dosepf = self.addLine(50, 20, 4, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name2, mode, time, frames,
@@ -365,26 +399,15 @@ class Page2(QWizardPage):
         return groupBox
 
     def group3(self):
-        groupBox = QGroupBox("Particle")
+        groupBox = QGroupBox("Recommended parameters")
 
         box = QLabel("Box size (px)")
         mask = QLabel("Mask size (A)")
         box2 = QLabel("Downscale to (px)")
 
-        self.box = QLineEdit()
-        self.box.setFixedSize(50, 20)
-        self.box.setMaxLength(5)
-        self.box.setAlignment(Qt.AlignRight)
-
-        self.mask = QLineEdit()
-        self.mask.setFixedSize(50, 20)
-        self.mask.setMaxLength(5)
-        self.mask.setAlignment(Qt.AlignRight)
-
-        self.box2 = QLineEdit()
-        self.box2.setFixedSize(50, 20)
-        self.box2.setMaxLength(5)
-        self.box2.setAlignment(Qt.AlignRight)
+        self.box = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.mask = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.box2 = self.addLine(50, 20, 5, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([box, mask, box2]):
@@ -412,17 +435,6 @@ class Page2(QWizardPage):
 
         return groupBox
 
-    def relionBt(self):
-        self.setRln = QRadioButton("Start Relion scheduler")
-        self.setRln.setChecked(True)
-
-        return self.setRln
-
-    def scipionBt(self):
-        self.setScp = QRadioButton("Start Scipion workflow")
-
-        return self.setScp
-
     def onFinish(self):
         # Finish pressed, we need to update all editable vars
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
@@ -438,10 +450,18 @@ class Page2(QWizardPage):
                 print(k, v)
             print('\n')
 
-        if self.setRln.isChecked():
+        if App.model.getPipeline() == 'Relion':
             setupRelion(App.model.acqDict)
         else:
             setupScipion(App.model.acqDict)
+
+    def addLine(self, sizex, sizey, length, align):
+        line = QLineEdit()
+        line.setFixedSize(sizex, sizey)
+        line.setMaxLength(length)
+        line.setAlignment(align)
+
+        return line
 
 
 if __name__ == '__main__':

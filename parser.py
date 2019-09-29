@@ -35,11 +35,13 @@ from config import *
 class Parser:
     """ XML / MDOC parser """
     def __init__(self):
-        self.path = None
-        self.software = None
-        self.ptclSizeShort = None
-        self.ptclSizeLong = None
+        self.rawPath = default_path
+        self.prjPath = os.getcwd()
+        self.software = 'EPU'
+        self.ptclSizeShort = part_size_short
+        self.ptclSizeLong = part_size_long
         self.fn = None
+        self.pipeline = 'Relion'
         self.acqDict = dict()
         # set default values
         self.acqDict['Mode'] = 'Linear'
@@ -49,23 +51,30 @@ class Parser:
         self.acqDict['PhasePlateUsed'] = 'false'
         self.acqDict['NoCl2D'] = 'false'
 
-    def setPath(self, path):
-        self.path = path
+    def setRawPath(self, path):
+        self.rawPath = path
 
-    def getPath(self):
-        return self.path
+    def getRawPath(self):
+        return self.rawPath
 
-    def getSizeShort(self):
-        return self.ptclSizeShort
+    def setPipeline(self, choice):
+        self.pipeline = choice
 
-    def setSizeShort(self, size):
-        self.ptclSizeShort = size
+    def getPipeline(self):
+        return self.pipeline
 
-    def getSizeLong(self):
-        return self.ptclSizeLong
+    def getPrjPath(self):
+        return self.prjPath
 
-    def setSizeLong(self, size):
-        self.ptclSizeLong = size
+    def setPrjPath(self, path):
+        self.prjPath = path
+
+    def getSizes(self):
+        return self.ptclSizeShort, self.ptclSizeLong
+
+    def setSizes(self, size1, size2):
+        self.ptclSizeShort = size1
+        self.ptclSizeLong = size2
 
     def getSoftware(self):
         return self.software
@@ -88,12 +97,12 @@ class Parser:
 
         # check if Images-DicsX exists in the path
         if ftype == 'xml':
-            check1 = os.path.exists(os.path.join(self.getPath(), 'Images-Disc1'))
-            check2 = os.path.exists(os.path.join(self.getPath(), 'Images-Disc2'))
+            check1 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc1'))
+            check2 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc2'))
             if not check1 and not check2:
                 return None
 
-        for root, _, files in os.walk(self.getPath()):
+        for root, _, files in os.walk(self.getRawPath()):
             for f in files:
                 m = re.compile(regex).match(f)
                 if m is not None:
@@ -277,7 +286,7 @@ class Parser:
         if self.getSoftware() == 'EPU':
             if 'Krios' in scope:
                 p1 = pathDict[camera] % scope
-                session = os.path.basename(self.getPath())
+                session = os.path.basename(self.getRawPath())
 
                 if camera == 'EF-CCD':
                     # get gain file
@@ -305,10 +314,10 @@ class Parser:
                 self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
 
         else:  # SerialEM
-            movieDir = os.path.join(self.getPath(), "*.tif")
-            gainFn = os.path.join(self.getPath(), self.acqDict['GainReference'])
+            movieDir = os.path.join(self.getRawPath(), "*.tif")
+            gainFn = os.path.join(self.getRawPath(), self.acqDict['GainReference'])
             if 'DefectFile' in self.acqDict:
-                defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
+                defFn = os.path.join(self.getRawPath(), self.acqDict['DefectFile'])
 
             if camera == 'EF-CCD':
                 # get MTF file for Gatan
@@ -324,6 +333,8 @@ class Parser:
                     self.acqDict['MTF'] = mtf_dict['Falcon3-count']
 
         # populate dict
+        self.acqDict['Software'] = self.getSoftware()
+        self.acqDict['PrjPath'] = self.getPrjPath()
         self.acqDict['MoviePath'] = movieDir
         self.acqDict['GainReference'] = gainFn
         self.acqDict['DefectFile'] = defFn
