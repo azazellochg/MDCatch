@@ -85,8 +85,7 @@ def setupRelion(paramDict):
 
     mapDict['gainref'] = os.path.basename(gain) or '""'
     mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
-    #FIXME
-    mapDict['defect'] = os.path.basename(defect) or '""'
+    mapDict['defect_file'] = os.path.basename(defect) or '""'
 
     try:
         subprocess.check_output(["which", "relion_scheduler"],
