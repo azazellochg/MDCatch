@@ -28,23 +28,24 @@
 
 DEBUG = 1
 
-default_path = "/home/azazello/MEGA/application/acquisition_patterns"
-#default_path = "/home/gsharov/MEGAsync/application/acquisition_patterns"
-#default_path = "/net/em-support3/Krios1/Gregory"
-schedule_dir = "Schedules"
+default_path = "/home/azazello/soft/MDCatch/examples"
+#default_path = "/home/gsharov/soft/MDCatch/examples"
+#default_path = "/net/em-support3/"
+schedule_dir = "/home/azazello/soft/MDCatch/Schedules"
 template_json = "template.json"
 output_json = "workflow.json"
 
 epu_movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
-reg_xml = "FoilHole_[0-9]{7,8}_Data_[0-9]{7,8}_[0-9]{7,8}_[0-9]{8}_[0-9]{4,6}.xml$"
+reg_xml = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.xml$"
 reg_mdoc = ".{1,}\.tif\.mdoc$"
 mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 matchDict = {"EPU": 'xml',
              "SerialEM": 'mdoc'}
 
-# default particle diameter (has to be a string)
-part_size = '200'
+# default particle diameter
+part_size_short = 150
+part_size_long = 180
 
 # scopeID: Cs aberration and scope name
 cs_dict = {
@@ -95,14 +96,14 @@ paramsList = [
 ]
 
 help_message = """Select the following folder:\n\n
-   1) For EPU session it will be the folder on 
-/net/em-support3/ with Images-DiscX folder inside.\n
-   2) For SerialEM session it will be the folder 
-on /net/cista1/ that contains tif and mdoc files inside.\n"""
+   1) EPU: the EPU session folder on /net/em-support3/
+   with Images-DiscX folder inside.\n
+   2) SerialEM: the folder on /net/cista1/ that
+   contains tif and mdoc files.\n"""
 
 error_message = """NO %s FILES WERE FOUND!\n\n
 Please make sure that you selected correct folder:\n
-   1) For EPU session it will be the folder on 
-/net/em-support3/ with Images-DiscX folder inside.\n
-   2) For SerialEM session it will be the folder 
-on /net/cista1/ that contains tif and mdoc files inside.\n"""
+   1) EPU: the EPU session folder on /net/em-support3/
+   with Images-DiscX folder inside.\n
+   2) SerialEM: the folder on /net/cista1/ that
+   contains tif and mdoc files.\n"""

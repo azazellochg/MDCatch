@@ -35,10 +35,13 @@ from config import *
 class Parser:
     """ XML / MDOC parser """
     def __init__(self):
-        self.path = None
-        self.software = None
-        self.ptclSize = None
+        self.rawPath = default_path
+        self.prjPath = os.getcwd()
+        self.software = 'EPU'
+        self.ptclSizeShort = part_size_short
+        self.ptclSizeLong = part_size_long
         self.fn = None
+        self.pipeline = 'Relion'
         self.acqDict = dict()
         # set default values
         self.acqDict['Mode'] = 'Linear'
@@ -46,18 +49,32 @@ class Parser:
         self.acqDict['Dose'] = '0'
         self.acqDict['OpticalGroup'] = 'opticsGroup1'
         self.acqDict['PhasePlateUsed'] = 'false'
+        self.acqDict['NoCl2D'] = 'false'
 
-    def setPath(self, path):
-        self.path = path
+    def setRawPath(self, path):
+        self.rawPath = path
 
-    def getPath(self):
-        return self.path
+    def getRawPath(self):
+        return self.rawPath
 
-    def getSize(self):
-        return self.ptclSize
+    def setPipeline(self, choice):
+        self.pipeline = choice
 
-    def setSize(self, size):
-        self.ptclSize = size
+    def getPipeline(self):
+        return self.pipeline
+
+    def getPrjPath(self):
+        return self.prjPath
+
+    def setPrjPath(self, path):
+        self.prjPath = path
+
+    def getSizes(self):
+        return self.ptclSizeShort, self.ptclSizeLong
+
+    def setSizes(self, size1, size2):
+        self.ptclSizeShort = size1
+        self.ptclSizeLong = size2
 
     def getSoftware(self):
         return self.software
@@ -80,10 +97,12 @@ class Parser:
 
         # check if Images-DicsX exists in the path
         if ftype == 'xml':
-            if not (os.path.exists(os.path.join(self.getPath(), 'Images-Disc1'))):
+            check1 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc1'))
+            check2 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc2'))
+            if not check1 and not check2:
                 return None
 
-        for root, _, files in os.walk(self.getPath()):
+        for root, _, files in os.walk(self.getRawPath()):
             for f in files:
                 m = re.compile(regex).match(f)
                 if m is not None:
@@ -97,11 +116,13 @@ class Parser:
     def parseImgXml(self, fn):
         tree = ET.parse(fn)
         root = tree.getroot()
+        # schema depends on EPU version
+        schema = '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}'
 
-        if root[6][0][2][4].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}ExposureTime':
+        if root[6][0][2][4].tag == '%sExposureTime' % schema:
             self.acqDict['ExposureTime'] = root[6][0][2][4].text
 
-        if root[6][0][2][6].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}Name':
+        if root[6][0][2][6].tag == '%sName' % schema:
             self.acqDict['Detector'] = root[6][0][2][6].text
 
         if self.acqDict['Detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
@@ -128,30 +149,30 @@ class Parser:
                             root[6][0][2][2][0][1].text == 'true':
                         self.acqDict['Mode'] = 'Counting'
 
-        if root[5][1].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}pixelSize':
+        if root[5][1].tag == '%spixelSize' % schema:
             self.acqDict['PixelSpacing'] = str(float(root[5][1][0][0].text) * math.pow(10, 10))
             if self.acqDict['Mode'] == 'Super-resolution':
                 self.acqDict['PixelSpacing'] /= 2.0
 
-        if root[6][2][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}AccelerationVoltage':
+        if root[6][2][0].tag == '%sAccelerationVoltage' % schema:
             self.acqDict['Voltage'] = str(int(root[6][2][0].text) / 1000)
 
-        if root[6][3][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}InstrumentID':
+        if root[6][3][3].tag == '%sInstrumentID' % schema:
             self.acqDict['MicroscopeID'] = root[6][3][3].text
 
             value = self.acqDict['MicroscopeID']
             if value in cs_dict:
                 self.acqDict['Cs'] = cs_dict[value][0]
 
-        if root[6][4][3].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}BeamTilt':
+        if root[6][4][3].tag == '%sBeamTilt' % schema:
             self.acqDict['BeamTiltX'] = root[6][4][3][0].text
             self.acqDict['BeamTiltY'] = root[6][4][3][1].text
 
-        if root[6][4][28][0].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}NominalMagnification':
+        if root[6][4][28][0].tag == '%sNominalMagnification' % schema:
             self.acqDict['Magnification'] = root[6][4][28][0].text
 
         # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus etc.
-        if root[2].tag == '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}CustomData':
+        if root[2].tag == '%sCustomData' % schema:
             i = 0
             while i < 8:
                 try:
@@ -222,6 +243,38 @@ class Parser:
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
+    def calcBox(self):
+        # calculate box, mask, downsample
+        minSize = self.acqDict['PtclSizeShort']
+        maxSize = self.acqDict['PtclSizeLong']
+        ptclSizeAng = max(minSize, maxSize)
+        # use +10% for mask size
+        self.acqDict['MaskSize'] = str(1.1 * float(ptclSizeAng))
+
+        angpix = float(self.acqDict['PixelSpacing'])
+        if self.acqDict['Mode'] == 'Super-resolution':
+            angpix = angpix * 2
+        ptclSizePx = float(ptclSizeAng) / angpix
+        # use +20% for box size, make it even
+        boxSize = 1.2 * ptclSizePx
+        self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
+
+        # from relion_it.py script
+        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
+        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+                    360, 384, 400, 420, 450, 480, 512, 640, 768,
+                    896, 1024):
+            # Don't go larger than the original box
+            if box > boxSize:
+                self.acqDict['BoxSizeSmall'] = str(boxSize)
+                break
+            # If Nyquist freq. is better than 8.5 A, use this
+            # downscaled box, otherwise continue to next size up
+            small_box_angpix = angpix * boxSize / box
+            if small_box_angpix < 4.25:
+                self.acqDict['BoxSizeSmall'] = str(box)
+                break
+
     def guessDataDir(self, fnList):
         # guess folder name with movies on cista1, gain and defects for Krios
         # the code below is LMB-specific
@@ -233,7 +286,7 @@ class Parser:
         if self.getSoftware() == 'EPU':
             if 'Krios' in scope:
                 p1 = pathDict[camera] % scope
-                session = os.path.basename(self.getPath())
+                session = os.path.basename(self.getRawPath())
 
                 if camera == 'EF-CCD':
                     # get gain file
@@ -261,10 +314,10 @@ class Parser:
                 self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
 
         else:  # SerialEM
-            movieDir = os.path.join(self.getPath(), "*.tif")
-            gainFn = os.path.join(self.getPath(), self.acqDict['GainReference'])
+            movieDir = os.path.join(self.getRawPath(), "*.tif")
+            gainFn = os.path.join(self.getRawPath(), self.acqDict['GainReference'])
             if 'DefectFile' in self.acqDict:
-                defFn = os.path.join(self.getPath(), self.acqDict['DefectFile'])
+                defFn = os.path.join(self.getRawPath(), self.acqDict['DefectFile'])
 
             if camera == 'EF-CCD':
                 # get MTF file for Gatan
@@ -280,6 +333,8 @@ class Parser:
                     self.acqDict['MTF'] = mtf_dict['Falcon3-count']
 
         # populate dict
+        self.acqDict['Software'] = self.getSoftware()
+        self.acqDict['PrjPath'] = self.getPrjPath()
         self.acqDict['MoviePath'] = movieDir
         self.acqDict['GainReference'] = gainFn
         self.acqDict['DefectFile'] = defFn

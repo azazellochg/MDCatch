@@ -25,7 +25,7 @@
 # **************************************************************************
 
 import os
-import math
+import shutil
 import subprocess
 import json
 from datetime import datetime
@@ -39,37 +39,70 @@ def precalculateVars(paramDict):
     vpp = True if paramDict['PhasePlateUsed'] in ['true', 'True'] else False
     gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-    # set box_size = PtclSize + 15%
-    box = int(paramDict['PtclSize']) / float(paramDict['PixelSpacing']) * 1.15
-    # make box size even
-    box_size = math.ceil(box / 2.) * 2
 
-    return bin, vpp, gain, defect, box_size
+    return bin, vpp, gain, defect
 
 
 def setupRelion(paramDict):
-    fnDir = os.path.join(schedule_dir, 'preprocess')
-    bin, vpp, gain, defect, box_size = precalculateVars(paramDict)
+    bin, vpp, gain, defect = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
-               'mask_diam': paramDict['PtclSize'],
+               'LOG_mind': paramDict['PtclSizeShort'],
+               'LOG_maxd': paramDict['PtclSizeLong'],
+               'boxsize_logpick': paramDict['BoxSizeSmall'],
+               'mask_diam': paramDict['MaskSize'],
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
-               'box_size': box_size,
+               'box_size': paramDict['BoxSize'],
+               'do_until_ctf': paramDict['NoCl2D'],
                'is_VPP': vpp,
-               'gainref': gain,
-               'movies_wildcard': '"%s"' % paramDict['MoviePath'],
-               'mtf_file': paramDict['MTF'],
                'optics_group': paramDict['OpticalGroup']}
 
-    cmdList = list()
+    # Create links
+    prjPath = paramDict['PrjPath']
+    movieDir = os.path.join(prjPath, "Movies")
+    if os.path.islink(movieDir):
+        os.remove(movieDir)
+    if os.path.exists(movieDir):
+        raise Exception('Destination %s already exists and is not a link' %
+                        movieDir)
 
+    if paramDict['Software'] == 'EPU':
+        # EPU: Movies -> EPU session folder
+        origPath1, origPath2 = paramDict['MoviePath'].split('/Images-Disc')
+        mapDict['movies_wildcard'] = '"Movies/Images-Disc%s"' % origPath2
+    else:
+        # SerialEM: Movies -> Raw path folder
+        origPath1 = paramDict['MoviePath'].split('*.tif')[0]
+        mapDict['movies_wildcard'] = '"Movies/*.tif"'
+
+    os.symlink(origPath1, movieDir)
+    os.chdir(paramDict['PrjPath'])
+    for i in [gain, defect, paramDict['MTF']]:
+        if os.path.exists(i):
+            os.symlink(i, os.path.basename(i))
+
+    mapDict['gainref'] = os.path.basename(gain) or '""'
+    mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
+    mapDict['defect_file'] = os.path.basename(defect) or '""'
+
+    try:
+        subprocess.check_output(["which", "relion_scheduler"],
+                                stderr=subprocess.DEVNULL)
+        if not os.path.exists('Schedules'):
+            shutil.copytree(schedule_dir, os.getcwd() + '/Schedules')
+    except subprocess.CalledProcessError:
+        print("ERROR: Relion not found in PATH or Schedules not found!")
+        exit(1)
+
+    # Run scheduler
+    cmdList = list()
     for key in mapDict:
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
-            fnDir, key, str(mapDict[key]))
+            'preprocess', key, str(mapDict[key]))
         cmdList.append(cmd)
-    cmdList.append('relion_scheduler --schedule %s --run &' % fnDir)
+    cmdList.append('relion_scheduler --schedule preprocess --run &')
 
     if DEBUG:
         for cmd in cmdList:
@@ -81,7 +114,7 @@ def setupRelion(paramDict):
 
 
 def setupScipion(paramDict):
-    bin, vpp, gain, defect, box_size = precalculateVars(paramDict)
+    bin, vpp, gain, defect = precalculateVars(paramDict)
     f = open(template_json, 'r')
     protocolsList = json.load(f)
     protNames = dict()
@@ -118,6 +151,13 @@ def setupScipion(paramDict):
     jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
     f.write(jsonStr)
     f.close()
+
+    try:
+        subprocess.check_output(["which", "scipion"],
+                                stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print("ERROR: Scipion not found in PATH!")
+        exit(1)
 
     # projectName = scopeName_date
     scope = cs_dict[paramDict['MicroscopeID']][1]

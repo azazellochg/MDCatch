@@ -25,12 +25,12 @@
 # *
 # **************************************************************************
 
-from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
-                             QPushButton, QWizard, QGroupBox,
+                             QPushButton, QWizard, QGroupBox, QSpinBox,
                              QSizePolicy, QLineEdit, QFileDialog,
-                             QComboBox, QApplication, QWizardPage)
+                             QCheckBox, QApplication, QWizardPage,
+                             QButtonGroup, QWidget)
 from PyQt5.QtCore import Qt
 import sys
 
@@ -63,9 +63,9 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.7 - metadata parser'
+        self.title = 'MDCatch v0.8 - metadata parser'
         self.width = 640
-        self.height = 280
+        self.height = 480
         self.initUI()
 
     def initUI(self):
@@ -109,78 +109,133 @@ class Page1(QWizardPage):
         label1 = QLabel('Software')
         label2 = QLabel('Path')
         label3 = QLabel('Particle diameter (A)')
+        label4 = QLabel('Run pipeline in')
+        self.label5 = QLabel('Relion project folder')
         vbox.addWidget(label1)
         vbox.addWidget(label2)
         vbox.addWidget(label3)
+        vbox.addWidget(label4)
+        vbox.addWidget(self.label5)
 
         return vbox
 
     def group2(self):
         grid = QVBoxLayout()
 
+        # software type
         hbox1 = QHBoxLayout()
         hbox1.setAlignment(Qt.AlignLeft)
+        btgroup1 = QButtonGroup()
+
         b1 = self.addRadioButton("EPU", default=True)
         b2 = self.addRadioButton("SerialEM")
+
+        btgroup1.addButton(b1)
+        btgroup1.addButton(b2)
+        btgroup1.buttonClicked.connect(lambda: self.updSoftware(btgroup1))
         hbox1.addWidget(b1)
         hbox1.addWidget(b2)
         grid.addLayout(hbox1)
 
+        # path box
         hbox2 = QHBoxLayout()
-        self.path = QLineEdit()
-        self.path.setReadOnly(True)
-        self.path.setText(default_path)
+        self.rawPath = QLineEdit()
+        self.rawPath.setReadOnly(True)
+        self.rawPath.setText(default_path)
 
         b3 = QPushButton('Browse')
-        b3.clicked.connect(self.browseSlot)
+        b3.clicked.connect(lambda: self.browseSlot(self.rawPath))
         b4 = QPushButton('?')
         b4.setFixedSize(20, 25)
         b4.clicked.connect(self.helpSlot)
 
-        hbox2.addWidget(self.path)
+        hbox2.addWidget(self.rawPath)
         hbox2.addWidget(b3)
         hbox2.addWidget(b4)
         grid.addLayout(hbox2)
 
-        self.size = QLineEdit()
-        self.size.setValidator(QIntValidator())
-        self.size.setMaxLength(4)
-        self.size.setText(part_size)
-        self.size.setAlignment(Qt.AlignRight)
-        self.size.setFixedSize(60, 20)
-        grid.addWidget(self.size)
+        # size box
+        hbox3 = QHBoxLayout()
+        labelSizeMin = QLabel('from')
+        hbox3.addWidget(labelSizeMin)
+
+        self.size_short = QSpinBox()
+        self.size_short.setRange(10, 9999)
+        self.size_short.setValue(part_size_short)
+        self.size_short.setFixedSize(60, 25)
+        hbox3.addWidget(self.size_short)
+
+        labelSizeMax = QLabel('to')
+        hbox3.addWidget(labelSizeMax)
+
+        self.size_long = QSpinBox()
+        self.size_long.setRange(10, 9999)
+        self.size_long.setValue(part_size_long)
+        self.size_long.setFixedSize(60, 25)
+        hbox3.addWidget(self.size_long)
+        hbox3.setAlignment(Qt.AlignLeft)
+        grid.addLayout(hbox3)
+
+        # pipeline
+        hbox4 = QHBoxLayout()
+        hbox4.setAlignment(Qt.AlignLeft)
+        btgroup2 = QButtonGroup()
+
+        b5 = self.addRadioButton("Relion", default=True)
+        b6 = self.addRadioButton("Scipion")
+
+        btgroup2.addButton(b5)
+        btgroup2.addButton(b6)
+        btgroup2.buttonClicked.connect(lambda: self.updPipeline(btgroup2))
+        hbox4.addWidget(b5)
+        hbox4.addWidget(b6)
+        grid.addLayout(hbox4)
+
+        # path box in a separate widget that can be hidden
+        hbox5 = QHBoxLayout()
+        self.prjpath = QLineEdit()
+        self.prjpath.setReadOnly(True)
+        self.prjpath.setText(os.getcwd())
+
+        self.b7 = QPushButton('Browse')
+        self.b7.clicked.connect(lambda: self.browseSlot(self.prjpath))
+
+        hbox5.addWidget(self.prjpath)
+        hbox5.addWidget(self.b7)
+        grid.addLayout(hbox5)
 
         return grid
 
-    def addRadioButton(self, choice, default=False):
-        rb = QRadioButton(choice)
-        if default:
-            rb.setChecked(True)
+    def updSoftware(self, btgroup):
+        bt = btgroup.checkedButton()
+        App.model.setSoftware(bt.text())
 
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
-        rb.setSizePolicy(sizePolicy)
+    def updPipeline(self, btgroup):
+        bt = btgroup.checkedButton()
+        App.model.setPipeline(bt.text())
+        # show/hide relion project path
+        self.label5.setVisible(bt.text() == 'Relion')
+        self.prjpath.setVisible(bt.text() == 'Relion')
+        self.b7.setVisible(bt.text() == 'Relion')
 
-        rb.toggled.connect(lambda: self.btnstate(rb))
-
-        return rb
-
-    def btnstate(self, bt):
-        if bt.isChecked():
-            App.model.setSoftware(bt.text())
-
-    def browseSlot(self):
-        # called when user pressed Browse
-        folder = default_path if self.path.text() is None else self.path.text()
+    def browseSlot(self, var):
+        # called when a user press Browse
+        default = os.getcwd() if var == self.prjpath else default_path
+        folder = default if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,
                                                 QFileDialog.ShowDirsOnly)
         if path:
-            App.model.setPath(path)
-            self.refreshPath()
+            self.refreshPath(var, path)
 
-    def refreshPath(self):
+    def refreshPath(self, var, path):
         # update line widget with selected path
-        self.path.setText(App.model.getPath())
+        if var == self.rawPath:
+            App.model.setRawPath(path)
+            self.rawPath.setText(App.model.getRawPath())
+        elif var == self.prjpath:
+            App.model.setPrjPath(path)
+            self.prjpath.setText(App.model.getPrjPath())
 
     def helpSlot(self):
         # called when pressed ?
@@ -189,17 +244,16 @@ class Page1(QWizardPage):
 
     def validatePage(self):
         # Next is pressed, returns True or False
-        App.model.setSize(self.size.text())
-        if App.model.getSoftware() is None:
-            App.model.setSoftware('EPU')
-        if App.model.getPath() is None:
-            App.model.setPath(default_path)
+        App.model.setSizes(self.size_short.text(), self.size_long.text())
+        if App.model.getRawPath() is None:
+            App.model.setRawPath(default_path)
 
         if DEBUG:
             print("\n\nInput params: ",
                   [App.model.getSoftware(),
-                   App.model.getPath(),
-                   App.model.getSize()])
+                   App.model.getRawPath(),
+                   App.model.getSizes(),
+                   App.model.getPipeline()])
 
         prog = App.model.getSoftware()
         fnList = App.model.guessFn(matchDict[prog])
@@ -217,6 +271,16 @@ class Page1(QWizardPage):
         App.model.acqDict.clear()
         App.model.__init__()
 
+    def addRadioButton(self, choice, default=False):
+        rb = QRadioButton(choice)
+        if default:
+            rb.setChecked(True)
+
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        rb.setSizePolicy(sizePolicy)
+
+        return rb
+
 
 class Page2(QWizardPage):
     def __init__(self, parent=None):
@@ -224,8 +288,8 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
-        self.mainLayout.addWidget(self.relionBt(), 1, 0)
-        self.mainLayout.addWidget(self.scipionBt(), 1, 1)
+        self.mainLayout.addWidget(self.group3(), 1, 0)
+        self.mainLayout.addWidget(self.group4(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -239,8 +303,9 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
-        acqDict['PtclSize'] = App.model.getSize()
+        acqDict['PtclSizeShort'], acqDict['PtclSizeLong'] = App.model.getSizes()
         App.model.calcDose()
+        App.model.calcBox()
         App.model.guessDataDir(fnList)
 
         self.setSubTitle("Found the following metadata from %s session:" % prog)
@@ -253,49 +318,46 @@ class Page2(QWizardPage):
         self.name.setText(cs_dict[scopeID][1])
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
-        self.mag.setText(acqDict['Magnification'])
+        self.px.setText(str(px))
 
         vpp = acqDict['PhasePlateUsed']
         if vpp in ['true', 'True']:
-            self.vpp.setCurrentIndex(0)
+            self.vpp.setChecked(True)
         else:
-            self.vpp.setCurrentIndex(1)
+            self.vpp.setChecked(False)
 
         self.name2.setText(acqDict['Detector'])
         self.mode.setText(acqDict['Mode'])
         self.time.setText(str(time))
         self.frames.setText(acqDict['NumSubFrames'])
         self.dosepf.setText(str(dosepf))
-        self.px.setText(str(px))
         self.gain.setText(os.path.basename(acqDict['GainReference']))
         self.defects.setText(os.path.basename(acqDict['DefectFile']))
+        self.box.setText(acqDict['BoxSize'])
+        self.mask.setText(acqDict['MaskSize'])
+        self.box2.setText(acqDict['BoxSizeSmall'])
 
     def group1(self):
         groupBox = QGroupBox("Microscope")
 
         name = QLabel("Name")
-        kv = QLabel("Voltage")
-        cs = QLabel("Cs")
-        mag = QLabel("Magnification")
+        kv = QLabel("Voltage (kV)")
+        cs = QLabel("Cs (mm)")
         vpp = QLabel("Phase plate")
+        px = QLabel("Pixel size (A)")
 
         self.name = QLabel()
         self.kv = QLabel()
         self.cs = QLabel()
-        self.mag = QLabel()
-
-        self.vpp = QComboBox()
-        vpp_values = ['true', 'false']
-        self.vpp.addItems(vpp_values)
-        self.vpp.setFixedSize(60, 20)
+        self.vpp = QCheckBox()
+        self.px = self.addLine(50, 20, 5, Qt.AlignRight)
 
         vbox = QGridLayout()
-        for num, i in enumerate([name, kv, cs, mag, vpp]):
+        for num, i in enumerate([name, kv, cs, px, vpp]):
             vbox.addWidget(i, num, 0)
 
         for num, i in enumerate([self.name, self.kv,
-                                 self.cs, self.mag,
-                                 self.vpp]):
+                                 self.cs, self.px, self.vpp]):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
@@ -307,10 +369,9 @@ class Page2(QWizardPage):
 
         name2 = QLabel("Name")
         mode = QLabel("Mode")
-        time = QLabel("Exposure time, s")
+        time = QLabel("Exposure time (s)")
         frames = QLabel("Frames")
-        dosepf = QLabel("Dose per frame, e/A²")
-        px = QLabel("Pixel size, A")
+        dosepf = QLabel("Dose per frame (e/A²)")
         gain = QLabel("Gain reference")
         defects = QLabel("Defects file")
 
@@ -320,57 +381,87 @@ class Page2(QWizardPage):
         self.frames = QLabel()
         self.gain = QLabel()
         self.defects = QLabel()
-
-        self.dosepf = QLineEdit()
-        self.dosepf.setFixedSize(50, 20)
-        self.dosepf.setMaxLength(4)
-        self.dosepf.setAlignment(Qt.AlignRight)
-
-        self.px = QLineEdit()
-        self.px.setFixedSize(50, 20)
-        self.px.setMaxLength(5)
-        self.px.setAlignment(Qt.AlignRight)
+        self.dosepf = self.addLine(50, 20, 4, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name2, mode, time, frames,
-                                 dosepf, px, gain, defects]):
+                                 dosepf, gain, defects]):
             vbox.addWidget(i, num, 0)
 
         for num, i in enumerate([self.name2, self.mode,
                                  self.time, self.frames,
-                                 self.dosepf, self.px,
-                                 self.gain, self.defects]):
+                                 self.dosepf, self.gain,
+                                 self.defects]):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
 
         return groupBox
 
-    def relionBt(self):
-        self.setRln = QRadioButton("Start Relion scheduler")
-        self.setRln.setChecked(True)
+    def group3(self):
+        groupBox = QGroupBox("Recommended parameters")
 
-        return self.setRln
+        box = QLabel("Box size (px)")
+        mask = QLabel("Mask size (A)")
+        box2 = QLabel("Downscale to (px)")
 
-    def scipionBt(self):
-        self.setScp = QRadioButton("Start Scipion workflow")
+        self.box = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.mask = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.box2 = self.addLine(50, 20, 5, Qt.AlignRight)
 
-        return self.setScp
+        vbox = QGridLayout()
+        for num, i in enumerate([box, mask, box2]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.box, self.mask,
+                                 self.box2]):
+            vbox.addWidget(i, num, 1)
+
+        groupBox.setLayout(vbox)
+
+        return groupBox
+
+    def group4(self):
+        groupBox = QGroupBox("Preprocessing")
+
+        self.runCtf = QRadioButton("Stop after CTF estimation?")
+        self.runCl2d = QRadioButton("Do 2D classification?")
+        self.runCl2d.setChecked(True)
+
+        hbox = QGridLayout()
+        hbox.addWidget(self.runCtf, 0, 0)
+        hbox.addWidget(self.runCl2d, 1, 0)
+        groupBox.setLayout(hbox)
+
+        return groupBox
 
     def onFinish(self):
-        # Finish pressed
+        # Finish pressed, we need to update all editable vars
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
-        App.model.acqDict['PhasePlateUsed'] = self.vpp.currentText()
+        App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
+        App.model.acqDict['NoCl2D'] = self.runCtf.isChecked()
+        App.model.acqDict['BoxSize'] = self.box.text()
+        App.model.acqDict['MaskSize'] = self.mask.text()
+        App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
             for k, v in App.model.acqDict.items():
                 print(k, v)
+            print('\n')
 
-        if self.setRln.isChecked():
+        if App.model.getPipeline() == 'Relion':
             setupRelion(App.model.acqDict)
         else:
             setupScipion(App.model.acqDict)
+
+    def addLine(self, sizex, sizey, length, align):
+        line = QLineEdit()
+        line.setFixedSize(sizex, sizey)
+        line.setMaxLength(length)
+        line.setAlignment(align)
+
+        return line
 
 
 if __name__ == '__main__':
