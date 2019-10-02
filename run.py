@@ -402,12 +402,12 @@ class Page2(QWizardPage):
         groupBox = QGroupBox("Recommended parameters")
 
         box = QLabel("Box size (px)")
-        mask = QLabel("Mask size (A)")
+        mask = QLabel("Mask size (px)")
         box2 = QLabel("Downscale to (px)")
 
-        self.box = self.addLine(50, 20, 5, Qt.AlignRight)
-        self.mask = self.addLine(50, 20, 5, Qt.AlignRight)
-        self.box2 = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.box = self.addLine(50, 20, 4, Qt.AlignRight)
+        self.mask = self.addLine(50, 20, 4, Qt.AlignRight)
+        self.box2 = self.addLine(50, 20, 4, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([box, mask, box2]):

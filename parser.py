@@ -250,12 +250,13 @@ class Parser:
         minSize = self.acqDict['PtclSizeShort']
         maxSize = self.acqDict['PtclSizeLong']
         ptclSizeAng = max(minSize, maxSize)
-        # use +10% for mask size
-        self.acqDict['MaskSize'] = str(1.1 * float(ptclSizeAng))
-
         angpix = float(self.acqDict['PixelSpacing'])
+
         if self.acqDict['Mode'] == 'Super-resolution':
             angpix = angpix * 2
+
+        # use +10% for mask size
+        self.acqDict['MaskSize'] = str(math.ceil(1.1 * float(ptclSizeAng) / angpix))
         ptclSizePx = float(ptclSizeAng) / angpix
         # use +20% for box size, make it even
         boxSize = 1.2 * ptclSizePx
