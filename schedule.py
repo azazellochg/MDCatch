@@ -36,15 +36,14 @@ from config import *
 def precalculateVars(paramDict):
     # set motioncor bin to 2 if using super-res data
     bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-    vpp = True if paramDict['PhasePlateUsed'] in ['true', 'True'] else False
     gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
 
-    return bin, vpp, gain, defect
+    return bin, gain, defect
 
 
 def setupRelion(paramDict):
-    bin, vpp, gain, defect = precalculateVars(paramDict)
+    bin, gain, defect = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
                'LOG_mind': paramDict['PtclSizeShort'],
@@ -56,7 +55,7 @@ def setupRelion(paramDict):
                'motioncorr_bin': bin,
                'box_size': paramDict['BoxSize'],
                'do_until_ctf': paramDict['NoCl2D'],
-               'is_VPP': vpp,
+               'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
 
     # Create links
@@ -114,7 +113,7 @@ def setupRelion(paramDict):
 
 
 def setupScipion(paramDict):
-    bin, vpp, gain, defect = precalculateVars(paramDict)
+    bin, gain, defect = precalculateVars(paramDict)
     f = open(template_json, 'r')
     protocolsList = json.load(f)
     protNames = dict()
@@ -143,7 +142,7 @@ def setupScipion(paramDict):
     movieProt["defectFile"] = defect
 
     ctfProt = protocolsList[protNames["ProtGctf"]]
-    ctfProt["doPhShEst"] = vpp
+    ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
 
     if os.path.exists(output_json):
         os.remove(output_json)

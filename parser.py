@@ -50,6 +50,8 @@ class Parser:
         self.acqDict['OpticalGroup'] = 'opticsGroup1'
         self.acqDict['PhasePlateUsed'] = 'false'
         self.acqDict['NoCl2D'] = 'false'
+        self.acqDict['GainReference'] = 'None'
+        self.acqDict['DefectFile'] = 'None'
 
     def setRawPath(self, path):
         self.rawPath = path
@@ -336,5 +338,7 @@ class Parser:
         self.acqDict['Software'] = self.getSoftware()
         self.acqDict['PrjPath'] = self.getPrjPath()
         self.acqDict['MoviePath'] = movieDir
-        self.acqDict['GainReference'] = gainFn
-        self.acqDict['DefectFile'] = defFn
+        if os.path.exists(gainFn):
+            self.acqDict['GainReference'] = gainFn
+        if os.path.exists(defFn):
+            self.acqDict['DefectFile'] = defFn
