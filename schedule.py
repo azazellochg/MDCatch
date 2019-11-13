@@ -86,6 +86,9 @@ def setupRelion(paramDict):
     mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
     mapDict['defect_file'] = os.path.basename(defect) or '""'
 
+    #FIXME: pix is different since we did rescale ptcls upon extraction :(
+    maskSizeAng = int(paramDict['MaskSize']) * float(paramDict['PixelSpacing'])
+
     try:
         subprocess.check_output(["which", "relion_scheduler"],
                                 stderr=subprocess.DEVNULL)
@@ -101,7 +104,12 @@ def setupRelion(paramDict):
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
             'preprocess', key, str(mapDict[key]))
         cmdList.append(cmd)
+    cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %f' %
+                   maskSizeAng)
     cmdList.append('relion_scheduler --schedule preprocess --run &')
+
+    if not mapDict['do_until_ctf']:
+        cmdList.append('relion_scheduler --schedule class2d --run &')
 
     if DEBUG:
         for cmd in cmdList:

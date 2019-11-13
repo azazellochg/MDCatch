@@ -28,9 +28,9 @@
 
 DEBUG = 1
 
-default_path = "/home/azazello/soft/MDCatch/examples"
+#default_path = "/home/azazello/soft/MDCatch/examples"
 #default_path = "/home/gsharov/soft/MDCatch/examples"
-#default_path = "/net/em-support3/"
+default_path = "/net/em-support3/"
 schedule_dir = "/home/azazello/soft/MDCatch/Schedules"
 template_json = "template.json"
 output_json = "workflow.json"
@@ -59,10 +59,10 @@ cs_dict = {
 
 # path to MTF files for Relion (300 kV only)
 mtf_dict = {
-    'Falcon3-count': '/beegfs3/otfp/MTFs/mtf_falcon3EC_300kV.star',
-    'Falcon3-linear': '/beegfs3/otfp/MTFs/mtf_falcon2_300kV.star',
-    'K2': '/beegfs3/otfp/MTFs/mtf_k2_300kV.star',
-    'K3': '/beegfs3/otfp/MTFs/mtf_K3_300kv_nocds.star'
+    'Falcon3-count': '/teraraid4/otfp/MTFs/mtf_falcon3EC_300kV.star',
+    'Falcon3-linear': '/teraraid4/otfp/MTFs/mtf_falcon2_300kV.star',
+    'K2': '/teraraid4/otfp/MTFs/mtf_k2_300kV.star',
+    'K3': '/teraraid4/otfp/MTFs/mtf_K3_300kv_nocds.star'
 }
 
 # path to raw movies folder on Krios etc
