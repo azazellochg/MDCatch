@@ -31,7 +31,7 @@ DEBUG = 1
 #default_path = "/home/azazello/soft/MDCatch/examples"
 #default_path = "/home/gsharov/soft/MDCatch/examples"
 default_path = "/net/em-support3/"
-schedule_dir = "/home/azazello/soft/MDCatch/Schedules"
+schedule_dir = "/beegfs3/otfp/Gregory/test1_krios1/Schedules"
 template_json = "template.json"
 output_json = "workflow.json"
 
@@ -51,10 +51,7 @@ part_size_long = 180
 cs_dict = {
     '3299': (2.7, 'Krios1'),
     '3413': (2.7, 'Krios2'),
-    '3593': (2.7, 'Krios3'),
-    '316': (2.25, 'Polara1'),
-    '304': (2.25, 'Polara2'),
-    '2366': (2.0, 'F20')
+    '3593': (2.7, 'Krios3')
 }
 
 # path to MTF files for Relion (300 kV only)
@@ -68,8 +65,7 @@ mtf_dict = {
 # path to raw movies folder on Krios etc
 pathDict = {
     'EF-CCD': '/net/cista1/%sGatan/',
-    'BM-Falcon': '/net/cista1/%sFalcon/',
-    'Polara1': '/net/cista1/Polara1/',
+    'BM-Falcon': '/net/cista1/%sFalcon/'
 }
 
 # SerialEM mdoc params to parse

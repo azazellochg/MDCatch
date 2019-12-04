@@ -312,10 +312,6 @@ class Parser:
                     else:
                         self.acqDict['MTF'] = mtf_dict['Falcon3-count']
 
-            elif scope == 'Polara1':
-                movieDir = pathDict[scope]
-                self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
-
         else:  # SerialEM
             movieDir = os.path.join(self.getRawPath(), "*.tif")
             gainFn = os.path.join(self.getRawPath(), self.acqDict['GainReference'])
@@ -343,3 +339,4 @@ class Parser:
             self.acqDict['GainReference'] = gainFn
         if os.path.exists(defFn):
             self.acqDict['DefectFile'] = defFn
+
