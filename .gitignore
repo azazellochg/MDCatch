@@ -109,3 +109,4 @@ examples/
 Schedules/
 .idea/
 workflow.json
+test.sh
