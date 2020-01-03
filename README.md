@@ -1,4 +1,5 @@
 # MDCatch
+## Still in development, but you are welcome to try!
 A simple app to fetch metadata from EPU (tested versions 1.10.0.77, 2.3.0.79, 2.0.13) or SerialEM. Requires python3 and PyQt5.
 It parses the first EPU xml and SerialEM mdoc file it finds, associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
 
