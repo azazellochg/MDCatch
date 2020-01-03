@@ -321,6 +321,7 @@ class Parser:
                     else:
                         self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
 
+
         else:  # SerialEM
             movieDir = os.path.join(self.getRawPath(), "*.tif")
             gainFn = os.path.join(self.getRawPath(), self.acqDict['GainReference'])
