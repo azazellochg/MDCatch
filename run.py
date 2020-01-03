@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QPushButton, QWizard, QGroupBox, QSpinBox,
                              QSizePolicy, QLineEdit, QFileDialog,
                              QCheckBox, QApplication, QWizardPage,
-                             QButtonGroup, QWidget)
+                             QButtonGroup)
 from PyQt5.QtCore import Qt
 import sys
 
@@ -63,7 +63,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.8 - metadata parser'
+        self.title = 'MDCatch v0.9 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -102,6 +102,7 @@ class Page1(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addLayout(self.group1(), 0, 0)
         self.mainLayout.addLayout(self.group2(), 0, 1)
+        self.mainLayout.addLayout(self.group3(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def group1(self):
@@ -110,12 +111,13 @@ class Page1(QWizardPage):
         label2 = QLabel('Path')
         label3 = QLabel('Particle diameter (A)')
         label4 = QLabel('Run pipeline in')
-        self.label5 = QLabel('Relion project folder')
+        label5 = QLabel('LMB username')
+
         vbox.addWidget(label1)
         vbox.addWidget(label2)
         vbox.addWidget(label3)
         vbox.addWidget(label4)
-        vbox.addWidget(self.label5)
+        vbox.addWidget(label5)
 
         return vbox
 
@@ -141,7 +143,7 @@ class Page1(QWizardPage):
         hbox2 = QHBoxLayout()
         self.rawPath = QLineEdit()
         self.rawPath.setReadOnly(True)
-        self.rawPath.setText(default_path)
+        self.rawPath.setText(METADATA_PATH)
 
         b3 = QPushButton('Browse')
         b3.clicked.connect(lambda: self.browseSlot(self.rawPath))
@@ -191,20 +193,30 @@ class Page1(QWizardPage):
         hbox4.addWidget(b6)
         grid.addLayout(hbox4)
 
-        # path box in a separate widget that can be hidden
+        # username
         hbox5 = QHBoxLayout()
-        self.prjpath = QLineEdit()
-        self.prjpath.setReadOnly(True)
-        self.prjpath.setText(os.getcwd())
+        hbox5.setAlignment(Qt.AlignLeft)
+        self.username = QLineEdit()
+        self.username.setFixedSize(200, 25)
 
-        self.b7 = QPushButton('Browse')
-        self.b7.clicked.connect(lambda: self.browseSlot(self.prjpath))
+        self.b7 = QPushButton('Check!')
+        self.b7.setFixedSize(70, 25)
+        self.b7.clicked.connect(lambda: self.checkLogin(self.username))
 
-        hbox5.addWidget(self.prjpath)
+        hbox5.addWidget(self.username)
         hbox5.addWidget(self.b7)
         grid.addLayout(hbox5)
 
         return grid
+
+    def group3(self):
+        vbox = QVBoxLayout()
+        self.label6 = QLabel('')
+        self.label6.setVisible(False)
+
+        vbox.addWidget(self.label6)
+
+        return vbox
 
     def updSoftware(self, btgroup):
         bt = btgroup.checkedButton()
@@ -213,15 +225,10 @@ class Page1(QWizardPage):
     def updPipeline(self, btgroup):
         bt = btgroup.checkedButton()
         App.model.setPipeline(bt.text())
-        # show/hide relion project path
-        self.label5.setVisible(bt.text() == 'Relion')
-        self.prjpath.setVisible(bt.text() == 'Relion')
-        self.b7.setVisible(bt.text() == 'Relion')
 
     def browseSlot(self, var):
         # called when a user press Browse
-        default = os.getcwd() if var == self.prjpath else default_path
-        folder = default if var.text() is None else var.text()
+        folder = METADATA_PATH if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,
                                                 QFileDialog.ShowDirsOnly)
@@ -230,28 +237,56 @@ class Page1(QWizardPage):
 
     def refreshPath(self, var, path):
         # update line widget with selected path
-        if var == self.rawPath:
-            App.model.setRawPath(path)
-            self.rawPath.setText(App.model.getRawPath())
-        elif var == self.prjpath:
-            App.model.setPrjPath(path)
-            self.prjpath.setText(App.model.getPrjPath())
+        App.model.setRawPath(path)
+        self.rawPath.setText(App.model.getRawPath())
 
     def helpSlot(self):
         # called when pressed ?
         App.showDialog("Help", help_message, 'help')
         return
 
+    def checkLogin(self, login):
+        # match username with NIS database
+        login = login.text()
+
+        if len(login) < 3:
+            App.showDialog("ERROR", "Username is too short!")
+            return False
+        else:
+            cmd = "/usr/bin/ypmatch %s passwd" % login 
+            res = subprocess.run(cmd, shell=True, check=False,
+                                 universal_newlines=True,
+                                 stdout=subprocess.PIPE)
+
+            if res.returncode == 1:
+                App.showDialog("ERROR", "Username %s not found!" %
+                               self.username.text())
+                return False
+            else:
+                res = str(res.stdout)
+                uid, gid = res.split(':')[2], res.split(':')[3]
+                self.label6.setVisible(True)
+                self.label6.setStyleSheet('color: green')
+                self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
+                App.model.setUser(login, uid, gid)
+                return True
+
     def validatePage(self):
         # Next is pressed, returns True or False
         App.model.setSizes(self.size_short.text(), self.size_long.text())
         if App.model.getRawPath() is None:
-            App.model.setRawPath(default_path)
+            App.model.setRawPath(METADATA_PATH)
+
+        # prevent Check button bypass
+        usrchk = self.checkLogin(self.username)
+        if not usrchk:
+            return False
 
         if DEBUG:
             print("\n\nInput params: ",
                   [App.model.getSoftware(),
                    App.model.getRawPath(),
+                   App.model.getUser(),
                    App.model.getSizes(),
                    App.model.getPipeline()])
 
@@ -315,7 +350,7 @@ class Page2(QWizardPage):
         dosepf = round(float(acqDict['DosePerFrame']), 2)
         px = round(float(acqDict['PixelSpacing']), 4)
 
-        self.name.setText(cs_dict[scopeID][1])
+        self.name.setText(CS_DICT[scopeID][1])
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
         self.px.setText(str(px))
@@ -402,12 +437,12 @@ class Page2(QWizardPage):
         groupBox = QGroupBox("Recommended parameters")
 
         box = QLabel("Box size (px)")
-        mask = QLabel("Mask size (A)")
+        mask = QLabel("Mask size (px)")
         box2 = QLabel("Downscale to (px)")
 
-        self.box = self.addLine(50, 20, 5, Qt.AlignRight)
-        self.mask = self.addLine(50, 20, 5, Qt.AlignRight)
-        self.box2 = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.box = self.addLine(50, 20, 4, Qt.AlignRight)
+        self.mask = self.addLine(50, 20, 4, Qt.AlignRight)
+        self.box2 = self.addLine(50, 20, 4, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([box, mask, box2]):
@@ -437,6 +472,7 @@ class Page2(QWizardPage):
 
     def onFinish(self):
         # Finish pressed, we need to update all editable vars
+        App.model.acqDict['User'] = App.model.getUser()
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()

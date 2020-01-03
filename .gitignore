@@ -109,3 +109,5 @@ examples/
 Schedules/
 .idea/
 workflow.json
+test.sh
+header.py

@@ -35,9 +35,10 @@ from config import *
 class Parser:
     """ XML / MDOC parser """
     def __init__(self):
-        self.rawPath = default_path
-        self.prjPath = os.getcwd()
+        self.rawPath = METADATA_PATH
+        self.prjPath = PROJECT_PATH
         self.software = 'EPU'
+        self.user = None, None, None
         self.ptclSizeShort = part_size_short
         self.ptclSizeLong = part_size_long
         self.fn = None
@@ -50,6 +51,9 @@ class Parser:
         self.acqDict['OpticalGroup'] = 'opticsGroup1'
         self.acqDict['PhasePlateUsed'] = 'false'
         self.acqDict['NoCl2D'] = 'false'
+        self.acqDict['GainReference'] = 'None'
+        self.acqDict['DefectFile'] = 'None'
+        self.acqDict['User'] = 'Unknown', 0, 0
 
     def setRawPath(self, path):
         self.rawPath = path
@@ -68,6 +72,12 @@ class Parser:
 
     def setPrjPath(self, path):
         self.prjPath = path
+
+    def getUser(self):
+        return self.user
+
+    def setUser(self, login, uid, gid):
+        self.user = login, uid, gid
 
     def getSizes(self):
         return self.ptclSizeShort, self.ptclSizeLong
@@ -90,7 +100,7 @@ class Parser:
 
     def guessFn(self, ftype="xml"):
         img = None
-        regex = reg_xml if ftype == 'xml' else reg_mdoc
+        regex = PATTERN_XML if ftype == 'xml' else PATTERN_MDOC
 
         if DEBUG:
             print("\nUsing regex: ", regex)
@@ -161,8 +171,8 @@ class Parser:
             self.acqDict['MicroscopeID'] = root[6][3][3].text
 
             value = self.acqDict['MicroscopeID']
-            if value in cs_dict:
-                self.acqDict['Cs'] = cs_dict[value][0]
+            if value in CS_DICT:
+                self.acqDict['Cs'] = CS_DICT[value][0]
 
         if root[6][4][3].tag == '%sBeamTilt' % schema:
             self.acqDict['BeamTiltX'] = root[6][4][3][0].text
@@ -197,11 +207,11 @@ class Parser:
         self.acqDict['Detector'] = 'EF-CCD'
 
         with open(fn, 'r') as fname:
-            regex = re.compile(mdocPattern)
+            regex = re.compile(REGEX_MDOC_VAR)
 
             for line in fname:
                 match = regex.match(line)
-                if match and match.groupdict()['var'] in paramsList:
+                if match and match.groupdict()['var'] in SERIALEM_PARAMS:
                     key = match.groupdict()['var']
                     self.acqDict[key] = match.groupdict()['value'].strip()
 
@@ -213,8 +223,8 @@ class Parser:
                 value = match.group().replace('D', '')
                 self.acqDict['MicroscopeID'] = value
                 self.acqDict.pop('T')
-                if value in cs_dict:
-                    self.acqDict['Cs'] = str(cs_dict[value][0])
+                if value in CS_DICT:
+                    self.acqDict['Cs'] = str(CS_DICT[value][0])
 
             self.acqDict['Dose'] = self.acqDict.pop('ExposureDose')
             self.acqDict['AppliedDefocus'] = self.acqDict.pop('TargetDefocus')
@@ -248,12 +258,13 @@ class Parser:
         minSize = self.acqDict['PtclSizeShort']
         maxSize = self.acqDict['PtclSizeLong']
         ptclSizeAng = max(minSize, maxSize)
-        # use +10% for mask size
-        self.acqDict['MaskSize'] = str(1.1 * float(ptclSizeAng))
-
         angpix = float(self.acqDict['PixelSpacing'])
+
         if self.acqDict['Mode'] == 'Super-resolution':
             angpix = angpix * 2
+
+        # use +10% for mask size
+        self.acqDict['MaskSize'] = str(math.ceil(1.1 * float(ptclSizeAng) / angpix))
         ptclSizePx = float(ptclSizeAng) / angpix
         # use +20% for box size, make it even
         boxSize = 1.2 * ptclSizePx
@@ -281,37 +292,34 @@ class Parser:
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         self.acqDict['MTF'] = ''
         camera = self.acqDict['Detector']
-        scope = cs_dict[self.acqDict['MicroscopeID']][1]
+        scope = CS_DICT[self.acqDict['MicroscopeID']][1]
 
         if self.getSoftware() == 'EPU':
             if 'Krios' in scope:
-                p1 = pathDict[camera] % scope
+                p1 = MOVIE_PATH_DICT[camera] % scope
                 session = os.path.basename(self.getRawPath())
 
                 if camera == 'EF-CCD':
                     # get gain file
-                    movieDir = os.path.join(p1, "DoseFractions", session, epu_movies_path)
+                    movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_PATH)
                     f1 = fnList.replace('.xml', '-gain-ref.MRC')  # TODO: check if gain is always named this way
                     f2 = f1.split('Images-Disc')[1]
                     gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
 
                     # get MTF file for Gatan
                     if scope == 'Krios3':
-                        self.acqDict['MTF'] = mtf_dict['K3']
+                        self.acqDict['MTF'] = MTF_DICT['K3']
                     else:
-                        self.acqDict['MTF'] = mtf_dict['K2']
+                        self.acqDict['MTF'] = MTF_DICT['K2']
                 else:
-                    movieDir = os.path.join(p1, session, epu_movies_path)
+                    movieDir = os.path.join(p1, session, EPU_MOVIES_PATH)
 
                     # get MTF file for Falcon
                     if self.acqDict['Mode'] == 'Linear':
-                        self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
+                        self.acqDict['MTF'] = MTF_DICT['Falcon3-linear']
                     else:
-                        self.acqDict['MTF'] = mtf_dict['Falcon3-count']
+                        self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
 
-            elif scope == 'Polara1':
-                movieDir = pathDict[scope]
-                self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
 
         else:  # SerialEM
             movieDir = os.path.join(self.getRawPath(), "*.tif")
@@ -321,20 +329,22 @@ class Parser:
 
             if camera == 'EF-CCD':
                 # get MTF file for Gatan
-                if scope in ['Krios3', 'Polara2']:
-                    self.acqDict['MTF'] = mtf_dict['K3']
+                if scope in ['Krios3']:
+                    self.acqDict['MTF'] = MTF_DICT['K3']
                 else:
-                    self.acqDict['MTF'] = mtf_dict['K2']
+                    self.acqDict['MTF'] = MTF_DICT['K2']
             else:
                 # get MTF file for Falcon
                 if self.acqDict['Mode'] == 'Linear':
-                    self.acqDict['MTF'] = mtf_dict['Falcon3-linear']
+                    self.acqDict['MTF'] = MTF_DICT['Falcon3-linear']
                 else:
-                    self.acqDict['MTF'] = mtf_dict['Falcon3-count']
+                    self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
 
         # populate dict
         self.acqDict['Software'] = self.getSoftware()
         self.acqDict['PrjPath'] = self.getPrjPath()
         self.acqDict['MoviePath'] = movieDir
-        self.acqDict['GainReference'] = gainFn
-        self.acqDict['DefectFile'] = defFn
+        if os.path.exists(gainFn):
+            self.acqDict['GainReference'] = gainFn
+        if os.path.exists(defFn):
+            self.acqDict['DefectFile'] = defFn
