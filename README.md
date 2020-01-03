@@ -17,7 +17,6 @@ It parses the first EPU xml and SerialEM mdoc file it finds, associated with a d
   3. create a Relion project folder `username_microscope_date_time` inside PROJECT_PATH
   4. create symlinks for movies, gain reference etc in the project folder
   5. read and modify existing Schedules then launch Relion
-* Extra: header.py can parse tif movie header directly, without libtiff. At the moment it's not used.
 
 If you don't have PyQt5 in your system python3 then create a virtual env:
 ```
