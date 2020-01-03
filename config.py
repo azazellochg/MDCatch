@@ -28,52 +28,53 @@
 
 DEBUG = 1
 
-#default_path = "/home/azazello/soft/MDCatch/examples"
-#default_path = "/home/gsharov/soft/MDCatch/examples"
-default_path = "/net/em-support3/"
-schedule_dir = "/home/azazello/soft/MDCatch/Schedules"
-template_json = "template.json"
-output_json = "workflow.json"
+# path to EPU session or folder with SerialEM mdoc files
+#METADATA_PATH = "/home/azazello/soft/MDCatch/examples"
+METADATA_PATH = "/home/gsharov/soft/MDCatch/examples"
+#METADATA_PATH = "/net/em-support3/"
 
-epu_movies_path = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
-reg_xml = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.xml$"
-reg_mdoc = ".{1,}\.tif\.mdoc$"
-mdocPattern = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
+PROJECT_PATH = "/home/gsharov/soft/MDCatch/"
 
-matchDict = {"EPU": 'xml',
-             "SerialEM": 'mdoc'}
+# Folder with Relion 3.1 schedules
+#SCHEDULE_PATH = "/beegfs3/otfp/Gregory/test1_krios1/Schedules"
+SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/Schedules"
 
-# default particle diameter
+# Scipion pre-processing template and output file
+JSON_TEMPLATE = "template.json"
+JSON_PATH = "workflow.json"
+
+EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
+PATTERN_XML = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.xml$"
+PATTERN_MDOC = ".{1,}\.tif\.mdoc$"
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
+
+# default particle size for Relion LoG picker
 part_size_short = 150
 part_size_long = 180
 
-# scopeID: Cs aberration and scope name
-cs_dict = {
+# scopeID: (Cs, scope name)
+CS_DICT = {
     '3299': (2.7, 'Krios1'),
     '3413': (2.7, 'Krios2'),
-    '3593': (2.7, 'Krios3'),
-    '316': (2.25, 'Polara1'),
-    '304': (2.25, 'Polara2'),
-    '2366': (2.0, 'F20')
+    '3593': (2.7, 'Krios3')
 }
 
 # path to MTF files for Relion (300 kV only)
-mtf_dict = {
+MTF_DICT = {
     'Falcon3-count': '/teraraid4/otfp/MTFs/mtf_falcon3EC_300kV.star',
     'Falcon3-linear': '/teraraid4/otfp/MTFs/mtf_falcon2_300kV.star',
     'K2': '/teraraid4/otfp/MTFs/mtf_k2_300kV.star',
     'K3': '/teraraid4/otfp/MTFs/mtf_K3_300kv_nocds.star'
 }
 
-# path to raw movies folder on Krios etc
-pathDict = {
+# path to raw movies folder depending on camera type
+MOVIE_PATH_DICT = {
     'EF-CCD': '/net/cista1/%sGatan/',
-    'BM-Falcon': '/net/cista1/%sFalcon/',
-    'Polara1': '/net/cista1/Polara1/',
+    'BM-Falcon': '/net/cista1/%sFalcon/'
 }
 
-# SerialEM mdoc params to parse
-paramsList = [
+# SerialEM mdoc vars to parse
+SERIALEM_PARAMS = [
     'T',  # Microscope ID
     #'TiltAngle',
     'Voltage',
@@ -88,7 +89,7 @@ paramsList = [
     'DefectFile',
     'GainReference',
 
-    # params below are added to mdoc using "AddToNextFrameStackMdoc key value"
+    # vars below are added to mdoc using "AddToNextFrameStackMdoc key value"
     'OpticalGroup',
     'PhasePlateInserted',  # later renamed to PhasePlateUsed in parser.py
     'BeamTiltCompensation',
@@ -107,3 +108,6 @@ Please make sure that you selected correct folder:\n
    with Images-DiscX folder inside.\n
    2) SerialEM: the folder on /net/cista1/ that
    contains tif and mdoc files.\n"""
+
+matchDict = {"EPU": 'xml',
+             "SerialEM": 'mdoc'}

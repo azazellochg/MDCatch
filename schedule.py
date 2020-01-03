@@ -58,8 +58,16 @@ def setupRelion(paramDict):
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
 
+    # Create Relion project dir username_scope_date_time
+    username, uid, gid = paramDict['User']
+    scope = CS_DICT[paramDict['MicroscopeID']][1]
+    dt = datetime.now()
+    dt = dt.strftime('%d-%m-%Y_%H%M')
+    prjName = username + '_' + scope + '_' + dt
+    prjPath = os.path.join(paramDict['PrjPath'], prjName)
+    os.mkdir(prjPath)
+
     # Create links
-    prjPath = paramDict['PrjPath']
     movieDir = os.path.join(prjPath, "Movies")
     if os.path.islink(movieDir):
         os.remove(movieDir)
@@ -93,9 +101,9 @@ def setupRelion(paramDict):
         subprocess.check_output(["which", "relion_scheduler"],
                                 stderr=subprocess.DEVNULL)
         if not os.path.exists('Schedules'):
-            shutil.copytree(schedule_dir, os.getcwd() + '/Schedules')
+            shutil.copytree(SCHEDULE_PATH, os.getcwd() + '/Schedules')
     except subprocess.CalledProcessError:
-        print("ERROR: Relion not found in PATH or Schedules not found!")
+        print("ERROR: Relion 3.1 not found in PATH or Schedules not found!")
         exit(1)
 
     # Run scheduler
@@ -121,8 +129,11 @@ def setupRelion(paramDict):
 
 
 def setupScipion(paramDict):
+    print("ERROR: Scipion pipeline not working yet.")
+    return
+
     bin, gain, defect = precalculateVars(paramDict)
-    f = open(template_json, 'r')
+    f = open(JSON_TEMPLATE, 'r')
     protocolsList = json.load(f)
     protNames = dict()
 
@@ -152,9 +163,9 @@ def setupScipion(paramDict):
     ctfProt = protocolsList[protNames["ProtGctf"]]
     ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
 
-    if os.path.exists(output_json):
-        os.remove(output_json)
-    f = open(output_json, "w")
+    if os.path.exists(JSON_PATH):
+        os.remove(JSON_PATH)
+    f = open(JSON_PATH, "w")
     jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
     f.write(jsonStr)
     f.close()
@@ -167,7 +178,7 @@ def setupScipion(paramDict):
         exit(1)
 
     # projectName = scopeName_date
-    scope = cs_dict[paramDict['MicroscopeID']][1]
+    scope = CS_DICT[paramDict['MicroscopeID']][1]
     dt = datetime.now()
     dt = dt.strftime('%d-%m-%Y')
     prjName = scope + '_' + dt
