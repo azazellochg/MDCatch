@@ -63,7 +63,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.8 - metadata parser'
+        self.title = 'MDCatch v0.9 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -251,6 +251,7 @@ class Page1(QWizardPage):
 
         if len(login) < 3:
             App.showDialog("ERROR", "Username is too short!")
+            return False
         else:
             cmd = "/usr/bin/ypmatch %s passwd" % login 
             res = subprocess.run(cmd, shell=True, check=False,
@@ -260,6 +261,7 @@ class Page1(QWizardPage):
             if res.returncode == 1:
                 App.showDialog("ERROR", "Username %s not found!" %
                                self.username.text())
+                return False
             else:
                 res = str(res.stdout)
                 uid, gid = res.split(':')[2], res.split(':')[3]
@@ -267,12 +269,18 @@ class Page1(QWizardPage):
                 self.label6.setStyleSheet('color: green')
                 self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
                 App.model.setUser(login, uid, gid)
+                return True
 
     def validatePage(self):
         # Next is pressed, returns True or False
         App.model.setSizes(self.size_short.text(), self.size_long.text())
         if App.model.getRawPath() is None:
             App.model.setRawPath(METADATA_PATH)
+
+        # prevent Check button bypass
+        usrchk = self.checkLogin(self.username)
+        if not usrchk:
+            return False
 
         if DEBUG:
             print("\n\nInput params: ",

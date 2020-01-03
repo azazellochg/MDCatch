@@ -29,7 +29,6 @@
 DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
-#METADATA_PATH = "/home/azazello/soft/MDCatch/examples"
 #METADATA_PATH = "/home/gsharov/soft/MDCatch/examples"
 METADATA_PATH = "/net/em-support3/"
 
