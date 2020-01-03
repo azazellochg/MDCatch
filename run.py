@@ -251,19 +251,18 @@ class Page1(QWizardPage):
 
         if len(login) < 3:
             App.showDialog("ERROR", "Username is too short!")
-            #return False
         else:
-            cmd = 'echo ypmatch %s passwd' % login
-            res = subprocess.check_output(cmd, shell=True)
-            res = res.decode()
+            cmd = "/usr/bin/ypmatch %s passwd" % login 
+            res = subprocess.run(cmd, shell=True, check=False,
+                                 universal_newlines=True,
+                                 stdout=subprocess.PIPE)
 
-            if res.startswith("Can't match key"):
+            if res.returncode == 1:
                 App.showDialog("ERROR", "Username %s not found!" %
                                self.username.text())
-                #return False
             else:
-                #uid, gid = res.split(':')[2], res.split(':')[3]
-                uid, gid = res.split()[0], res.split()[1]
+                res = str(res.stdout)
+                uid, gid = res.split(':')[2], res.split(':')[3]
                 self.label6.setVisible(True)
                 self.label6.setStyleSheet('color: green')
                 self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))

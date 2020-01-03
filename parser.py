@@ -110,8 +110,7 @@ class Parser:
             check1 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc1'))
             check2 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc2'))
             if not check1 and not check2:
-                pass  # FIXME: temporarily off
-                #return None
+                return None
 
         for root, _, files in os.walk(self.getRawPath()):
             for f in files:

@@ -85,7 +85,7 @@ def setupRelion(paramDict):
         mapDict['movies_wildcard'] = '"Movies/*.tif"'
 
     os.symlink(origPath1, movieDir)
-    os.chdir(paramDict['PrjPath'])
+    os.chdir(prjPath)
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             os.symlink(i, os.path.basename(i))

@@ -30,14 +30,15 @@ DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
 #METADATA_PATH = "/home/azazello/soft/MDCatch/examples"
-METADATA_PATH = "/home/gsharov/soft/MDCatch/examples"
-#METADATA_PATH = "/net/em-support3/"
+#METADATA_PATH = "/home/gsharov/soft/MDCatch/examples"
+METADATA_PATH = "/net/em-support3/"
 
-PROJECT_PATH = "/home/gsharov/soft/MDCatch/"
+#PROJECT_PATH = "/home/gsharov/soft/MDCatch/"
+PROJECT_PATH = "/cephfs/gsharov/testing"
 
 # Folder with Relion 3.1 schedules
-#SCHEDULE_PATH = "/beegfs3/otfp/Gregory/test1_krios1/Schedules"
-SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/Schedules"
+SCHEDULE_PATH = "/beegfs3/otfp/Gregory/test1_krios1/Schedules"
+#SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/Schedules"
 
 # Scipion pre-processing template and output file
 JSON_TEMPLATE = "template.json"
