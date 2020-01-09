@@ -33,6 +33,7 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QButtonGroup)
 from PyQt5.QtCore import Qt
 import sys
+import threading
 
 from parser import Parser
 from schedule import *
@@ -245,6 +246,23 @@ class Page1(QWizardPage):
         App.showDialog("Help", help_message, 'help')
         return
 
+    def checkName(self, cmd, login):
+        res = subprocess.run(cmd, check=False,
+                             universal_newlines=True,
+                             stdout=subprocess.PIPE)
+        if res.returncode == 1:
+            App.showDialog("ERROR", "Username %s not found!" %
+                           self.username.text())
+            return False
+        else:
+            res = str(res.stdout)
+            uid, gid = res.split(':')[2], res.split(':')[3]
+            self.label6.setVisible(True)
+            self.label6.setStyleSheet('color: green')
+            self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
+            App.model.setUser(login, uid, gid)
+            return True
+
     def checkLogin(self, login):
         # match username with NIS database
         login = login.text()
@@ -253,23 +271,10 @@ class Page1(QWizardPage):
             App.showDialog("ERROR", "Username is too short!")
             return False
         else:
-            cmd = "/usr/bin/ypmatch %s passwd" % login 
-            res = subprocess.run(cmd, shell=True, check=False,
-                                 universal_newlines=True,
-                                 stdout=subprocess.PIPE)
-
-            if res.returncode == 1:
-                App.showDialog("ERROR", "Username %s not found!" %
-                               self.username.text())
-                return False
-            else:
-                res = str(res.stdout)
-                uid, gid = res.split(':')[2], res.split(':')[3]
-                self.label6.setVisible(True)
-                self.label6.setStyleSheet('color: green')
-                self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
-                App.model.setUser(login, uid, gid)
-                return True
+            cmd = ["/usr/bin/ypmatch", "%s" % login,  "passwd"]
+            thr = threading.Thread(target=self.checkName, args=(cmd, login),
+                                   daemon=True)
+            thr.start()
 
     def validatePage(self):
         # Next is pressed, returns True or False
