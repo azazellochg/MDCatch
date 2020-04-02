@@ -178,8 +178,9 @@ class Parser:
             self.acqDict['BeamTiltX'] = root[6][4][3][0].text
             self.acqDict['BeamTiltY'] = root[6][4][3][1].text
 
-        if root[6][4][28][0].tag == '%sNominalMagnification' % schema:
-            self.acqDict['Magnification'] = root[6][4][28][0].text
+        # FIXME: 28 for old epu
+        if root[6][4][29][0].tag == '%sNominalMagnification' % schema:
+            self.acqDict['Magnification'] = root[6][4][29][0].text
 
         # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus etc.
         if root[2].tag == '%sCustomData' % schema:

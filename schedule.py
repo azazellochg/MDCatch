@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import json
 from datetime import datetime
+import threading
 
 from config import *
 
@@ -124,8 +125,16 @@ def setupRelion(paramDict):
             print(cmd)
 
     cmd = '\n'.join([line for line in cmdList])
-    proc = subprocess.check_output(cmd, shell=True)
-    proc.wait()
+    #cmd = ['sleep', '20']
+
+    thr = threading.Thread(target=runProc, args=cmd, daemon=True)
+    thr.start()
+
+
+def runProc(*args):
+    proc = subprocess.run(args, check=False, universal_newlines=True,
+                          stdout=subprocess.PIPE)
+    # proc.wait()
 
 
 def setupScipion(paramDict):
