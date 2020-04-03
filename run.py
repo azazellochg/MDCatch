@@ -33,7 +33,6 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QButtonGroup)
 from PyQt5.QtCore import Qt
 import sys
-import threading
 
 from parser import Parser
 from schedule import *
@@ -41,10 +40,6 @@ from schedule import *
 
 '''
 The app returns self.acqDict with all metadata.
-Tested with:
-
- - EPU 1.10.0.77, 2.3.0.79, 2.0.13
- - SerialEM 3.7, 3.8
 
 Units:
  - Dose, e/A^2 - total dose
@@ -64,7 +59,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.9 - metadata parser'
+        self.title = 'MDCatch v0.9.1 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -238,30 +233,13 @@ class Page1(QWizardPage):
 
     def refreshPath(self, var, path):
         # update line widget with selected path
-        App.model.setRawPath(path)
-        self.rawPath.setText(App.model.getRawPath())
+        App.model.setMdPath(path)
+        self.rawPath.setText(App.model.getMdPath())
 
     def helpSlot(self):
-        # called when pressed ?
+        # called when "?" is pressed
         App.showDialog("Help", help_message, 'help')
         return
-
-    def checkName(self, cmd, login):
-        res = subprocess.run(cmd, check=False,
-                             universal_newlines=True,
-                             stdout=subprocess.PIPE)
-        if res.returncode == 1:
-            App.showDialog("ERROR", "Username %s not found!" %
-                           self.username.text())
-            return False
-        else:
-            res = str(res.stdout)
-            uid, gid = res.split(':')[2], res.split(':')[3]
-            self.label6.setVisible(True)
-            self.label6.setStyleSheet('color: green')
-            self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
-            App.model.setUser(login, uid, gid)
-            return True
 
     def checkLogin(self, login):
         # match username with NIS database
@@ -271,35 +249,48 @@ class Page1(QWizardPage):
             App.showDialog("ERROR", "Username is too short!")
             return False
         else:
-            cmd = ["/usr/bin/ypmatch", "%s" % login,  "passwd"]
-            thr = threading.Thread(target=self.checkName, args=(cmd, login),
-                                   daemon=True)
-            thr.start()
+            cmd = "/usr/bin/ypmatch %s passwd" % login
+            res = subprocess.run(cmd.split(), check=True,
+                                 stdout=subprocess.PIPE)
+
+            if res.returncode == 1:
+                App.showDialog("ERROR", "Username %s not found!" %
+                               self.username.text())
+                return False
+            else:
+                res = str(res.stdout)
+                uid, gid = res.split(':')[2], res.split(':')[3]
+                self.label6.setVisible(True)
+                self.label6.setStyleSheet('color: green')
+                self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
+                App.model.setUser(login, uid, gid)
+                return True
 
     def validatePage(self):
         # Next is pressed, returns True or False
         App.model.setSizes(self.size_short.text(), self.size_long.text())
-        if App.model.getRawPath() is None:
-            App.model.setRawPath(METADATA_PATH)
+        if App.model.getMdPath() is None:
+            App.model.setMdPath(METADATA_PATH)
 
+        # FIXME
         # prevent Check button bypass
-        usrchk = self.checkLogin(self.username)
-        if not usrchk:
-            return False
+        #usrchk = self.checkLogin(self.username)
+        #if not usrchk:
+        #    return False
 
         if DEBUG:
             print("\n\nInput params: ",
                   [App.model.getSoftware(),
-                   App.model.getRawPath(),
+                   App.model.getMdPath(),
                    App.model.getUser(),
                    App.model.getSizes(),
                    App.model.getPipeline()])
 
         prog = App.model.getSoftware()
-        fnList = App.model.guessFn(matchDict[prog])
+        fnList = App.model.guessFn(prog)
 
         if fnList is None:
-            App.showDialog("ERROR", error_message % matchDict[prog])
+            App.showDialog("ERROR", error_message % prog)
             return False
         else:
             print("\nFiles found: %s\n" % fnList) if DEBUG else ""
@@ -307,7 +298,7 @@ class Page1(QWizardPage):
             return True
 
     def reset(self):
-        # Back pressed
+        # "Back" is pressed
         App.model.acqDict.clear()
         App.model.__init__()
 
@@ -487,8 +478,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
-            for k, v in App.model.acqDict.items():
-                print(k, v)
+            print((k, v) for k, v in App.model.acqDict.items())
             print('\n')
 
         if App.model.getPipeline() == 'Relion':

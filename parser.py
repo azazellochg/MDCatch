@@ -27,15 +27,16 @@
 import re
 import os
 import math
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 
 from config import *
 
 
 class Parser:
-    """ XML / MDOC parser """
+    """ XML / MDOC parser. """
     def __init__(self):
-        self.rawPath = METADATA_PATH
+        # set default values
+        self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
         self.software = 'EPU'
         self.user = None, None, None
@@ -43,8 +44,8 @@ class Parser:
         self.ptclSizeLong = part_size_long
         self.fn = None
         self.pipeline = 'Relion'
+
         self.acqDict = dict()
-        # set default values
         self.acqDict['Mode'] = 'Linear'
         self.acqDict['NumSubFrames'] = '0'
         self.acqDict['Dose'] = '0'
@@ -53,13 +54,14 @@ class Parser:
         self.acqDict['NoCl2D'] = 'false'
         self.acqDict['GainReference'] = 'None'
         self.acqDict['DefectFile'] = 'None'
+        self.acqDict['MTF'] = ''
         self.acqDict['User'] = 'Unknown', 0, 0
 
-    def setRawPath(self, path):
-        self.rawPath = path
+    def setMdPath(self, path):
+        self.mdPath = path
 
-    def getRawPath(self):
-        return self.rawPath
+    def getMdPath(self):
+        return self.mdPath
 
     def setPipeline(self, choice):
         self.pipeline = choice
@@ -98,21 +100,21 @@ class Parser:
     def getFn(self):
         return self.fn
 
-    def guessFn(self, ftype="xml"):
+    def guessFn(self, prog="EPU"):
         img = None
-        regex = PATTERN_XML if ftype == 'xml' else PATTERN_MDOC
+        regex = PATTERN_XML if prog == "EPU" else PATTERN_MDOC
 
         if DEBUG:
             print("\nUsing regex: ", regex)
 
         # check if Images-DicsX exists in the path
-        if ftype == 'xml':
-            check1 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc1'))
-            check2 = os.path.exists(os.path.join(self.getRawPath(), 'Images-Disc2'))
+        if prog == "EPU":
+            check1 = os.path.exists(os.path.join(self.getMdPath(), 'Images-Disc1'))
+            check2 = os.path.exists(os.path.join(self.getMdPath(), 'Images-Disc2'))
             if not check1 and not check2:
                 return None
 
-        for root, _, files in os.walk(self.getRawPath()):
+        for root, _, files in os.walk(self.getMdPath()):
             for f in files:
                 m = re.compile(regex).match(f)
                 if m is not None:
@@ -124,87 +126,90 @@ class Parser:
         return img
 
     def parseImgXml(self, fn):
+        """ Main XML parser for EPU files. """
         tree = ET.parse(fn)
         root = tree.getroot()
-        # schema depends on EPU version
-        schema = '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}'
+        schema = {'so': '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}',
+                  'ar': '{http://schemas.microsoft.com/2003/10/Serialization/Arrays}',
+                  'fr': '{http://schemas.datacontract.org/2004/07/Fei.Applications.Common.Omp.Interface}'}
 
-        if root[6][0][2][4].tag == '%sExposureTime' % schema:
-            self.acqDict['ExposureTime'] = root[6][0][2][4].text
+        elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}ExposureTime"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['ExposureTime'] = e.text
 
-        if root[6][0][2][6].tag == '%sName' % schema:
-            self.acqDict['Detector'] = root[6][0][2][6].text
+        elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['Detector'] = e.text
 
-        if self.acqDict['Detector'] == 'EF-CCD' and root[6][0][2][2][3][0].text == 'FractionationSettings':
-            self.acqDict['NumSubFrames'] = root[6][0][2][2][3][1][0].text
+        # get cameraSpecificInput: ElectronCountingEnabled, SuperResolutionFactor etc.
+        customDict = dict()
+        keys = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Key"
+        values = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value"
+        for k, v in zip(root.findall(keys.format(**schema)), root.findall(values.format(**schema))):
+            customDict[k.text] = v.text
 
-            # check if counting is enabled, check if super-res is enabled
-            if root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
-                if root[6][0][2][2][0][1].text == 'true':
-                    if root[6][0][2][2][2][0].text == 'SuperResolutionFactor':
-                        sr = root[6][0][2][2][2][1].text  # 1 - counting, 2 - super-res
-                        self.acqDict['Mode'] = 'Counting' if sr == '1' else 'Super-resolution'
+        # check if counting/super-res is enabled
+        if customDict['ElectronCountingEnabled'] == 'true':
+            sr = customDict['SuperResolutionFactor']  # 1 - counting, 2 - super-res
+            self.acqDict['Mode'] = 'Counting' if sr == '1' else 'Super-resolution'
 
+        if self.acqDict['Detector'] == 'EF-CCD':
+            elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}NumberOffractions"
+            for e in root.findall(elem.format(**schema)):
+                self.acqDict['NumSubFrames'] = e.text
         else:
-            # count number of b:DoseFractionDefinition occurrences for Falcon 3
-            if len(list(root[6][0][2][2])) > 2:
-                if root[6][0][2][2][5][0].text == 'FractionationSettings':
-                    self.acqDict['NumSubFrames'] = str(len(list(root[6][0][2][2][5][1][0])))
-                elif root[6][0][2][2][3][0].text == 'FractionationSettings':
-                    self.acqDict['NumSubFrames'] = str(len(list(root[6][0][2][2][3][1][0])))
-                # check if counting is enabled
-                if root[6][0][2][2][2][0].text == 'ElectronCountingEnabled' or \
-                        root[6][0][2][2][0][0].text == 'ElectronCountingEnabled':
-                    if root[6][0][2][2][2][1].text == 'true' or \
-                            root[6][0][2][2][0][1].text == 'true':
-                        self.acqDict['Mode'] = 'Counting'
+            # count number of DoseFractions for Falcon 3
+            elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}DoseFractions"
+            for e in root.findall(elem.format(**schema)):
+                self.acqDict['NumSubFrames'] = len(e)
 
-        if root[5][1].tag == '%spixelSize' % schema:
-            self.acqDict['PixelSpacing'] = str(float(root[5][1][0][0].text) * math.pow(10, 10))
+        elem = "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['PixelSpacing'] = str(float(e.text) * math.pow(10, 10))
             if self.acqDict['Mode'] == 'Super-resolution':
                 self.acqDict['PixelSpacing'] /= 2.0
 
-        if root[6][2][0].tag == '%sAccelerationVoltage' % schema:
-            self.acqDict['Voltage'] = str(int(root[6][2][0].text) / 1000)
+        elem = "./{so}microscopeData/{so}gun/{so}AccelerationVoltage"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['Voltage'] = int(e.text) // 1000
 
-        if root[6][3][3].tag == '%sInstrumentID' % schema:
-            self.acqDict['MicroscopeID'] = root[6][3][3].text
+        elem = "./{so}microscopeData/{so}instrument/{so}InstrumentID"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['MicroscopeID'] = e.text
+            if e.text in CS_DICT:
+                self.acqDict['Cs'] = CS_DICT[e.text][0]
 
-            value = self.acqDict['MicroscopeID']
-            if value in CS_DICT:
-                self.acqDict['Cs'] = CS_DICT[value][0]
+        elem = "./{so}microscopeData/{so}optics/{so}BeamTilt"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['BeamTiltX'] = e[0].text
+            self.acqDict['BeamTiltY'] = e[1].text
 
-        if root[6][4][3].tag == '%sBeamTilt' % schema:
-            self.acqDict['BeamTiltX'] = root[6][4][3][0].text
-            self.acqDict['BeamTiltY'] = root[6][4][3][1].text
+        elem = "./{so}microscopeData/{so}optics/{so}TemMagnification/{so}NominalMagnification"
+        for e in root.findall(elem.format(**schema)):
+            self.acqDict['Magnification'] = e.text
 
-        # FIXME: 28 for old epu
-        if root[6][4][29][0].tag == '%sNominalMagnification' % schema:
-            self.acqDict['Magnification'] = root[6][4][29][0].text
+        # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus
+        customDict = dict()
+        keys = "./{so}CustomData/{ar}KeyValueOfstringanyType/{ar}Key"
+        values = "./{so}CustomData/{ar}KeyValueOfstringanyType/{ar}Value"
+        for k, v in zip(root.findall(keys.format(**schema)), root.findall(values.format(**schema))):
+            customDict[k.text] = v.text
 
-        # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus etc.
-        if root[2].tag == '%sCustomData' % schema:
-            i = 0
-            while i < 8:
-                try:
-                    self.acqDict[root[2][i][0].text] = root[2][i][1].text
-                    i += 1
-                except IndexError:
-                    break
-
-        if 'BinaryResult.Detector' in self.acqDict:
-            self.acqDict.pop('BinaryResult.Detector')
-        if 'AppliedDefocus' in self.acqDict:
-            self.acqDict['AppliedDefocus'] = str(float(self.acqDict['AppliedDefocus']) * math.pow(10, 6))
-        if 'Dose' in self.acqDict:
-            self.acqDict['Dose'] = str(float(self.acqDict['Dose']) / math.pow(10, 20))
+        if 'AppliedDefocus' in customDict:
+            self.acqDict['AppliedDefocus'] = float(customDict['AppliedDefocus']) * math.pow(10, 6)
+        if 'Dose' in customDict:
+            self.acqDict['Dose'] = float(customDict['Dose']) / math.pow(10, 20)
+        if 'PhasePlateUsed' in customDict:
+            self.acqDict['PhasePlateUsed'] = customDict['PhasePlateUsed']
+        if 'DoseOnCamera' in customDict:
+            self.acqDict['DoseOnCamera'] = customDict['DoseOnCamera']
 
         # convert all to str
         for key in self.acqDict:
             self.acqDict[key] = str(self.acqDict[key])
 
     def parseImgMdoc(self, fn):
-        # SerialEM is used only for K2/K3 cameras
+        """ SerialEM is used only for K2/K3 cameras. """
         self.acqDict['Detector'] = 'EF-CCD'
 
         with open(fn, 'r') as fname:
@@ -236,7 +241,7 @@ class Parser:
             pass
 
     def calcDose(self):
-        # calculate dose rate per unbinned px
+        """ Calculate dose rate per unbinned px. """
         dose_per_frame, dose_on_camera = 0, 0
         numFr = int(self.acqDict['NumSubFrames'])
         dose_total = float(self.acqDict['Dose'])  # e/A^2
@@ -255,7 +260,7 @@ class Parser:
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
     def calcBox(self):
-        # calculate box, mask, downsample
+        """ Calculate box, mask, downsample. """
         minSize = self.acqDict['PtclSizeShort']
         maxSize = self.acqDict['PtclSizeLong']
         ptclSizeAng = max(minSize, maxSize)
@@ -288,58 +293,40 @@ class Parser:
                 break
 
     def guessDataDir(self, fnList):
-        # guess folder name with movies on cista1, gain and defects for Krios
-        # the code below is LMB-specific
+        """ Guess folder name with movies, gain and defects for Krios. """
+        # code below may be LMB-specific
         movieDir, gainFn, defFn = 'None', 'None', 'None'
-        self.acqDict['MTF'] = ''
         camera = self.acqDict['Detector']
         scope = CS_DICT[self.acqDict['MicroscopeID']][1]
 
+        # get MTF file
+        if camera == 'EF-CCD':
+            self.acqDict['MTF'] = MTF_DICT['K3'] if scope == 'Krios3' else MTF_DICT['K2']
+        else:
+            if self.acqDict['Mode'] == 'Linear':
+                self.acqDict['MTF'] = MTF_DICT['Falcon3-linear']
+            else:
+                self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
+
         if self.getSoftware() == 'EPU':
-            if 'Krios' in scope:
-                p1 = MOVIE_PATH_DICT[camera] % scope
-                session = os.path.basename(self.getRawPath())
-
-                if camera == 'EF-CCD':
-                    # get gain file
-                    movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_PATH)
-                    f1 = fnList.replace('.xml', '-gain-ref.MRC')  # TODO: check if gain is always named this way
-                    f2 = f1.split('Images-Disc')[1]
-                    gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
-
-                    # get MTF file for Gatan
-                    if scope == 'Krios3':
-                        self.acqDict['MTF'] = MTF_DICT['K3']
-                    else:
-                        self.acqDict['MTF'] = MTF_DICT['K2']
-                else:
-                    movieDir = os.path.join(p1, session, EPU_MOVIES_PATH)
-
-                    # get MTF file for Falcon
-                    if self.acqDict['Mode'] == 'Linear':
-                        self.acqDict['MTF'] = MTF_DICT['Falcon3-linear']
-                    else:
-                        self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
-
-
-        else:  # SerialEM
-            movieDir = os.path.join(self.getRawPath(), "*.tif")
-            gainFn = os.path.join(self.getRawPath(), self.acqDict['GainReference'])
-            if 'DefectFile' in self.acqDict:
-                defFn = os.path.join(self.getRawPath(), self.acqDict['DefectFile'])
+            p1 = MOVIE_PATH_DICT[camera] % scope
+            session = os.path.basename(self.getMdPath())
 
             if camera == 'EF-CCD':
-                # get MTF file for Gatan
-                if scope in ['Krios3']:
-                    self.acqDict['MTF'] = MTF_DICT['K3']
-                else:
-                    self.acqDict['MTF'] = MTF_DICT['K2']
+                # get gain file
+                movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_PATH)
+                # TODO: check if gain is always named this way
+                f1 = fnList.replace('.xml', '-gain-ref.MRC')
+                f2 = f1.split('Images-Disc')[1]
+                gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
             else:
-                # get MTF file for Falcon
-                if self.acqDict['Mode'] == 'Linear':
-                    self.acqDict['MTF'] = MTF_DICT['Falcon3-linear']
-                else:
-                    self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
+                movieDir = os.path.join(p1, session, EPU_MOVIES_PATH)
+
+        else:  # SerialEM
+            movieDir = os.path.join(self.getMdPath(), "*.tif")
+            gainFn = os.path.join(self.getMdPath(), self.acqDict['GainReference'])
+            if 'DefectFile' in self.acqDict:
+                defFn = os.path.join(self.getMdPath(), self.acqDict['DefectFile'])
 
         # populate dict
         self.acqDict['Software'] = self.getSoftware()

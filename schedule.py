@@ -29,7 +29,6 @@ import shutil
 import subprocess
 import json
 from datetime import datetime
-import threading
 
 from config import *
 
@@ -120,21 +119,21 @@ def setupRelion(paramDict):
     if not mapDict['do_until_ctf']:
         cmdList.append('relion_scheduler --schedule class2d --run &')
 
-    if DEBUG:
-        for cmd in cmdList:
+    for cmd in cmdList:
+        if DEBUG:
             print(cmd)
+        proc = subprocess.run(cmd.split(), check=True)
 
-    cmd = '\n'.join([line for line in cmdList])
-    #cmd = ['sleep', '20']
+    # now use Popen - without waiting for return
+    cmdList = list()
+    cmdList.append('relion_scheduler --schedule preprocess --run')
 
-    thr = threading.Thread(target=runProc, args=cmd, daemon=True)
-    thr.start()
+    if not mapDict['do_until_ctf']:
+        cmdList.append('relion_scheduler --schedule class2d --run')
 
-
-def runProc(*args):
-    proc = subprocess.run(args, check=False, universal_newlines=True,
-                          stdout=subprocess.PIPE)
-    # proc.wait()
+    for cmd in cmdList:
+        proc = subprocess.Popen(cmd.split(), universal_newlines=True,
+                                stdout=subprocess.PIPE)
 
 
 def setupScipion(paramDict):

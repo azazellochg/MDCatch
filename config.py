@@ -24,20 +24,17 @@
 # *
 # **************************************************************************
 
-# Config vars and dicts
-
+# Config variables
 DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
-#METADATA_PATH = "/home/gsharov/soft/MDCatch/examples"
-METADATA_PATH = "/net/em-support3/"
+METADATA_PATH = "/mnt/Krios1/Metadata"
 
-#PROJECT_PATH = "/home/gsharov/soft/MDCatch/"
-PROJECT_PATH = "/cephfs/gsharov/testing"
+# path where Relion projects are created
+PROJECT_PATH = "/work/gsharov/tmp"
 
 # Folder with Relion 3.1 schedules
-SCHEDULE_PATH = "/beegfs3/otfp/Gregory/test1_krios1/Schedules"
-#SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/Schedules"
+SCHEDULE_PATH = "/home/gsharov/soft/Schedules"
 
 # Scipion pre-processing template and output file
 JSON_TEMPLATE = "template.json"
@@ -52,25 +49,23 @@ REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 part_size_short = 150
 part_size_long = 180
 
-# scopeID: (Cs, scope name)
-CS_DICT = {
-    '3299': (2.7, 'Krios1'),
-    '3413': (2.7, 'Krios2'),
-    '3593': (2.7, 'Krios3')
-}
+# instrumentID: (Cs, scope name)
+CS_DICT = {'3299': (2.7, 'Krios1'),
+           '3413': (2.7, 'Krios2'),
+           '3593': (2.7, 'Krios3')}
 
 # path to MTF files for Relion (300 kV only)
 MTF_DICT = {
-    'Falcon3-count': '/teraraid4/otfp/MTFs/mtf_falcon3EC_300kV.star',
-    'Falcon3-linear': '/teraraid4/otfp/MTFs/mtf_falcon2_300kV.star',
-    'K2': '/teraraid4/otfp/MTFs/mtf_k2_300kV.star',
-    'K3': '/teraraid4/otfp/MTFs/mtf_K3_300kv_nocds.star'
+    'Falcon3-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
+    'Falcon3-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
+    'K2': '/home/gsharov/soft/MTFs/mtf_k2_300kV.star',
+    'K3': '/home/gsharov/soft/MTFs/mtf_K3_300kv_nocds.star'
 }
 
 # path to raw movies folder depending on camera type
 MOVIE_PATH_DICT = {
-    'EF-CCD': '/net/cista1/%sGatan/',
-    'BM-Falcon': '/net/cista1/%sFalcon/'
+    'EF-CCD': '/mnt/%s/Data/K2/',
+    'BM-Falcon': '/mnt/%s/Data/Falcon3/'
 }
 
 # SerialEM mdoc vars to parse
@@ -97,17 +92,14 @@ SERIALEM_PARAMS = [
 ]
 
 help_message = """Select the following folder:\n\n
-   1) EPU: the EPU session folder on /net/em-support3/
+   1) EPU: the EPU session folder on /mnt/Krios1/Metadata
    with Images-DiscX folder inside.\n
-   2) SerialEM: the folder on /net/cista1/ that
+   2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
    contains tif and mdoc files.\n"""
 
 error_message = """NO %s FILES WERE FOUND!\n\n
 Please make sure that you selected correct folder:\n
-   1) EPU: the EPU session folder on /net/em-support3/
+   1) EPU: the EPU session folder on /mnt/Krios1/Metadata
    with Images-DiscX folder inside.\n
-   2) SerialEM: the folder on /net/cista1/ that
+   2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
    contains tif and mdoc files.\n"""
-
-matchDict = {"EPU": 'xml',
-             "SerialEM": 'mdoc'}
