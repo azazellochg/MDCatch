@@ -41,7 +41,7 @@ def setupRelion(paramDict):
                'LOG_mind': paramDict['PtclSizeShort'],
                'LOG_maxd': paramDict['PtclSizeLong'],
                'boxsize_logpick': paramDict['BoxSizeSmall'],
-               'mask_diam': paramDict['MaskSize'] * paramDict['PixelSpacing'],
+               'mask_diam': float(paramDict['MaskSize']) * float(paramDict['PixelSpacing']),
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
@@ -65,11 +65,11 @@ def setupRelion(paramDict):
     if paramDict['Software'] == 'EPU':
         # EPU: Movies -> EPU session folder
         origPath1, origPath2 = paramDict['MoviePath'].split('/Images-Disc')
-        mapDict['movies_wildcard'] = '"Movies/Images-Disc%s"' % origPath2
+        mapDict['movies_wildcard'] = 'Movies/Images-Disc%s' % origPath2
     else:
         # SerialEM: Movies -> Raw path folder
         origPath1 = paramDict['MoviePath'].split('*.tif')[0]
-        mapDict['movies_wildcard'] = '"Movies/*.tif"'
+        mapDict['movies_wildcard'] = 'Movies/*.tif'
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
@@ -106,14 +106,15 @@ def setupRelion(paramDict):
 
     # now use Popen - without waiting for return
     cmdList = list()
-    cmdList.append('relion_scheduler --schedule preprocess --run')
+    cmdList.append('relion_scheduler --schedule preprocess --run &')
 
-    if not mapDict['do_until_ctf']:
-        cmdList.append('relion_scheduler --schedule class2d --run')
+    if mapDict['do_until_ctf'] != 'false':
+        cmdList.append('relion_scheduler --schedule class2d --run &')
 
     for cmd in cmdList:
-        proc = subprocess.Popen(cmd.split(), universal_newlines=True,
-                                stdout=subprocess.PIPE)
+        if DEBUG:
+            print(cmd)
+        proc = subprocess.Popen(cmd.split(), universal_newlines=True)
 
 
 def setupScipion(paramDict):
