@@ -272,11 +272,10 @@ class Page1(QWizardPage):
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
 
-        # FIXME
         # prevent Check button bypass
-        #usrchk = self.checkLogin(self.username)
-        #if not usrchk:
-        #    return False
+        usrchk = self.checkLogin(self.username)
+        if not usrchk:
+            return False
 
         if DEBUG:
             print("\n\nInput params: ",
@@ -478,7 +477,8 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
-            print((k, v) for k, v in App.model.acqDict.items())
+            for k, v in App.model.acqDict.items():
+                print(k, v)
             print('\n')
 
         if App.model.getPipeline() == 'Relion':
