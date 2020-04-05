@@ -33,16 +33,8 @@ from datetime import datetime
 from config import *
 
 
-def precalculateVars(paramDict):
-    # set motioncor bin to 2 if using super-res data
-    bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-    gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
-    defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-
-    return bin, gain, defect
-
-
 def setupRelion(paramDict):
+    """ Prepare and launch Relion 3.1 schedules. """
     bin, gain, defect = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
@@ -58,12 +50,7 @@ def setupRelion(paramDict):
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
 
-    # Create Relion project dir username_scope_date_time
-    username, uid, gid = paramDict['User']
-    scope = CS_DICT[paramDict['MicroscopeID']][1]
-    dt = datetime.now()
-    dt = dt.strftime('%d-%m-%Y_%H%M')
-    prjName = username + '_' + scope + '_' + dt
+    prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
 
@@ -78,11 +65,11 @@ def setupRelion(paramDict):
     if paramDict['Software'] == 'EPU':
         # EPU: Movies -> EPU session folder
         origPath1, origPath2 = paramDict['MoviePath'].split('/Images-Disc')
-        mapDict['movies_wildcard'] = '"Movies/Images-Disc%s"' % origPath2
+        mapDict['movies_wildcard'] = 'Movies/Images-Disc%s' % origPath2
     else:
         # SerialEM: Movies -> Raw path folder
         origPath1 = paramDict['MoviePath'].split('*.tif')[0]
-        mapDict['movies_wildcard'] = '"Movies/*.tif"'
+        mapDict['movies_wildcard'] = 'Movies/*.tif'
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
@@ -93,9 +80,6 @@ def setupRelion(paramDict):
     mapDict['gainref'] = os.path.basename(gain) or '""'
     mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
     mapDict['defect_file'] = os.path.basename(defect) or '""'
-
-    #FIXME: pix is different since we did rescale ptcls upon extraction :(
-    maskSizeAng = int(paramDict['MaskSize']) * float(paramDict['PixelSpacing'])
 
     try:
         subprocess.check_output(["which", "relion_scheduler"],
@@ -112,27 +96,39 @@ def setupRelion(paramDict):
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
             'preprocess', key, str(mapDict[key]))
         cmdList.append(cmd)
+
+    # mask for cl2d is in Angstroms
+    diam = float(mapDict['angpix']) * float(mapDict['mask_diam'])
     cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %f' %
-                   maskSizeAng)
+                   diam)
+
+    for cmd in cmdList:
+        if DEBUG:
+            print(cmd)
+        proc = subprocess.run(cmd.split(), check=True)
+
+    # now use Popen - without waiting for return
+    cmdList = list()
     cmdList.append('relion_scheduler --schedule preprocess --run &')
 
-    if not mapDict['do_until_ctf']:
+    if mapDict['do_until_ctf'] != 'false':
         cmdList.append('relion_scheduler --schedule class2d --run &')
 
-    if DEBUG:
-        for cmd in cmdList:
+    for cmd in cmdList:
+        if DEBUG:
             print(cmd)
-
-    cmd = '\n'.join([line for line in cmdList])
-    proc = subprocess.check_output(cmd, shell=True)
-    proc.wait()
+        proc = subprocess.Popen(cmd.split(), universal_newlines=True)
 
 
 def setupScipion(paramDict):
-    print("ERROR: Scipion pipeline not working yet.")
+    """ Prepare and launch Scipion 3 workflow. """
+    print("ERROR: Scipion pipeline is not ready yet.")
     return
 
-    bin, gain, defect = precalculateVars(paramDict)
+    prjName = getPrjName(paramDict)
+    prjPath = os.path.join(paramDict['PrjPath'], prjName)
+    os.mkdir(prjPath)
+    os.chdir(prjPath)
     f = open(JSON_TEMPLATE, 'r')
     protocolsList = json.load(f)
     protNames = dict()
@@ -142,6 +138,9 @@ def setupScipion(paramDict):
         protNames[protClassName] = i
     f.close()
 
+    bin, gain, defect = precalculateVars(paramDict)
+
+    # import movies
     importProt = protocolsList[protNames["ProtImportMovies"]]
     importProt["filesPath"] = "%s/" % "/".join(paramDict['MoviePath'].split('/')[:-1])
     if paramDict['MoviePath'].endswith('mrc'):
@@ -153,15 +152,32 @@ def setupScipion(paramDict):
     importProt["samplingRate"] = float(paramDict['PixelSpacing'])
     importProt["dosePerFrame"] = float(paramDict['DosePerFrame'])
     importProt["gainFile"] = gain
-    importProt["opticsGroup"] = paramDict['OpticalGroup']
-    importProt["mtf"] = paramDict['MTF']
 
+    # assign optics
+    opticsProt = protocolsList[protNames["ProtRelionAssignOpticsGroup"]]
+    opticsProt["opticsGroupName"] = paramDict['OpticalGroup']
+    opticsProt["mtfFile"] = paramDict['MTF']
+
+    # motioncorr
     movieProt = protocolsList[protNames["ProtMotionCorr"]]
     movieProt["binFactor"] = bin
     movieProt["defectFile"] = defect
 
+    # gctf
     ctfProt = protocolsList[protNames["ProtGctf"]]
     ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
+
+    # relion Log picker
+    pickProt = protocolsList[protNames["ProtRelionAutopickLoG"]]
+    pickProt["minDiameter"] = paramDict["PtclSizeShort"]
+    pickProt["maxDiameter"] = paramDict["PtclSizeLong"]
+    pickProt["boxSize"] = paramDict['BoxSize']
+
+    # relion extract ptcls
+    extrProt = protocolsList[protNames["ProtRelionExtractParticles"]]
+    extrProt["boxSize"] = paramDict['BoxSize']
+    extrProt["rescaledSize"] = paramDict['BoxSizeSmall']
+    extrProt["backDiameter"] = paramDict['MaskSize'] * paramDict['PixelSpacing']
 
     if os.path.exists(JSON_PATH):
         os.remove(JSON_PATH)
@@ -171,19 +187,37 @@ def setupScipion(paramDict):
     f.close()
 
     try:
-        subprocess.check_output(["which", "scipion"],
-                                stderr=subprocess.DEVNULL)
+        subprocess.check_output(["which", "scipion"], stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-        print("ERROR: Scipion not found in PATH!")
+        print("ERROR: Scipion 3.0 not found in PATH!")
         exit(1)
 
-    # projectName = scopeName_date
-    scope = CS_DICT[paramDict['MicroscopeID']][1]
-    dt = datetime.now()
-    dt = dt.strftime('%d-%m-%Y')
-    prjName = scope + '_' + dt
+    cmd = 'scipion python scripts/create_project.py name="%s" workflow="%s"' % (
+        prjName, os.path.abspath(JSON_PATH))
+    proc = subprocess.run(cmd.split(), check=True)
 
-    cmd = 'scipion run python pyworkflow/project/scripts/create.py %s workflow.json' % prjName
-    cmd += '\nscipion project %s &' % prjName
-    proc = subprocess.check_output(cmd, shell=True)
-    proc.wait()
+    cmd2 = 'scipion project %s' % prjName
+    proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True,
+                             stdout=subprocess.PIPE)
+
+
+def getPrjName(paramDict):
+    """ Util func to get project name. """
+    # project name = username_scope_date_time
+    username, uid, gid = paramDict['User']
+    scope = SCOPE_DICT[paramDict['MicroscopeID']][0]
+    dt = datetime.now()
+    dt = dt.strftime('%d-%m-%Y_%H%M')
+    prjName = username + '_' + scope + '_' + dt
+
+    return prjName
+
+
+def precalculateVars(paramDict):
+    """ Get binning, gain and defect files. """
+    # set motioncor bin to 2 if using super-res data
+    bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
+    gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
+    defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
+
+    return bin, gain, defect

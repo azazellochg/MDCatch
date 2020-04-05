@@ -1,0 +1,8 @@
+0.9.1:
+    - refactored xml parser, now it should not depend on EPU version
+    - launching Relion schedules in a separate subprocess, return shell immediately
+    - code clean up
+    - fix wrong ptcl diameter for preprocess schedule
+    - remove shell=True to increase security
+    - initial preparation for scipion 3 workflow
+    - created SCOPE_DICT, now parser is not LMB-specific
