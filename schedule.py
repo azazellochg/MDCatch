@@ -41,7 +41,7 @@ def setupRelion(paramDict):
                'LOG_mind': paramDict['PtclSizeShort'],
                'LOG_maxd': paramDict['PtclSizeLong'],
                'boxsize_logpick': paramDict['BoxSizeSmall'],
-               'mask_diam': float(paramDict['MaskSize']) * float(paramDict['PixelSpacing']),
+               'mask_diam': paramDict['MaskSize'],
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
@@ -96,8 +96,11 @@ def setupRelion(paramDict):
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
             'preprocess', key, str(mapDict[key]))
         cmdList.append(cmd)
+
+    # mask for cl2d is in Angstroms
+    diam = float(mapDict['angpix']) * float(mapDict['mask_diam'])
     cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %f' %
-                   mapDict['mask_diam'])
+                   diam)
 
     for cmd in cmdList:
         if DEBUG:
