@@ -1,0 +1,23 @@
+job_type == 0
+is_continue == false
+Spherical aberration (mm): == $$Cs
+Amplitude contrast: == 0.1
+Pixel size (Angstrom): == $$angpix
+Beamtilt in X (mrad): == 0
+Beamtilt in Y (mrad): == 0
+Import other node types? == No
+Submit to queue? == No
+Import raw movies/micrographs? == Yes
+Input file: == ref.mrc
+Raw input files: == $$movies_wildcard
+MTF of the detector: == $$mtf_file
+Are these multi-frame movies? == Yes
+Voltage (kV): == $$voltage
+Minimum dedicated cores per node: == 24
+Node type: == Particle coordinates (*.box, *_pick.star)
+Optics group name: == $$optics_group
+Rename optics group for particles: == 
+Additional arguments: == --do_at_most $$do_at_most
+Queue submit command: == qsub
+Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
+Queue name:  == openmpi
