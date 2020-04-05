@@ -105,10 +105,6 @@ venv.bak/
 
 # other stuff
 *~
-examples/
-Schedules/
 .idea/
-workflow.json
-test.sh
-header.py
-test.py
+test*
+.directory
