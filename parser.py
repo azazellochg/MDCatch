@@ -176,8 +176,8 @@ class Parser:
         elem = "./{so}microscopeData/{so}instrument/{so}InstrumentID"
         for e in root.findall(elem.format(**schema)):
             self.acqDict['MicroscopeID'] = e.text
-            if e.text in CS_DICT:
-                self.acqDict['Cs'] = CS_DICT[e.text][0]
+            if e.text in SCOPE_DICT:
+                self.acqDict['Cs'] = SCOPE_DICT[e.text][1]
 
         elem = "./{so}microscopeData/{so}optics/{so}BeamTilt"
         for e in root.findall(elem.format(**schema)):
@@ -223,19 +223,20 @@ class Parser:
 
         try:
             # rename a few keys to match EPU
-            # T = SerialEM: Acquired on Tecnai Polara D304
+            # T = SerialEM: Acquired on Titan Krios D3593
             match = re.search("D[0-9]{3,4}", self.acqDict['T'])
             if match:
                 value = match.group().replace('D', '')
                 self.acqDict['MicroscopeID'] = value
                 self.acqDict.pop('T')
-                if value in CS_DICT:
-                    self.acqDict['Cs'] = str(CS_DICT[value][0])
+                if value in SCOPE_DICT:
+                    self.acqDict['Cs'] = str(SCOPE_DICT[value][1])
 
             self.acqDict['Dose'] = self.acqDict.pop('ExposureDose')
             self.acqDict['AppliedDefocus'] = self.acqDict.pop('TargetDefocus')
             self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
-            self.acqDict['PhasePlateUsed'] = self.acqDict.pop('PhasePlateInserted')
+            if 'PhasePlateInserted' in self.acqDict:
+                self.acqDict['PhasePlateUsed'] = self.acqDict.pop('PhasePlateInserted')
             self.acqDict.pop('Binning')
         except KeyError:
             pass
@@ -267,6 +268,7 @@ class Parser:
         angpix = float(self.acqDict['PixelSpacing'])
 
         if self.acqDict['Mode'] == 'Super-resolution':
+            # since we always bin by 2 in mc if using super-res
             angpix = angpix * 2
 
         # use +10% for mask size
@@ -297,25 +299,33 @@ class Parser:
         # code below may be LMB-specific
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
-        scope = CS_DICT[self.acqDict['MicroscopeID']][1]
+        scopeID = self.acqDict['MicroscopeID']
 
         # get MTF file
         if camera == 'EF-CCD':
-            self.acqDict['MTF'] = MTF_DICT['K3'] if scope == 'Krios3' else MTF_DICT['K2']
+            model = SCOPE_DICT[scopeID][3]
+            if model is not None:
+                self.acqDict['MTF'] = MTF_DICT[model]
         else:
+            model = SCOPE_DICT[scopeID][2]
             if self.acqDict['Mode'] == 'Linear':
-                self.acqDict['MTF'] = MTF_DICT['Falcon3-linear']
+                self.acqDict['MTF'] = MTF_DICT['%s-linear' % model]
             else:
-                self.acqDict['MTF'] = MTF_DICT['Falcon3-count']
+                self.acqDict['MTF'] = MTF_DICT['%s-count' % model]
 
         if self.getSoftware() == 'EPU':
-            p1 = MOVIE_PATH_DICT[camera] % scope
+            p1 = MOVIE_PATH_DICT[camera] % (SCOPE_DICT[scopeID][0], model)
             session = os.path.basename(self.getMdPath())
 
             if camera == 'EF-CCD':
-                # get gain file
                 movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_PATH)
-                # TODO: check if gain is always named this way
+                # TODO: use gain_dict instead
+                # regex = GAIN_DICT[model]
+                # with os.scandir(path) as fns:
+                #     for f in fns:
+                #         m = re.compile(regex).match(f)
+                #         if m is not None:
+                #             img = os.path.join(root, f)
                 f1 = fnList.replace('.xml', '-gain-ref.MRC')
                 f2 = f1.split('Images-Disc')[1]
                 gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
@@ -325,8 +335,7 @@ class Parser:
         else:  # SerialEM
             movieDir = os.path.join(self.getMdPath(), "*.tif")
             gainFn = os.path.join(self.getMdPath(), self.acqDict['GainReference'])
-            if 'DefectFile' in self.acqDict:
-                defFn = os.path.join(self.getMdPath(), self.acqDict['DefectFile'])
+            defFn = os.path.join(self.getMdPath(), self.acqDict['DefectFile'])
 
         # populate dict
         self.acqDict['Software'] = self.getSoftware()

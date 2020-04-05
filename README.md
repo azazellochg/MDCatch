@@ -1,7 +1,7 @@
 # MDCatch
 ## Still in development, but you are welcome to try!
 A simple PyQt5 app to fetch metadata from EPU or SerialEM.
-It parses the first EPU xml and SerialEM mdoc file it finds, associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
+It parses the first found EPU xml and SerialEM mdoc file associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
 
 ### Prerequisites / installation:
   - Python 3 and PyQt5. If you don't have PyQt5 module in your system python3 then create a virtual environment:
@@ -10,7 +10,7 @@ It parses the first EPU xml and SerialEM mdoc file it finds, associated with a d
     source venv/bin/activate
     pip install PyQt5
     ```
-  - Relion 3.1 or Scipion 3.0 sourced in your `PATH` (at the moment Scipion option is disabled, sorry!)
+  - Relion 3.1 or Scipion 3.0 sourced in your `PATH` (at the moment Scipion is not ready!)
   - Preprocessing templates: `Schedules` folder for Relion, `template.json` for Scipion
   - Edit `config.py` to adjust it to your settings
  
@@ -37,5 +37,7 @@ The idea is to launch the app on a separate OTF machine as soon as EPU/SerialEM 
 ### TODO
   - beam tilt is parsed but not used since we parse only a single xml/mdoc for the whole session
   - Scipion 3.0 support
-  - More testing on SerialEM mdoc files
+  - SerialEM conversions: gain ref dm4->mrc, defects SerialEM->Relion
+  - K3 EPU 2.6.1 gain file is a rubbish tif, to be fixed by TFS
+  - use GAIN_DICT from config
  

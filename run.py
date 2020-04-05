@@ -106,7 +106,7 @@ class Page1(QWizardPage):
         label1 = QLabel('Software')
         label2 = QLabel('Path')
         label3 = QLabel('Particle diameter (A)')
-        label4 = QLabel('Run pipeline in')
+        label4 = QLabel('Launch pipeline in')
         label5 = QLabel('LMB username')
 
         vbox.addWidget(label1)
@@ -345,7 +345,7 @@ class Page2(QWizardPage):
         dosepf = round(float(acqDict['DosePerFrame']), 2)
         px = round(float(acqDict['PixelSpacing']), 4)
 
-        self.name.setText(CS_DICT[scopeID][1])
+        self.name.setText(SCOPE_DICT[scopeID][0])
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
         self.px.setText(str(px))
@@ -429,7 +429,7 @@ class Page2(QWizardPage):
         return groupBox
 
     def group3(self):
-        groupBox = QGroupBox("Recommended parameters")
+        groupBox = QGroupBox("Recommended options")
 
         box = QLabel("Box size (px)")
         mask = QLabel("Mask size (px)")

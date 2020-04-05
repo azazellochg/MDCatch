@@ -5,3 +5,4 @@
     - fix wrong ptcl diameter for preprocess schedule
     - remove shell=True to increase security
     - initial preparation for scipion 3 workflow
+    - created SCOPE_DICT, now parser is not LMB-specific

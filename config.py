@@ -40,8 +40,14 @@ SCHEDULE_PATH = "/home/gsharov/soft/Schedules"
 JSON_TEMPLATE = "template.json"
 JSON_PATH = "workflow.json"
 
+# EPU 2.6.1 patterns
 EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
 PATTERN_XML = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.xml$"
+GAIN_DICT = {'K2': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}-gain-ref.MRC$",
+             'K3': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}_gain.tiff$"
+             }
+
+# SerialEM patterns
 PATTERN_MDOC = ".{1,}\.tif\.mdoc$"
 REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
@@ -49,12 +55,15 @@ REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 part_size_short = 150
 part_size_long = 180
 
-# instrumentID: (Cs, scope name)
-CS_DICT = {'3299': (2.7, 'Krios1'),
-           '3413': (2.7, 'Krios2'),
-           '3593': (2.7, 'Krios3')}
+# instrumentID: [name, Cs, TFS camera, Gatan camera]
+SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon3', 'K2'],
+              '3413': ['Krios2', 2.7, 'Falcon3', 'K2'],
+              '3593': ['Krios3', 2.7, 'Falcon3', 'K3'],
+              '9952833': ['Glacios', 2.7, 'Falcon3', None]
+              }
 
 # path to MTF files for Relion (300 kV only)
+# examples: Name-count, Name-linear or Name, where Name should match the one in SCOPE_DICT
 MTF_DICT = {
     'Falcon3-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
     'Falcon3-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
@@ -63,9 +72,10 @@ MTF_DICT = {
 }
 
 # path to raw movies folder depending on camera type
+# example: /mnt/Krios1/Data/Falcon3/
 MOVIE_PATH_DICT = {
-    'EF-CCD': '/mnt/%s/Data/K2/',
-    'BM-Falcon': '/mnt/%s/Data/Falcon3/'
+    'EF-CCD': '/mnt/%s/Data/%s/',
+    'BM-Falcon': '/mnt/%s/Data/%s/'
 }
 
 # SerialEM mdoc vars to parse
@@ -86,7 +96,7 @@ SERIALEM_PARAMS = [
 
     # vars below are added to mdoc using "AddToNextFrameStackMdoc key value"
     'OpticalGroup',
-    'PhasePlateInserted',  # later renamed to PhasePlateUsed in parser.py
+    'PhasePlateInserted',  # renamed to PhasePlateUsed in parser.py
     'BeamTiltCompensation',
     'Beamtilt'
 ]

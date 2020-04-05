@@ -202,7 +202,7 @@ def getPrjName(paramDict):
     """ Util func to get project name. """
     # project name = username_scope_date_time
     username, uid, gid = paramDict['User']
-    scope = CS_DICT[paramDict['MicroscopeID']][1]
+    scope = SCOPE_DICT[paramDict['MicroscopeID']][0]
     dt = datetime.now()
     dt = dt.strftime('%d-%m-%Y_%H%M')
     prjName = username + '_' + scope + '_' + dt
