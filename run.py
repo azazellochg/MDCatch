@@ -197,7 +197,7 @@ class Page1(QWizardPage):
 
         self.b7 = QPushButton('Check!')
         self.b7.setFixedSize(70, 25)
-        self.b7.clicked.connect(lambda: self.checkLogin(self.username))
+        self.b7.clicked.connect(lambda: self.checkLogin(self.username.text()))
 
         hbox5.addWidget(self.username)
         hbox5.addWidget(self.b7)
@@ -243,28 +243,23 @@ class Page1(QWizardPage):
 
     def checkLogin(self, login):
         # match username with NIS database
-        login = login.text()
-
-        if len(login) < 3:
-            App.showDialog("ERROR", "Username is too short!")
+        cmd = "/usr/bin/ypmatch %s passwd" % login
+        try:
+            res = subprocess.check_output(cmd.split())
+        except subprocess.CalledProcessError:
+            App.showDialog("ERROR", "Username %s not found!" % login)
             return False
-        else:
-            cmd = "/usr/bin/ypmatch %s passwd" % login
-            res = subprocess.run(cmd.split(), check=True,
-                                 stdout=subprocess.PIPE)
+        except FileNotFoundError:
+            App.showDialog("ERROR", "Command %s not found!" % cmd.split()[0])
+            return False
 
-            if res.returncode == 1:
-                App.showDialog("ERROR", "Username %s not found!" %
-                               self.username.text())
-                return False
-            else:
-                res = str(res.stdout)
-                uid, gid = res.split(':')[2], res.split(':')[3]
-                self.label6.setVisible(True)
-                self.label6.setStyleSheet('color: green')
-                self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
-                App.model.setUser(login, uid, gid)
-                return True
+        res = str(res)
+        uid, gid = res.split(':')[2], res.split(':')[3]
+        self.label6.setVisible(True)
+        self.label6.setStyleSheet('color: green')
+        self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
+        App.model.setUser(login, uid, gid)
+        return True
 
     def validatePage(self):
         # Next is pressed, returns True or False
@@ -273,7 +268,7 @@ class Page1(QWizardPage):
             App.model.setMdPath(METADATA_PATH)
 
         # prevent Check button bypass
-        usrchk = self.checkLogin(self.username)
+        usrchk = self.checkLogin(self.username.text())
         if not usrchk:
             return False
 
