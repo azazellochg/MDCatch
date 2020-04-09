@@ -230,9 +230,9 @@ class Page1(QWizardPage):
                                                 folder,
                                                 QFileDialog.ShowDirsOnly)
         if path:
-            self.refreshPath(var, path)
+            self.refreshPath(path)
 
-    def refreshPath(self, var, path):
+    def refreshPath(self, path):
         # update line widget with selected path
         App.model.setMdPath(path)
         self.rawPath.setText(App.model.getMdPath())
