@@ -106,10 +106,3 @@ help_message = """Select the following folder:\n\n
    with Images-DiscX folder inside.\n
    2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
    contains tif and mdoc files.\n"""
-
-error_message = """NO %s FILES WERE FOUND!\n\n
-Please make sure that you selected correct folder:\n
-   1) EPU: the EPU session folder on /mnt/Krios1/Metadata
-   with Images-DiscX folder inside.\n
-   2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
-   contains tif and mdoc files.\n"""
