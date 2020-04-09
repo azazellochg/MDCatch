@@ -2,7 +2,6 @@
     - Scipion 3 scheduling works, however relion 3.1 is not ready for streaming
     - added more parameters to xml parser: VPP options, gun lens, spot size, beam size
     - fix "do until ctf"
-    - 
 
 0.9.1:
     - refactored xml parser, now it should not depend on EPU version
