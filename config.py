@@ -28,16 +28,16 @@
 DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
-METADATA_PATH = "/mnt/Krios1/Metadata"
+METADATA_PATH = "/home/azazello/soft/MDCatch/Metadata-examples"
 
 # path where Relion projects are created
 PROJECT_PATH = "/work/gsharov/tmp"
 
 # Folder with Relion 3.1 schedules
-SCHEDULE_PATH = "/home/gsharov/soft/Schedules"
+SCHEDULE_PATH = "/home/azazello/soft/MDCatch/Schedules"
 
 # Scipion pre-processing template and output file
-JSON_TEMPLATE = "template.json"
+JSON_TEMPLATE = "/home/azazello/soft/MDCatch/template.json"
 JSON_PATH = "workflow.json"
 
 # EPU 2.6.1 patterns
@@ -102,13 +102,6 @@ SERIALEM_PARAMS = [
 ]
 
 help_message = """Select the following folder:\n\n
-   1) EPU: the EPU session folder on /mnt/Krios1/Metadata
-   with Images-DiscX folder inside.\n
-   2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
-   contains tif and mdoc files.\n"""
-
-error_message = """NO %s FILES WERE FOUND!\n\n
-Please make sure that you selected correct folder:\n
    1) EPU: the EPU session folder on /mnt/Krios1/Metadata
    with Images-DiscX folder inside.\n
    2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that

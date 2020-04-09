@@ -111,7 +111,7 @@ def setupRelion(paramDict):
     cmdList = list()
     cmdList.append('relion_scheduler --schedule preprocess --run &')
 
-    if mapDict['do_until_ctf'] != 'false':
+    if mapDict['do_until_ctf'] is False:
         cmdList.append('relion_scheduler --schedule class2d --run &')
 
     for cmd in cmdList:
@@ -121,10 +121,7 @@ def setupRelion(paramDict):
 
 
 def setupScipion(paramDict):
-    """ Prepare and launch Scipion 3 workflow. """
-    print("ERROR: Scipion pipeline is not ready yet.")
-    return
-
+    """ Prepare and schedule Scipion 3 workflow. """
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
@@ -177,7 +174,7 @@ def setupScipion(paramDict):
     extrProt = protocolsList[protNames["ProtRelionExtractParticles"]]
     extrProt["boxSize"] = paramDict['BoxSize']
     extrProt["rescaledSize"] = paramDict['BoxSizeSmall']
-    extrProt["backDiameter"] = paramDict['MaskSize'] * paramDict['PixelSpacing']
+    extrProt["backDiameter"] = paramDict['MaskSize']
 
     if os.path.exists(JSON_PATH):
         os.remove(JSON_PATH)
@@ -192,13 +189,12 @@ def setupScipion(paramDict):
         print("ERROR: Scipion 3.0 not found in PATH!")
         exit(1)
 
-    cmd = 'scipion python scripts/create_project.py name="%s" workflow="%s"' % (
+    cmd = 'scipion python -m pyworkflow.project.scripts.create %s %s' % (
         prjName, os.path.abspath(JSON_PATH))
     proc = subprocess.run(cmd.split(), check=True)
 
-    cmd2 = 'scipion project %s' % prjName
-    proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True,
-                             stdout=subprocess.PIPE)
+    cmd2 = 'scipion python -m pyworkflow.project.scripts.schedule %s' % prjName
+    proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
 
 
 def getPrjName(paramDict):

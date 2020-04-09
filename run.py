@@ -42,14 +42,15 @@ from schedule import *
 The app returns self.acqDict with all metadata.
 
 Units:
- - Dose, e/A^2 - total dose
+ - Dose, e/A^2 (total dose)
  - DoseOnCamera, e/ubpx/s
- - DosePerFrame, e/A^2/
+ - DosePerFrame, e/A^2
  - PixelSpacing, A
  - Voltage, keV
  - Defocus, um
  - Cs, mm
  - ExposureTime, s
+ - BeamSize, um
 
 '''
 
@@ -59,7 +60,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.9.1 - metadata parser'
+        self.title = 'MDCatch v0.9.2 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -229,9 +230,9 @@ class Page1(QWizardPage):
                                                 folder,
                                                 QFileDialog.ShowDirsOnly)
         if path:
-            self.refreshPath(var, path)
+            self.refreshPath(path)
 
-    def refreshPath(self, var, path):
+    def refreshPath(self, path):
         # update line widget with selected path
         App.model.setMdPath(path)
         self.rawPath.setText(App.model.getMdPath())
@@ -284,7 +285,7 @@ class Page1(QWizardPage):
         fnList = App.model.guessFn(prog)
 
         if fnList is None:
-            App.showDialog("ERROR", error_message % prog)
+            App.showDialog("ERROR", "No matching files found!\n\n" + help_message)
             return False
         else:
             print("\nFiles found: %s\n" % fnList) if DEBUG else ""
@@ -472,7 +473,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
-            for k, v in App.model.acqDict.items():
+            for k, v in sorted(App.model.acqDict.items()):
                 print(k, v)
             print('\n')
 

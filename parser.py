@@ -39,7 +39,7 @@ class Parser:
         self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
         self.software = 'EPU'
-        self.user = None, None, None
+        self.user = 'unknown', 0, 0
         self.ptclSizeShort = part_size_short
         self.ptclSizeLong = part_size_long
         self.fn = None
@@ -51,11 +51,9 @@ class Parser:
         self.acqDict['Dose'] = '0'
         self.acqDict['OpticalGroup'] = 'opticsGroup1'
         self.acqDict['PhasePlateUsed'] = 'false'
-        self.acqDict['NoCl2D'] = 'false'
         self.acqDict['GainReference'] = 'None'
         self.acqDict['DefectFile'] = 'None'
         self.acqDict['MTF'] = ''
-        self.acqDict['User'] = 'Unknown', 0, 0
 
     def setMdPath(self, path):
         self.mdPath = path
@@ -129,23 +127,40 @@ class Parser:
         """ Main XML parser for EPU files. """
         tree = ET.parse(fn)
         root = tree.getroot()
-        schema = {'so': '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}',
+        nspace = {'so': '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}',
                   'ar': '{http://schemas.microsoft.com/2003/10/Serialization/Arrays}',
                   'fr': '{http://schemas.datacontract.org/2004/07/Fei.Applications.Common.Omp.Interface}'}
 
-        elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}ExposureTime"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['ExposureTime'] = e.text
+        items = {'ExposureTime': "./{so}microscopeData/{so}acquisition/{so}camera/{so}ExposureTime",
+                 'Detector': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name",
+                 'GunLens': "./{so}microscopeData/{so}gun/{so}GunLens",
+                 'SpotSize': "./{so}microscopeData/{so}optics/{so}SpotIndex",
+                 'Magnification': "./{so}microscopeData/{so}optics/{so}TemMagnification/{so}NominalMagnification",
+                 'BeamSize': "./{so}microscopeData/{so}optics/{so}BeamDiameter",
+                 'Voltage': "./{so}microscopeData/{so}gun/{so}AccelerationVoltage",
+                 'MicroscopeID': "./{so}microscopeData/{so}instrument/{so}InstrumentID",
+                 'PixelSpacing': "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue",
+                 'EPUversion': "./{so}microscopeData/{so}core/{so}ApplicationSoftwareVersion",
+                 }
 
-        elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['Detector'] = e.text
+        for key in items:
+            self.acqDict[key] = root.find(items[key].format(**nspace)).text
+
+        self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing']) * math.pow(10, 10)
+        if self.acqDict['Mode'] == 'Super-resolution':
+            self.acqDict['PixelSpacing'] /= 2.0
+
+        if self.acqDict['MicroscopeID'] in SCOPE_DICT:
+            self.acqDict['Cs'] = SCOPE_DICT[self.acqDict['MicroscopeID']][1]
+
+        self.acqDict['BeamSize'] = float(self.acqDict['BeamSize']) * math.pow(10, 6)
+        self.acqDict['Voltage'] = int(self.acqDict['Voltage']) // 1000
 
         # get cameraSpecificInput: ElectronCountingEnabled, SuperResolutionFactor etc.
         customDict = dict()
         keys = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Key"
         values = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value"
-        for k, v in zip(root.findall(keys.format(**schema)), root.findall(values.format(**schema))):
+        for k, v in zip(root.findall(keys.format(**nspace)), root.findall(values.format(**nspace))):
             customDict[k.text] = v.text
 
         # check if counting/super-res is enabled
@@ -155,44 +170,21 @@ class Parser:
 
         if self.acqDict['Detector'] == 'EF-CCD':
             elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}NumberOffractions"
-            for e in root.findall(elem.format(**schema)):
-                self.acqDict['NumSubFrames'] = e.text
+            self.acqDict['NumSubFrames'] = root.find(elem.format(**nspace)).text
         else:
             # count number of DoseFractions for Falcon 3
             elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}DoseFractions"
-            for e in root.findall(elem.format(**schema)):
-                self.acqDict['NumSubFrames'] = len(e)
+            self.acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
 
-        elem = "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['PixelSpacing'] = str(float(e.text) * math.pow(10, 10))
-            if self.acqDict['Mode'] == 'Super-resolution':
-                self.acqDict['PixelSpacing'] /= 2.0
-
-        elem = "./{so}microscopeData/{so}gun/{so}AccelerationVoltage"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['Voltage'] = int(e.text) // 1000
-
-        elem = "./{so}microscopeData/{so}instrument/{so}InstrumentID"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['MicroscopeID'] = e.text
-            if e.text in SCOPE_DICT:
-                self.acqDict['Cs'] = SCOPE_DICT[e.text][1]
-
-        elem = "./{so}microscopeData/{so}optics/{so}BeamTilt"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['BeamTiltX'] = e[0].text
-            self.acqDict['BeamTiltY'] = e[1].text
-
-        elem = "./{so}microscopeData/{so}optics/{so}TemMagnification/{so}NominalMagnification"
-        for e in root.findall(elem.format(**schema)):
-            self.acqDict['Magnification'] = e.text
+        e = root.find("./{so}microscopeData/{so}optics/{so}BeamTilt".format(**nspace))
+        self.acqDict['BeamTiltX'] = e[0].text
+        self.acqDict['BeamTiltY'] = e[1].text
 
         # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus
         customDict = dict()
         keys = "./{so}CustomData/{ar}KeyValueOfstringanyType/{ar}Key"
         values = "./{so}CustomData/{ar}KeyValueOfstringanyType/{ar}Value"
-        for k, v in zip(root.findall(keys.format(**schema)), root.findall(values.format(**schema))):
+        for k, v in zip(root.findall(keys.format(**nspace)), root.findall(values.format(**nspace))):
             customDict[k.text] = v.text
 
         if 'AppliedDefocus' in customDict:
@@ -201,6 +193,11 @@ class Parser:
             self.acqDict['Dose'] = float(customDict['Dose']) / math.pow(10, 20)
         if 'PhasePlateUsed' in customDict:
             self.acqDict['PhasePlateUsed'] = customDict['PhasePlateUsed']
+
+            if customDict['PhasePlateUsed'] == 'true':
+                self.acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName']
+                self.acqDict['PhasePlatePosition'] = customDict['PhasePlatePosition']
+
         if 'DoseOnCamera' in customDict:
             self.acqDict['DoseOnCamera'] = customDict['DoseOnCamera']
 
