@@ -28,13 +28,13 @@
 DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
-METADATA_PATH = "/mnt/Krios1/Metadata"
+METADATA_PATH = "Metadata-examples"
 
 # path where Relion projects are created
 PROJECT_PATH = "/work/gsharov/tmp"
 
 # Folder with Relion 3.1 schedules
-SCHEDULE_PATH = "/home/gsharov/soft/Schedules"
+SCHEDULE_PATH = "Schedules"
 
 # Scipion pre-processing template and output file
 JSON_TEMPLATE = "template.json"

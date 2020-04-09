@@ -50,6 +50,7 @@ Units:
  - Defocus, um
  - Cs, mm
  - ExposureTime, s
+ - BeamSize, um
 
 '''
 
@@ -472,7 +473,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
-            for k, v in App.model.acqDict.items():
+            for k, v in sorted(App.model.acqDict.items()):
                 print(k, v)
             print('\n')
 
