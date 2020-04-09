@@ -34,8 +34,8 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
 from PyQt5.QtCore import Qt
 import sys
 
-from parser import Parser
-from schedule import *
+from .parser import Parser
+from .schedule import *
 
 
 '''

@@ -106,5 +106,4 @@ venv.bak/
 # other stuff
 *~
 .idea/
-test*
 .directory

@@ -29,7 +29,7 @@ import os
 import math
 import xml.etree.ElementTree as ET
 
-from config import *
+from .config import *
 
 
 class Parser:
