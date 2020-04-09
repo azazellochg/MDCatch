@@ -59,7 +59,7 @@ setup(
     packages=find_packages(),
     install_requires=['pyqt5'],
     entry_points={
-        'gui_scripts': [
+        'console_scripts': [
             'mdcatch=mdcatch.run:main'
         ],
     },

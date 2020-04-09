@@ -491,7 +491,7 @@ class Page2(QWizardPage):
         return line
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     wizard = App()
