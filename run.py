@@ -285,7 +285,7 @@ class Page1(QWizardPage):
         fnList = App.model.guessFn(prog)
 
         if fnList is None:
-            App.showDialog("ERROR", error_message % prog)
+            App.showDialog("ERROR", "No matching files found!\n\n" + help_message)
             return False
         else:
             print("\nFiles found: %s\n" % fnList) if DEBUG else ""

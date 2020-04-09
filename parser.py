@@ -140,6 +140,7 @@ class Parser:
                  'Voltage': "./{so}microscopeData/{so}gun/{so}AccelerationVoltage",
                  'MicroscopeID': "./{so}microscopeData/{so}instrument/{so}InstrumentID",
                  'PixelSpacing': "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue",
+                 'EPUversion': "./{so}microscopeData/{so}core/{so}ApplicationSoftwareVersion",
                  }
 
         for key in items:
