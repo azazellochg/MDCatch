@@ -111,7 +111,7 @@ def setupRelion(paramDict):
     cmdList = list()
     cmdList.append('relion_scheduler --schedule preprocess --run &')
 
-    if mapDict['do_until_ctf'] != 'false':
+    if mapDict['do_until_ctf'] is False:
         cmdList.append('relion_scheduler --schedule class2d --run &')
 
     for cmd in cmdList:

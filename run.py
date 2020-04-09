@@ -42,9 +42,9 @@ from schedule import *
 The app returns self.acqDict with all metadata.
 
 Units:
- - Dose, e/A^2 - total dose
+ - Dose, e/A^2 (total dose)
  - DoseOnCamera, e/ubpx/s
- - DosePerFrame, e/A^2/
+ - DosePerFrame, e/A^2
  - PixelSpacing, A
  - Voltage, keV
  - Defocus, um
@@ -60,7 +60,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.9.1 - metadata parser'
+        self.title = 'MDCatch v0.9.2 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()

@@ -39,4 +39,3 @@ The idea is to launch the app on a separate OTF machine as soon as EPU/SerialEM 
   - SerialEM conversions: gain ref dm4->mrc, defects SerialEM->Relion
   - K3 EPU 2.6.1 gain file is a rubbish tif, to be fixed by TFS
   - use GAIN_DICT from config
- 

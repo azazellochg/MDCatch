@@ -51,7 +51,6 @@ class Parser:
         self.acqDict['Dose'] = '0'
         self.acqDict['OpticalGroup'] = 'opticsGroup1'
         self.acqDict['PhasePlateUsed'] = 'false'
-        self.acqDict['NoCl2D'] = 'false'
         self.acqDict['GainReference'] = 'None'
         self.acqDict['DefectFile'] = 'None'
         self.acqDict['MTF'] = ''
