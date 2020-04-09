@@ -34,8 +34,8 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
 from PyQt5.QtCore import Qt
 import sys
 
-from parser import Parser
-from schedule import *
+from .parser import Parser
+from .schedule import *
 
 
 '''
@@ -491,7 +491,7 @@ class Page2(QWizardPage):
         return line
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     wizard = App()

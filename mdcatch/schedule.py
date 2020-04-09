@@ -30,7 +30,7 @@ import subprocess
 import json
 from datetime import datetime
 
-from config import *
+from .config import *
 
 
 def setupRelion(paramDict):
