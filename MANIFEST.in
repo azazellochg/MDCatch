@@ -2,5 +2,5 @@ recursive-include mdcatch/Metadata-examples *
 recursive-include mdcatch/Schedules *
 include mdcatch/template.json
 
-include README.md
+include README.rst
 include LICENSE
