@@ -146,10 +146,6 @@ class Parser:
         for key in items:
             self.acqDict[key] = root.find(items[key].format(**nspace)).text
 
-        self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing']) * math.pow(10, 10)
-        if self.acqDict['Mode'] == 'Super-resolution':
-            self.acqDict['PixelSpacing'] /= 2.0
-
         if self.acqDict['MicroscopeID'] in SCOPE_DICT:
             self.acqDict['Cs'] = SCOPE_DICT[self.acqDict['MicroscopeID']][1]
 
@@ -164,9 +160,12 @@ class Parser:
             customDict[k.text] = v.text
 
         # check if counting/super-res is enabled
+        sr = 1.0
         if customDict['ElectronCountingEnabled'] == 'true':
-            sr = customDict['SuperResolutionFactor']  # 1 - counting, 2 - super-res
-            self.acqDict['Mode'] = 'Counting' if sr == '1' else 'Super-resolution'
+            sr = float(customDict['SuperResolutionFactor'])  # 1 - counting, 2 - super-res
+            self.acqDict['Mode'] = 'Counting' if sr == 1.0 else 'Super-resolution'
+
+        self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing']) * math.pow(10, 10) / sr
 
         if self.acqDict['Detector'] == 'EF-CCD':
             elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}NumberOffractions"
@@ -190,12 +189,12 @@ class Parser:
         if 'AppliedDefocus' in customDict:
             self.acqDict['AppliedDefocus'] = float(customDict['AppliedDefocus']) * math.pow(10, 6)
         if 'Dose' in customDict:
-            self.acqDict['Dose'] = float(customDict['Dose']) / math.pow(10, 20)
+            self.acqDict['Dose'] = float(customDict['Dose']) * math.pow(10, -20)
         if 'PhasePlateUsed' in customDict:
             self.acqDict['PhasePlateUsed'] = customDict['PhasePlateUsed']
 
             if customDict['PhasePlateUsed'] == 'true':
-                self.acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName']
+                self.acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName'].split(" ")[-1]
                 self.acqDict['PhasePlatePosition'] = customDict['PhasePlatePosition']
 
         if 'DoseOnCamera' in customDict:
