@@ -325,7 +325,7 @@ class Page2(QWizardPage):
         fnList = App.model.getFn()
 
         if prog == 'EPU':
-            App.model.parseImgXml(fnList)
+            App.model.parseImgEpu(fnList)
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
@@ -347,7 +347,7 @@ class Page2(QWizardPage):
         self.px.setText(str(px))
 
         vpp = acqDict['PhasePlateUsed']
-        if vpp in ['true', 'True']:
+        if vpp in ['true', 'True', True]:
             self.vpp.setChecked(True)
         else:
             self.vpp.setChecked(False)

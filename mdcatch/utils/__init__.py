@@ -23,3 +23,7 @@
 # *  e-mail address 'gsharov@mrc-lmb.cam.ac.uk'
 # *
 # **************************************************************************
+
+from .feixml import parseXml
+from .feimrc import parseMrc
+#from .bigtiff import parseTif

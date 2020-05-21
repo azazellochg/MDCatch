@@ -1,3 +1,7 @@
+0.9.5:
+    - add mrc and tif parsers
+0.9.4:
+    - fix pixel size for super-res
 0.9.3:
     - first version for PyPi
 0.9.2:
