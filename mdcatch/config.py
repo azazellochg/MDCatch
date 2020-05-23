@@ -81,7 +81,6 @@ MOVIE_PATH_DICT = {
 # SerialEM mdoc vars to parse
 SERIALEM_PARAMS = [
     'T',  # Microscope ID
-    #'TiltAngle',
     'Voltage',
     'Magnification',
     'ExposureDose',
@@ -96,7 +95,7 @@ SERIALEM_PARAMS = [
 
     # vars below are added to mdoc using "AddToNextFrameStackMdoc key value"
     'OpticalGroup',
-    'PhasePlateInserted',  # renamed to PhasePlateUsed in parser.py
+    'PhasePlateInserted',
     'BeamTiltCompensation',
     'Beamtilt'
 ]

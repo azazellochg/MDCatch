@@ -81,9 +81,9 @@ def _standardizeDict(acqDict):
     """Convert values to expected format. """
     stdDict = {
         'AppliedDefocus': float(acqDict['Applied defocus']) * math.pow(10, 6),
-        'BeamShiftX': acqDict['Shift X'],
+        'BeamShiftX': acqDict['Shift X'],  # TEM beam-image shift
         'BeamShiftY': acqDict['Shift Y'],
-        'ImageShiftX': acqDict['Shift offset X'],
+        'ImageShiftX': acqDict['Shift offset X'],  # TEM pure image shift
         'ImageShiftY': acqDict['Shift offset Y'],
         'BeamSize': float(acqDict['Illuminated area']) * math.pow(10, 6),
         'Detector': acqDict['Camera name'].decode("utf-8"),
@@ -95,7 +95,7 @@ def _standardizeDict(acqDict):
         # no way to find super-res?
         'Mode': 'Counting' if bool(acqDict['Direct detector electron counting']) else 'Linear',
         # no way to find frames number?
-        'NumSubFrames': 1,
+        'NumSubFrames': 0,
         'SpotSize': acqDict['Spot index'],
         'Voltage': float(acqDict['HT']) // 1000,
         'PhasePlateUsed': bool(acqDict['Phase Plate']),
