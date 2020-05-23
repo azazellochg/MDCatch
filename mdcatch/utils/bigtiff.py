@@ -25,7 +25,7 @@
 # *
 # **************************************************************************
 
-""" This script parses BigTIFF file header. """
+""" This script parses BigTIFF file header from SerialEM movies. """
 
 from struct import unpack
 from mdcatch.utils.dtypes import bigtiff_tags
