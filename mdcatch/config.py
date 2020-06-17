@@ -63,7 +63,8 @@ SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon3', 'K2'],
               }
 
 # path to MTF files for Relion (300 kV only)
-# examples: Name-count, Name-linear or Name, where Name should match the one in SCOPE_DICT
+# examples: Name-count, Name-linear or Name,
+# where Name should match the camera name in SCOPE_DICT
 MTF_DICT = {
     'Falcon3-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
     'Falcon3-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
@@ -71,7 +72,7 @@ MTF_DICT = {
     'K3': '/home/gsharov/soft/MTFs/mtf_K3_300kv_nocds.star'
 }
 
-# path to raw movies folder depending on camera type
+# path to raw movies folder depending on camera name
 # example: /mnt/Krios1/Data/Falcon3/
 MOVIE_PATH_DICT = {
     'EF-CCD': '/mnt/%s/Data/%s/',
@@ -93,15 +94,16 @@ SERIALEM_PARAMS = [
     'DefectFile',
     'GainReference',
 
-    # vars below are added to mdoc using "AddToNextFrameStackMdoc key value"
+    # optional vars below can be added to mdoc using "AddToNextFrameStackMdoc key value"
     'OpticalGroup',
     'PhasePlateInserted',
     'BeamTiltCompensation',
     'Beamtilt'
 ]
 
+# error message for path selection
 help_message = """Select the following folder:\n\n
    1) EPU: the EPU session folder on /mnt/Krios1/Metadata
    with Images-DiscX folder inside.\n
    2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
-   contains tif and mdoc files.\n"""
+   contains tif movies and mdoc files.\n"""

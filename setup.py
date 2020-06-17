@@ -57,7 +57,7 @@ setup(
     ],
     keywords='cryo-em python qt5 epu serialem',
     packages=find_packages(),
-    install_requires=['pyqt5'],
+    install_requires=['pyqt5', 'numpy'],
     entry_points={
         'console_scripts': [
             'mdcatch=mdcatch.run:main'

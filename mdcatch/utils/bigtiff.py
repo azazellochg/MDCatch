@@ -28,7 +28,8 @@
 """ This script parses BigTIFF file header from SerialEM movies. """
 
 from struct import unpack
-from mdcatch.utils.dtypes import bigtiff_tags
+
+from .dtypes import bigtiff_tags
 
 file = '/home/azazello/test/parser/K3-serialem.tif'
 header_dict = dict()

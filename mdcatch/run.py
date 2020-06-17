@@ -38,29 +38,13 @@ from .parser import Parser
 from .schedule import *
 
 
-'''
-The app returns self.acqDict with all metadata.
-
-Units:
- - Dose, e/A^2 (total dose)
- - DoseOnCamera, e/ubpx/s
- - DosePerFrame, e/A^2
- - PixelSpacing, A
- - Voltage, keV
- - Defocus, um
- - Cs, mm
- - ExposureTime, s
- - BeamSize, um
-
-'''
-
 
 class App(QWizard):
     model = Parser()
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.9.2 - metadata parser'
+        self.title = 'MDCatch v0.9.5 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -269,9 +253,9 @@ class Page1(QWizardPage):
             App.model.setMdPath(METADATA_PATH)
 
         # prevent Check button bypass
-        usrchk = self.checkLogin(self.username.text())
-        if not usrchk:
-            return False
+        #usrchk = self.checkLogin(self.username.text())
+        #if not usrchk:
+        #    return False
 
         if DEBUG:
             print("\n\nInput params: ",

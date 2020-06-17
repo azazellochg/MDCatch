@@ -27,7 +27,6 @@
 import re
 import os
 import math
-import xml.etree.ElementTree as ET
 
 from .config import *
 from .utils import parseXml, parseMrc
