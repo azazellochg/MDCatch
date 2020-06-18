@@ -126,14 +126,13 @@ def setupScipion(paramDict):
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
     os.chdir(prjPath)
-    f = open(JSON_TEMPLATE, 'r')
-    protocolsList = json.load(f)
-    protNames = dict()
+    with open(JSON_TEMPLATE, 'r') as f:
+        protocolsList = json.load(f)
+        protNames = dict()
 
-    for i, protDict in enumerate(protocolsList):
-        protClassName = protDict['object.className']
-        protNames[protClassName] = i
-    f.close()
+        for i, protDict in enumerate(protocolsList):
+            protClassName = protDict['object.className']
+            protNames[protClassName] = i
 
     bin, gain, defect = precalculateVars(paramDict)
 
@@ -178,10 +177,9 @@ def setupScipion(paramDict):
 
     if os.path.exists(JSON_PATH):
         os.remove(JSON_PATH)
-    f = open(JSON_PATH, "w")
-    jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
-    f.write(jsonStr)
-    f.close()
+    with open(JSON_PATH, "w") as f:
+        jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
+        f.write(jsonStr)
 
     try:
         subprocess.check_output(["which", "scipion"], stderr=subprocess.DEVNULL)

@@ -253,9 +253,9 @@ class Page1(QWizardPage):
             App.model.setMdPath(METADATA_PATH)
 
         # prevent Check button bypass
-        #usrchk = self.checkLogin(self.username.text())
-        #if not usrchk:
-        #    return False
+        usrchk = self.checkLogin(self.username.text())
+        if not usrchk:
+            return False
 
         if DEBUG:
             print("\n\nInput params: ",
@@ -457,6 +457,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
+            print("\nFinal parameters:\n")
             for k, v in sorted(App.model.acqDict.items()):
                 print(k, v)
             print('\n')

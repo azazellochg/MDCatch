@@ -46,15 +46,13 @@ with open(file, 'rb') as fin:
     if version == 42:
         raise Exception('Only BigTIFF files are supported!')
 
-    ifd_offset = unpack(byteorder + 'Q', header[8:16])[0]  # offset to first IFD
+    ifd_offset = unpack(byteorder + 'Q', header[8:16])[0]  # offset to the first IFD
     # find number of tags in the first IFD
     fin.seek(ifd_offset)
     num_tags = unpack(byteorder + 'Q', fin.read(8))[0]
-
-    i = 1
     start = int(ifd_offset) + 8
 
-    while i <= num_tags:
+    for _ in range(1, num_tags+1):
         fin.seek(start)
         tag = fin.read(20)  # every tag takes 20 bytes
         tagnum = unpack(byteorder + 'H', tag[:2])[0]  # IFD tag
@@ -71,7 +69,6 @@ with open(file, 'rb') as fin:
             header_dict[tagname] = (count, offset)
         elif dtype == 1:  # BYTE 1-byte uint
             header_dict[tagname] = unpack(byteorder + 'B', tag[12:13])[0]
-        i += 1
         start += 20
 
     # parse tags 270=ImageDescription, 306=DateTime && update dict

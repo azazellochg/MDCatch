@@ -105,5 +105,6 @@ SERIALEM_PARAMS = [
 help_message = """Select the following folder:\n\n
    1) EPU: the EPU session folder on /mnt/Krios1/Metadata
    with Images-DiscX folder inside.\n
+   OR\n
    2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
    contains tif movies and mdoc files.\n"""
