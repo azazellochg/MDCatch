@@ -160,6 +160,10 @@ class Parser:
         except KeyError:
             pass
 
+        if DEBUG:
+            for k, v in sorted(self.acqDict.items()):
+                print("%s = %s" % (k, v))
+
     def calcDose(self):
         """ Calculate dose rate per unbinned px. """
         numFr = int(self.acqDict['NumSubFrames'])
