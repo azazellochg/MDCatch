@@ -3,13 +3,13 @@ MDCatch
 
 Still in development, but you are welcome to try!
 
-A simple PyQt5 app to fetch metadata from EPU or SerialEM.
-It parses the first found EPU xml and SerialEM mdoc file associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
+A simple PyQt5 app to fetch acquisition metadata from EPU session or SerialEM.
+It parses the first found xml/mrc (EPU) or mdoc file (SerialEM) associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
 
 Installation
 ------------
 
-The app requires python3 and PyQt5 to run.
+The app requires python3, numpy and PyQt5 to run.
 
   1) From pypi: **pip install MDCatch** (recommended)
   2) From sources - you have two options:
@@ -38,9 +38,9 @@ The app requires python3 and PyQt5 to run.
 Configure
 ---------
 
-  - Relion 3.1 or Scipion 3.0 is in in your *PATH* (at the moment Scipion 3 is not ready!)
+  - Relion 3.1 or Scipion 3.0 is in in your *PATH*
   - Preprocessing templates: *Schedules* folder for Relion, *template.json* for Scipion
-  - Edit *config.py* to adjust it to your settings
+  - Edit *config.py* to adjust it to your setup
  
 Running
 -------
@@ -50,7 +50,8 @@ Running
 Working principle
 -----------------
 
-The idea is to launch the app on a separate OTF machine as soon as EPU/SerialEM starts data collection and the first movie is acquired.
+The idea is to launch the app on a processing server as soon as EPU/SerialEM starts data collection and the first movie is acquired.
+The server has to have access to both EPU session folder and movies folder, or to SerialEM movie folder.
 
   1. check if username exists in the NIS database (``ypmatch username passwd``)
   2. find and parse the first xml/mdoc file, getting all acquisition metadata
@@ -72,5 +73,4 @@ TODO
 
   - beam tilt is parsed but not used since we parse only a single xml/mdoc for the whole session
   - SerialEM conversions: gain ref dm4->mrc, defects SerialEM->Relion
-  - K3 EPU 2.6.1 gain file is a rubbish tif, to be fixed by TFS
   - use GAIN_DICT from config

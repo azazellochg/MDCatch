@@ -38,29 +38,13 @@ from .parser import Parser
 from .schedule import *
 
 
-'''
-The app returns self.acqDict with all metadata.
-
-Units:
- - Dose, e/A^2 (total dose)
- - DoseOnCamera, e/ubpx/s
- - DosePerFrame, e/A^2
- - PixelSpacing, A
- - Voltage, keV
- - Defocus, um
- - Cs, mm
- - ExposureTime, s
- - BeamSize, um
-
-'''
-
 
 class App(QWizard):
     model = Parser()
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.9.2 - metadata parser'
+        self.title = 'MDCatch v0.9.5 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -325,7 +309,7 @@ class Page2(QWizardPage):
         fnList = App.model.getFn()
 
         if prog == 'EPU':
-            App.model.parseImgXml(fnList)
+            App.model.parseImgEpu(fnList)
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
@@ -347,7 +331,7 @@ class Page2(QWizardPage):
         self.px.setText(str(px))
 
         vpp = acqDict['PhasePlateUsed']
-        if vpp in ['true', 'True']:
+        if vpp in ['true', 'True', True]:
             self.vpp.setChecked(True)
         else:
             self.vpp.setChecked(False)
@@ -473,6 +457,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
+            print("\nFinal parameters:\n")
             for k, v in sorted(App.model.acqDict.items()):
                 print(k, v)
             print('\n')

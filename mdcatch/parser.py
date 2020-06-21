@@ -27,9 +27,9 @@
 import re
 import os
 import math
-import xml.etree.ElementTree as ET
 
 from .config import *
+from .utils import parseXml, parseMrc
 
 
 class Parser:
@@ -100,7 +100,7 @@ class Parser:
 
     def guessFn(self, prog="EPU"):
         img = None
-        regex = PATTERN_XML if prog == "EPU" else PATTERN_MDOC
+        regex = PATTERN_EPU if prog == "EPU" else PATTERN_MDOC
 
         if DEBUG:
             print("\nUsing regex: ", regex)
@@ -123,87 +123,9 @@ class Parser:
 
         return img
 
-    def parseImgXml(self, fn):
-        """ Main XML parser for EPU files. """
-        tree = ET.parse(fn)
-        root = tree.getroot()
-        nspace = {'so': '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}',
-                  'ar': '{http://schemas.microsoft.com/2003/10/Serialization/Arrays}',
-                  'fr': '{http://schemas.datacontract.org/2004/07/Fei.Applications.Common.Omp.Interface}'}
-
-        items = {'ExposureTime': "./{so}microscopeData/{so}acquisition/{so}camera/{so}ExposureTime",
-                 'Detector': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name",
-                 'GunLens': "./{so}microscopeData/{so}gun/{so}GunLens",
-                 'SpotSize': "./{so}microscopeData/{so}optics/{so}SpotIndex",
-                 'Magnification': "./{so}microscopeData/{so}optics/{so}TemMagnification/{so}NominalMagnification",
-                 'BeamSize': "./{so}microscopeData/{so}optics/{so}BeamDiameter",
-                 'Voltage': "./{so}microscopeData/{so}gun/{so}AccelerationVoltage",
-                 'MicroscopeID': "./{so}microscopeData/{so}instrument/{so}InstrumentID",
-                 'PixelSpacing': "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue",
-                 'EPUversion': "./{so}microscopeData/{so}core/{so}ApplicationSoftwareVersion",
-                 }
-
-        for key in items:
-            self.acqDict[key] = root.find(items[key].format(**nspace)).text
-
-        self.acqDict['PixelSpacing'] = float(self.acqDict['PixelSpacing']) * math.pow(10, 10)
-        if self.acqDict['Mode'] == 'Super-resolution':
-            self.acqDict['PixelSpacing'] /= 2.0
-
-        if self.acqDict['MicroscopeID'] in SCOPE_DICT:
-            self.acqDict['Cs'] = SCOPE_DICT[self.acqDict['MicroscopeID']][1]
-
-        self.acqDict['BeamSize'] = float(self.acqDict['BeamSize']) * math.pow(10, 6)
-        self.acqDict['Voltage'] = int(self.acqDict['Voltage']) // 1000
-
-        # get cameraSpecificInput: ElectronCountingEnabled, SuperResolutionFactor etc.
-        customDict = dict()
-        keys = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Key"
-        values = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value"
-        for k, v in zip(root.findall(keys.format(**nspace)), root.findall(values.format(**nspace))):
-            customDict[k.text] = v.text
-
-        # check if counting/super-res is enabled
-        if customDict['ElectronCountingEnabled'] == 'true':
-            sr = customDict['SuperResolutionFactor']  # 1 - counting, 2 - super-res
-            self.acqDict['Mode'] = 'Counting' if sr == '1' else 'Super-resolution'
-
-        if self.acqDict['Detector'] == 'EF-CCD':
-            elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}NumberOffractions"
-            self.acqDict['NumSubFrames'] = root.find(elem.format(**nspace)).text
-        else:
-            # count number of DoseFractions for Falcon 3
-            elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}DoseFractions"
-            self.acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
-
-        e = root.find("./{so}microscopeData/{so}optics/{so}BeamTilt".format(**nspace))
-        self.acqDict['BeamTiltX'] = e[0].text
-        self.acqDict['BeamTiltY'] = e[1].text
-
-        # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus
-        customDict = dict()
-        keys = "./{so}CustomData/{ar}KeyValueOfstringanyType/{ar}Key"
-        values = "./{so}CustomData/{ar}KeyValueOfstringanyType/{ar}Value"
-        for k, v in zip(root.findall(keys.format(**nspace)), root.findall(values.format(**nspace))):
-            customDict[k.text] = v.text
-
-        if 'AppliedDefocus' in customDict:
-            self.acqDict['AppliedDefocus'] = float(customDict['AppliedDefocus']) * math.pow(10, 6)
-        if 'Dose' in customDict:
-            self.acqDict['Dose'] = float(customDict['Dose']) / math.pow(10, 20)
-        if 'PhasePlateUsed' in customDict:
-            self.acqDict['PhasePlateUsed'] = customDict['PhasePlateUsed']
-
-            if customDict['PhasePlateUsed'] == 'true':
-                self.acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName']
-                self.acqDict['PhasePlatePosition'] = customDict['PhasePlatePosition']
-
-        if 'DoseOnCamera' in customDict:
-            self.acqDict['DoseOnCamera'] = customDict['DoseOnCamera']
-
-        # convert all to str
-        for key in self.acqDict:
-            self.acqDict[key] = str(self.acqDict[key])
+    def parseImgEpu(self, fn):
+        acqDict = parseXml(fn) if fn.endswith("xml") else parseMrc(fn)
+        self.acqDict.update(acqDict)
 
     def parseImgMdoc(self, fn):
         """ SerialEM is used only for K2/K3 cameras. """
@@ -238,21 +160,26 @@ class Parser:
         except KeyError:
             pass
 
+        if DEBUG:
+            for k, v in sorted(self.acqDict.items()):
+                print("%s = %s" % (k, v))
+
     def calcDose(self):
         """ Calculate dose rate per unbinned px. """
-        dose_per_frame, dose_on_camera = 0, 0
         numFr = int(self.acqDict['NumSubFrames'])
         dose_total = float(self.acqDict['Dose'])  # e/A^2
         exp = float(self.acqDict['ExposureTime'])  # s
+
         if self.acqDict['Mode'] == 'Super-resolution':
             pix = 2 * float(self.acqDict['PixelSpacing'])  # A
         else:
             pix = float(self.acqDict['PixelSpacing'])  # A
 
-        if numFr and dose_total:
+        if numFr:  # not 0
             dose_per_frame = dose_total / numFr  # e/A^2/frame
-            if exp and pix:
-                dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
+        else:
+            dose_per_frame = 0
+        dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
 
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)

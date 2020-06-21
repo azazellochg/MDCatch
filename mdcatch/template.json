@@ -198,7 +198,7 @@
     {
         "object.className": "ProtMonitorSummary",
         "object.id": "336",
-        "object.label": "pwem - monitor summary",
+        "object.label": "emfacilities - monitor summary",
         "object.comment": "",
         "_useQueue": false,
         "_queueParams": null,
