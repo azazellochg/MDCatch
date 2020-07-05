@@ -54,6 +54,11 @@ def setupRelion(paramDict):
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
 
+    # setup ACL for uid
+    _, uid, gid = paramDict['User']
+    cmd = "setfacl -R -m u:%d:rwx %s" % (uid, prjPath)
+    subprocess.check_output(cmd.split())
+
     # Create links
     movieDir = os.path.join(prjPath, "Movies")
     if os.path.islink(movieDir):

@@ -1,10 +1,9 @@
 MDCatch
 =======
 
-Still in development, but you are welcome to try!
-
 A simple PyQt5 app to fetch acquisition metadata from EPU session or SerialEM.
-It parses the first found xml/mrc (EPU) or mdoc file (SerialEM) associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
+It parses the first found xml/mrc (EPU) or mdoc file (SerialEM) associated with a data collection session and launches Relion or Scipion pipeline.
+In case of SerialEM you need to enable saving mdoc file for each movie.
 
 Installation
 ------------
