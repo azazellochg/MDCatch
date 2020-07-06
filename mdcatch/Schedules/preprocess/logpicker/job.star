@@ -47,7 +47,7 @@ maxstddevnoise_autopick        1.1
 min_dedicated         24 
 minavgnoise_autopick       -999 
 mindist_autopick        100 
-    nr_mpi          1 
+    nr_mpi          5
 other_args         "" 
 particle_diameter         -1 
 psi_sampling_autopick          5 
