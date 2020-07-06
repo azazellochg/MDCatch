@@ -33,6 +33,6 @@ Queue submit command: == qsub
 Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
 Queue name:  == openmpi
 Angular search range - psi (deg): == 6
-Copy particles to scratch directory: == /ssd
+Copy particles to scratch directory: == /work
 Regularisation parameter T: == 2
 Use GPU acceleration? == Yes
