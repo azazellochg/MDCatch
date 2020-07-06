@@ -80,7 +80,7 @@ def setupRelion(paramDict):
     os.chdir(prjPath)
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
-            os.symlink(i, os.path.basename(i))
+            shutil.copyfile(i, os.path.basename(i))
 
     mapDict['gainref'] = os.path.basename(gain) or '""'
     mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
