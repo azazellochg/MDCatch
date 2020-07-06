@@ -56,7 +56,7 @@ def setupRelion(paramDict):
 
     # setup ACL for uid
     _, uid, gid = paramDict['User']
-    cmd = "setfacl -R -m u:%d:rwx %s" % (uid, prjPath)
+    cmd = "setfacl -R -m u:%s:rwx %s" % (uid, prjPath)
     subprocess.check_output(cmd.split())
 
     # Create links
