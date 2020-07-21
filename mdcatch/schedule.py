@@ -97,11 +97,6 @@ def setupRelion(paramDict):
             'preprocess', key, str(mapDict[key]))
         cmdList.append(cmd)
 
-    # mask for cl2d is in Angstroms
-    diam = float(mapDict['angpix']) * float(mapDict['mask_diam'])
-    cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %f' %
-                   diam)
-
     for cmd in cmdList:
         if DEBUG:
             print(cmd)

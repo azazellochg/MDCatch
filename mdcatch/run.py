@@ -227,9 +227,9 @@ class Page1(QWizardPage):
             App.model.setMdPath(METADATA_PATH)
 
         # prevent Check button bypass
-        #usrchk = self.checkLogin(self.username.text())
-        #if not usrchk:
-        #    return False
+        usrchk = self.checkLogin(self.username.text())
+        if not usrchk:
+            return False
 
         if DEBUG:
             print("\n\nInput params: ",
