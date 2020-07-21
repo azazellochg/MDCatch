@@ -42,7 +42,7 @@ JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 JSON_PATH = "workflow.json"
 
 # EPU 2.6.1 patterns
-EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*_fractions.tiff"
+EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
 PATTERN_EPU = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.(xml|mrcs)$"
 GAIN_DICT = {'K2': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}-gain-ref.MRC$",
              'K3': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}_gain.tiff$"
