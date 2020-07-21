@@ -76,7 +76,7 @@ def run_job(project_dir, args):
             print("Processing mic: ", mic)
         mic_dir = os.path.dirname(mic)
         if not os.path.isdir(mic_dir):
-            os.mkdir(mic_dir)
+            os.makedirs(mic_dir)
         if mic_dir not in mic_dirs:
             mic_dirs.append(mic_dir)
             print("Added folder %s to the mic_dirs" % mic_dir)
