@@ -108,6 +108,7 @@ def setupRelion(paramDict):
 
     if mapDict['do_until_ctf'] is False:
         cmdList.append('relion_scheduler --schedule class2d --run &')
+        cmdList.append('relion_scheduler --schedule class2d_2nd --run &')
 
     for cmd in cmdList:
         if DEBUG:
