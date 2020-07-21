@@ -27,14 +27,14 @@ do_preread_images         No
 do_restrict_xoff        Yes 
 do_zero_mask        Yes 
 dont_skip_align        Yes 
-   fn_cont Class2D/job036/run_it012_optimiser.star 
-    fn_img  $$mybatch 
+   fn_cont "" 
+    fn_img Work/particles.star 
    gpu_ids        0:1 
 helical_rise       4.75 
 helical_tube_outer_diameter        200 
 highres_limit         -1 
 min_dedicated         24 
-nr_classes $$nr_classes 
+nr_classes $$nr_classes_first
    nr_iter         20 
     nr_mpi          3 
    nr_pool         30 
@@ -48,7 +48,7 @@ psi_sampling          6
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
  range_psi          6 
-scratch_dir       "" 
+scratch_dir       /work 
  tau_fudge          2 
    use_gpu        Yes 
  

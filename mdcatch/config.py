@@ -28,21 +28,22 @@
 DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
-METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples"
+#METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
+METADATA_PATH = "/mnt/MetaData/"
 
 # path where Relion projects are created
-PROJECT_PATH = "/work/gsharov/tmp"
+PROJECT_PATH = "/cephfs"
 
 # Folder with Relion 3.1 schedules
-SCHEDULE_PATH = "/home/azazello/soft/MDCatch/mdcatch/Schedules"
+SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schedules"
 
 # Scipion pre-processing template and output file
-JSON_TEMPLATE = "/home/azazello/soft/MDCatch/mdcatch/template.json"
+JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 JSON_PATH = "workflow.json"
 
 # EPU 2.6.1 patterns
-EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
-PATTERN_EPU = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.(xml|mrc)$"
+EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*_fractions.tiff"
+PATTERN_EPU = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.(xml|mrcs)$"
 GAIN_DICT = {'K2': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}-gain-ref.MRC$",
              'K3': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}_gain.tiff$"
              }
@@ -51,32 +52,28 @@ GAIN_DICT = {'K2': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9
 PATTERN_MDOC = ".{1,}\.tif\.mdoc$"
 REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
-# default particle size for Relion LoG picker
-part_size_short = 150
-part_size_long = 180
-
 # instrumentID: [name, Cs, TFS camera, Gatan camera]
-SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon3', 'K2'],
-              '3413': ['Krios2', 2.7, 'Falcon3', 'K2'],
-              '3593': ['Krios3', 2.7, 'Falcon3', 'K3'],
-              '9952833': ['Glacios', 2.7, 'Falcon3', None]
+SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
+              '3413': ['Krios2', 2.7, 'Falcon', 'K2'],
+              '3593': ['Krios3', 2.7, 'Falcon', 'K3'],
+              '9952833': ['Glacios', 2.7, 'Falcon', None]
               }
 
 # path to MTF files for Relion (300 kV only)
 # examples: Name-count, Name-linear or Name,
 # where Name should match the camera name in SCOPE_DICT
 MTF_DICT = {
-    'Falcon3-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
-    'Falcon3-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
+    'Falcon-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
+    'Falcon-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
     'K2': '/home/gsharov/soft/MTFs/mtf_k2_300kV.star',
     'K3': '/home/gsharov/soft/MTFs/mtf_K3_300kv_nocds.star'
 }
 
 # path to raw movies folder depending on camera name
-# example: /mnt/Krios1/Data/Falcon3/
+# example: /mnt/Data/Krios3/K3/
 MOVIE_PATH_DICT = {
-    'EF-CCD': '/mnt/%s/Data/%s/',
-    'BM-Falcon': '/mnt/%s/Data/%s/'
+    'EF-CCD': '/mnt/Data/%s/%s/',
+    'BM-Falcon': '/mnt/Data/%s/%s/'
 }
 
 # SerialEM mdoc vars to parse

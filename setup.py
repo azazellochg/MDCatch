@@ -44,7 +44,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='MDCatch',
-    version='0.9.5',
+    version='0.9.6',
     description='Fetch metadata from EPU / SerialEM and launch on-the-fly pre-processing',
     long_description=long_description,
     url='https://github.com/azazellochg/MDCatch',

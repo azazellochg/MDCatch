@@ -3,7 +3,7 @@
 
 data_pipeline_general
 
-_rlnPipeLineJobCounter                       0
+_rlnPipeLineJobCounter                       1
  
 
 # version 30001
@@ -18,12 +18,8 @@ _rlnPipeLineProcessStatus #4
 Schedules/preprocess/importmovies/       None            0            1 
 Schedules/preprocess/motioncorr/       None            1            1 
 Schedules/preprocess/ctffind/       None            2            1 
-Schedules/preprocess/logpicker/       None            4            1 
-Schedules/preprocess/refpicker/       None            4            1 
-Schedules/preprocess/extract_logpick/       None            5            1 
-Schedules/preprocess/extract_refpick/       None            5            1 
-Schedules/preprocess/split_logpick/       None            7            1 
-Schedules/preprocess/split_refpick/       None            7            1 
+Schedules/preprocess/cryolopicker/       None           99            1 
+Schedules/preprocess/extract/       None            5            1 
  
 
 # version 30001
@@ -38,13 +34,8 @@ Schedules/preprocess/motioncorr/corrected_micrographs.star            1
 Schedules/preprocess/motioncorr/logfile.pdf           13 
 Schedules/preprocess/ctffind/micrographs_ctf.star            1 
 Schedules/preprocess/ctffind/logfile.pdf           13 
-Schedules/preprocess/logpicker/coords_suffix_autopick.star            2 
-Schedules/preprocess/logpicker/logfile.pdf           13 
-$$2drefs_name            5 
-Schedules/preprocess/refpicker/coords_suffix_autopick.star            2 
-Schedules/preprocess/refpicker/logfile.pdf           13 
-Schedules/preprocess/extract_logpick/particles.star            3 
-Schedules/preprocess/extract_refpick/particles.star            3 
+Schedules/preprocess/cryolopicker/coords_suffix_autopick.star            2 
+Schedules/preprocess/extract/particles.star            3 
  
 
 # version 30001
@@ -56,15 +47,9 @@ _rlnPipeLineEdgeFromNode #1
 _rlnPipeLineEdgeProcess #2 
 Schedules/preprocess/importmovies/movies.star Schedules/preprocess/motioncorr/ 
 Schedules/preprocess/motioncorr/corrected_micrographs.star Schedules/preprocess/ctffind/ 
-Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/logpicker/ 
-Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/refpicker/ 
-$$2drefs_name Schedules/preprocess/refpicker/ 
-Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/extract_logpick/ 
-Schedules/preprocess/logpicker/coords_suffix_autopick.star Schedules/preprocess/extract_logpick/ 
-Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/extract_refpick/ 
-Schedules/preprocess/refpicker/coords_suffix_autopick.star Schedules/preprocess/extract_refpick/ 
-Schedules/preprocess/extract_logpick/particles.star Schedules/preprocess/split_logpick/ 
-Schedules/preprocess/extract_refpick/particles.star Schedules/preprocess/split_refpick/ 
+Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/cryolopicker/ 
+Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/extract/ 
+Schedules/preprocess/cryolopicker/coords_suffix_autopick.star Schedules/preprocess/extract/ 
  
 
 # version 30001
@@ -78,10 +63,6 @@ Schedules/preprocess/importmovies/ Schedules/preprocess/importmovies/movies.star
 Schedules/preprocess/motioncorr/ Schedules/preprocess/motioncorr/corrected_micrographs.star 
 Schedules/preprocess/ctffind/ Schedules/preprocess/ctffind/micrographs_ctf.star 
 Schedules/preprocess/ctffind/ Schedules/preprocess/ctffind/logfile.pdf 
-Schedules/preprocess/logpicker/ Schedules/preprocess/logpicker/coords_suffix_autopick.star 
-Schedules/preprocess/logpicker/ Schedules/preprocess/logpicker/logfile.pdf 
-Schedules/preprocess/refpicker/ Schedules/preprocess/refpicker/coords_suffix_autopick.star 
-Schedules/preprocess/refpicker/ Schedules/preprocess/refpicker/logfile.pdf 
-Schedules/preprocess/extract_logpick/ Schedules/preprocess/extract_logpick/particles.star 
-Schedules/preprocess/extract_refpick/ Schedules/preprocess/extract_refpick/particles.star 
+Schedules/preprocess/cryolopicker/ Schedules/preprocess/cryolopicker/coords_suffix_autopick.star 
+Schedules/preprocess/extract/ Schedules/preprocess/extract/particles.star 
  
