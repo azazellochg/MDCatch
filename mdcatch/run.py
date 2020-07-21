@@ -27,7 +27,7 @@
 
 from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
-                             QPushButton, QWizard, QGroupBox, QSpinBox,
+                             QPushButton, QWizard, QGroupBox,
                              QSizePolicy, QLineEdit, QFileDialog,
                              QCheckBox, QApplication, QWizardPage,
                              QButtonGroup)
@@ -38,13 +38,12 @@ from .parser import Parser
 from .schedule import *
 
 
-
 class App(QWizard):
     model = Parser()
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent)
-        self.title = 'MDCatch v0.9.5 - metadata parser'
+        self.title = 'MDCatch v0.9.6 - metadata parser'
         self.width = 640
         self.height = 480
         self.initUI()
@@ -90,15 +89,13 @@ class Page1(QWizardPage):
         vbox = QVBoxLayout()
         label1 = QLabel('Software')
         label2 = QLabel('Path')
-        label3 = QLabel('Particle diameter (A)')
-        label4 = QLabel('Launch pipeline in')
-        label5 = QLabel('LMB username')
+        label3 = QLabel('Launch pipeline in')
+        label4 = QLabel('LMB username')
 
         vbox.addWidget(label1)
         vbox.addWidget(label2)
         vbox.addWidget(label3)
         vbox.addWidget(label4)
-        vbox.addWidget(label5)
 
         return vbox
 
@@ -137,31 +134,9 @@ class Page1(QWizardPage):
         hbox2.addWidget(b4)
         grid.addLayout(hbox2)
 
-        # size box
-        hbox3 = QHBoxLayout()
-        labelSizeMin = QLabel('from')
-        hbox3.addWidget(labelSizeMin)
-
-        self.size_short = QSpinBox()
-        self.size_short.setRange(10, 9999)
-        self.size_short.setValue(part_size_short)
-        self.size_short.setFixedSize(60, 25)
-        hbox3.addWidget(self.size_short)
-
-        labelSizeMax = QLabel('to')
-        hbox3.addWidget(labelSizeMax)
-
-        self.size_long = QSpinBox()
-        self.size_long.setRange(10, 9999)
-        self.size_long.setValue(part_size_long)
-        self.size_long.setFixedSize(60, 25)
-        hbox3.addWidget(self.size_long)
-        hbox3.setAlignment(Qt.AlignLeft)
-        grid.addLayout(hbox3)
-
         # pipeline
-        hbox4 = QHBoxLayout()
-        hbox4.setAlignment(Qt.AlignLeft)
+        hbox3 = QHBoxLayout()
+        hbox3.setAlignment(Qt.AlignLeft)
         btgroup2 = QButtonGroup()
 
         b5 = self.addRadioButton("Relion", default=True)
@@ -170,13 +145,13 @@ class Page1(QWizardPage):
         btgroup2.addButton(b5)
         btgroup2.addButton(b6)
         btgroup2.buttonClicked.connect(lambda: self.updPipeline(btgroup2))
-        hbox4.addWidget(b5)
-        hbox4.addWidget(b6)
-        grid.addLayout(hbox4)
+        hbox3.addWidget(b5)
+        hbox3.addWidget(b6)
+        grid.addLayout(hbox3)
 
         # username
-        hbox5 = QHBoxLayout()
-        hbox5.setAlignment(Qt.AlignLeft)
+        hbox4 = QHBoxLayout()
+        hbox4.setAlignment(Qt.AlignLeft)
         self.username = QLineEdit()
         self.username.setFixedSize(200, 25)
 
@@ -184,9 +159,9 @@ class Page1(QWizardPage):
         self.b7.setFixedSize(70, 25)
         self.b7.clicked.connect(lambda: self.checkLogin(self.username.text()))
 
-        hbox5.addWidget(self.username)
-        hbox5.addWidget(self.b7)
-        grid.addLayout(hbox5)
+        hbox4.addWidget(self.username)
+        hbox4.addWidget(self.b7)
+        grid.addLayout(hbox4)
 
         return grid
 
@@ -248,21 +223,19 @@ class Page1(QWizardPage):
 
     def validatePage(self):
         # Next is pressed, returns True or False
-        App.model.setSizes(self.size_short.text(), self.size_long.text())
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
 
         # prevent Check button bypass
-        usrchk = self.checkLogin(self.username.text())
-        if not usrchk:
-            return False
+        #usrchk = self.checkLogin(self.username.text())
+        #if not usrchk:
+        #    return False
 
         if DEBUG:
             print("\n\nInput params: ",
                   [App.model.getSoftware(),
                    App.model.getMdPath(),
                    App.model.getUser(),
-                   App.model.getSizes(),
                    App.model.getPipeline()])
 
         prog = App.model.getSoftware()
@@ -298,8 +271,7 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
-        self.mainLayout.addWidget(self.group3(), 1, 0)
-        self.mainLayout.addWidget(self.group4(), 1, 1)
+        self.mainLayout.addWidget(self.group3(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -313,9 +285,7 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
-        acqDict['PtclSizeShort'], acqDict['PtclSizeLong'] = App.model.getSizes()
         App.model.calcDose()
-        App.model.calcBox()
         App.model.guessDataDir(fnList)
 
         self.setSubTitle("Found the following metadata from %s session:" % prog)
@@ -343,9 +313,6 @@ class Page2(QWizardPage):
         self.dosepf.setText(str(dosepf))
         self.gain.setText(os.path.basename(acqDict['GainReference']))
         self.defects.setText(os.path.basename(acqDict['DefectFile']))
-        self.box.setText(acqDict['BoxSize'])
-        self.mask.setText(acqDict['MaskSize'])
-        self.box2.setText(acqDict['BoxSizeSmall'])
 
     def group1(self):
         groupBox = QGroupBox("Microscope")
@@ -409,29 +376,6 @@ class Page2(QWizardPage):
         return groupBox
 
     def group3(self):
-        groupBox = QGroupBox("Recommended options")
-
-        box = QLabel("Box size (px)")
-        mask = QLabel("Mask size (px)")
-        box2 = QLabel("Downscale to (px)")
-
-        self.box = self.addLine(50, 20, 4, Qt.AlignRight)
-        self.mask = self.addLine(50, 20, 4, Qt.AlignRight)
-        self.box2 = self.addLine(50, 20, 4, Qt.AlignRight)
-
-        vbox = QGridLayout()
-        for num, i in enumerate([box, mask, box2]):
-            vbox.addWidget(i, num, 0)
-
-        for num, i in enumerate([self.box, self.mask,
-                                 self.box2]):
-            vbox.addWidget(i, num, 1)
-
-        groupBox.setLayout(vbox)
-
-        return groupBox
-
-    def group4(self):
         groupBox = QGroupBox("Preprocessing")
 
         self.runCtf = QRadioButton("Stop after CTF estimation?")
@@ -452,9 +396,6 @@ class Page2(QWizardPage):
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
         App.model.acqDict['NoCl2D'] = self.runCtf.isChecked()
-        App.model.acqDict['BoxSize'] = self.box.text()
-        App.model.acqDict['MaskSize'] = self.mask.text()
-        App.model.acqDict['BoxSizeSmall'] = self.box2.text()
 
         if DEBUG:
             print("\nFinal parameters:\n")

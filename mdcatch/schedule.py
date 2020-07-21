@@ -38,14 +38,9 @@ def setupRelion(paramDict):
     bin, gain, defect = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
-               'LOG_mind': paramDict['PtclSizeShort'],
-               'LOG_maxd': paramDict['PtclSizeLong'],
-               'boxsize_logpick': paramDict['BoxSizeSmall'],
-               'mask_diam': paramDict['MaskSize'],
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
-               'box_size': paramDict['BoxSize'],
                'do_until_ctf': paramDict['NoCl2D'],
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
@@ -168,7 +163,7 @@ def setupScipion(paramDict):
     ctfProt = protocolsList[protNames["ProtGctf"]]
     ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
 
-    # relion Log picker
+    # relion Log picker TODO: replace by cryolo!
     pickProt = protocolsList[protNames["ProtRelionAutopickLoG"]]
     pickProt["minDiameter"] = paramDict["PtclSizeShort"]
     pickProt["maxDiameter"] = paramDict["PtclSizeLong"]

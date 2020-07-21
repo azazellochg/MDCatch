@@ -40,8 +40,6 @@ class Parser:
         self.prjPath = PROJECT_PATH
         self.software = 'EPU'
         self.user = 'unknown', 0, 0
-        self.ptclSizeShort = part_size_short
-        self.ptclSizeLong = part_size_long
         self.fn = None
         self.pipeline = 'Relion'
 
@@ -78,13 +76,6 @@ class Parser:
 
     def setUser(self, login, uid, gid):
         self.user = login, uid, gid
-
-    def getSizes(self):
-        return self.ptclSizeShort, self.ptclSizeLong
-
-    def setSizes(self, size1, size2):
-        self.ptclSizeShort = size1
-        self.ptclSizeLong = size2
 
     def getSoftware(self):
         return self.software
@@ -183,40 +174,6 @@ class Parser:
 
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
-
-    def calcBox(self):
-        """ Calculate box, mask, downsample. """
-        minSize = self.acqDict['PtclSizeShort']
-        maxSize = self.acqDict['PtclSizeLong']
-        ptclSizeAng = max(minSize, maxSize)
-        angpix = float(self.acqDict['PixelSpacing'])
-
-        if self.acqDict['Mode'] == 'Super-resolution':
-            # since we always bin by 2 in mc if using super-res
-            angpix = angpix * 2
-
-        # use +10% for mask size
-        self.acqDict['MaskSize'] = str(math.ceil(1.1 * float(ptclSizeAng) / angpix))
-        ptclSizePx = float(ptclSizeAng) / angpix
-        # use +20% for box size, make it even
-        boxSize = 1.2 * ptclSizePx
-        self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
-
-        # from relion_it.py script
-        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
-        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
-                    360, 384, 400, 420, 450, 480, 512, 640, 768,
-                    896, 1024):
-            # Don't go larger than the original box
-            if box > boxSize:
-                self.acqDict['BoxSizeSmall'] = str(boxSize)
-                break
-            # If Nyquist freq. is better than 8.5 A, use this
-            # downscaled box, otherwise continue to next size up
-            small_box_angpix = angpix * boxSize / box
-            if small_box_angpix < 4.25:
-                self.acqDict['BoxSizeSmall'] = str(box)
-                break
 
     def guessDataDir(self, fnList):
         """ Guess folder name with movies, gain and defects for Krios. """
