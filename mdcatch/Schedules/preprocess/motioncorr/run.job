@@ -18,7 +18,7 @@ Group frames: == 1
 Input movies STAR file: == Schedules/preprocess/importmovies/movies.star
 Last frame for corrected sum: == -1
 Minimum dedicated cores per node: == 24
-Number of MPI procs: == 1
+Number of MPI procs: == 5
 Number of threads: == 12
 Additional arguments: == --do_at_most $$do_at_most
 Other MOTIONCOR2 arguments == 

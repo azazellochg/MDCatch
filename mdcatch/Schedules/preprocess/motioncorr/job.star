@@ -32,7 +32,7 @@ group_frames          1
 input_star_mics Schedules/preprocess/importmovies/movies.star 
 last_frame_sum         -1 
 min_dedicated         24 
-    nr_mpi          1 
+    nr_mpi          5 
 nr_threads         12 
 other_args "--do_at_most $$do_at_most" 
 other_motioncor2_args         "" 
