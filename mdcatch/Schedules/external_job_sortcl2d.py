@@ -5,7 +5,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 
 import os
 import argparse
-from emtable import Table
+from emtable import Table  # requires pip install emtable
 
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
@@ -42,7 +42,7 @@ def run_job(project_dir, args):
 
     if DEBUG:
         print("Input particles: %d\nOutput particles: %d" % 
-                (len(ptcls), len(out_ptcls)))
+              (len(ptcls), len(out_ptcls)))
 
     out_star = getPath(job_dir, "particles_for_training.star")
     with open(out_star, "w") as f:

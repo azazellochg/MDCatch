@@ -6,10 +6,8 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
-from glob import glob
 import subprocess
-import math
-from emtable import Table
+from emtable import Table  # requires pip install emtable
 
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
@@ -34,36 +32,36 @@ def run_job(project_dir, args):
 
     # Making a cryolo config file
     json_dict = {
-    "model": {
-        "architecture": "PhosaurusNet",
-        "input_size": 1024,
-        "max_box_per_image": 600,
-        "anchors": [box_size, box_size],
-        "norm": "STANDARD",
-        "filter": [
-            0.1,
-            "filtered_tmp/"
+        "model": {
+            "architecture": "PhosaurusNet",
+            "input_size": 1024,
+            "max_box_per_image": 600,
+            "anchors": [box_size, box_size],
+            "norm": "STANDARD",
+            "filter": [
+                0.1,
+                "filtered_tmp/"
             ]
         },
-    "train": {
-        "train_image_folder": IMG_FOLDER,
-        "train_annot_folder": ANNOT_FOLDER,
-        "train_times": 10,
-        "batch_size": 6,
-        "learning_rate": 0.0001,
-        "nb_epoch": 200,
-        "object_scale": 5.0,
-        "no_object_scale": 1.0,
-        "coord_scale": 1.0,
-        "class_scale": 1.0,
-        "pretrained_weights": "%s" % model,
-        "saved_weights_name": getPath(job_dir, TUNE_MODEL),
-        "debug": True
+        "train": {
+            "train_image_folder": IMG_FOLDER,
+            "train_annot_folder": ANNOT_FOLDER,
+            "train_times": 10,
+            "batch_size": 6,
+            "learning_rate": 0.0001,
+            "nb_epoch": 200,
+            "object_scale": 5.0,
+            "no_object_scale": 1.0,
+            "coord_scale": 1.0,
+            "class_scale": 1.0,
+            "pretrained_weights": "%s" % model,
+            "saved_weights_name": getPath(job_dir, TUNE_MODEL),
+            "debug": True
         },
-    "valid": {
-        "valid_image_folder": "",
-        "valid_annot_folder": "",
-        "valid_times": 1
+        "valid": {
+            "valid_image_folder": "",
+            "valid_annot_folder": "",
+            "valid_times": 1
         }
     }
 
@@ -91,7 +89,6 @@ def run_job(project_dir, args):
         else:
             mics_dict[mic] = [(xCoord, yCoord)]
 
-
     for mic in mics_dict:
         micSrc = getPath(mic)
         micDst = getPath(job_dir, IMG_FOLDER, os.path.basename(mic))
@@ -109,7 +106,6 @@ def run_job(project_dir, args):
         if DEBUG:
             print("Created box file: %s" % box)
     
-
     # Launching cryolo
     args_dict = {
         '--conf': "config.json",

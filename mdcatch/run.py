@@ -271,7 +271,6 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
-        self.mainLayout.addWidget(self.group3(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -375,27 +374,12 @@ class Page2(QWizardPage):
 
         return groupBox
 
-    def group3(self):
-        groupBox = QGroupBox("Preprocessing")
-
-        self.runCtf = QRadioButton("Stop after CTF estimation?")
-        self.runCl2d = QRadioButton("Do 2D classification?")
-        self.runCl2d.setChecked(True)
-
-        hbox = QGridLayout()
-        hbox.addWidget(self.runCtf, 0, 0)
-        hbox.addWidget(self.runCl2d, 1, 0)
-        groupBox.setLayout(hbox)
-
-        return groupBox
-
     def onFinish(self):
         # Finish pressed, we need to update all editable vars
         App.model.acqDict['User'] = App.model.getUser()
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
-        App.model.acqDict['NoCl2D'] = self.runCtf.isChecked()
 
         if DEBUG:
             print("\nFinal parameters:\n")

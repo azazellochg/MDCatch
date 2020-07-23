@@ -8,7 +8,7 @@ In case of SerialEM you need to enable saving mdoc file for each movie.
 Installation
 ------------
 
-The app requires python3, numpy and PyQt5 to run.
+The app requires python3, numpy (only if you parse mrc files) and PyQt5 to run.
 
   1) From pypi: **pip install MDCatch** (recommended)
   2) From sources - you have two options:
@@ -70,6 +70,5 @@ Screenshots
 TODO
 ----
 
-  - beam tilt is parsed but not used since we parse only a single xml/mdoc for the whole session
-  - SerialEM conversions: gain ref dm4->mrc, defects SerialEM->Relion
-  - use GAIN_DICT from config
+  - Add defects file to config (only relevant for SerialEM)
+  - Add class2d job to Scipion workflow. Replace Relion logpicker by crYOLO protocol

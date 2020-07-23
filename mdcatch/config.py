@@ -28,7 +28,7 @@
 DEBUG = 1
 
 # path to EPU session or folder with SerialEM mdoc files
-#METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
+# METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
 METADATA_PATH = "/mnt/MetaData/"
 
 # path where Relion projects are created
@@ -90,7 +90,7 @@ SERIALEM_PARAMS = [
     'Binning',
     'TargetDefocus',
     'NumSubFrames',
-    #'DateTime',
+    # 'DateTime',
     'DefectFile',
     'GainReference',
 

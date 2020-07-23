@@ -9,7 +9,7 @@ import os
 from glob import glob
 import subprocess
 import math
-from emtable import Table
+from emtable import Table  # requires pip install emtable
 
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"

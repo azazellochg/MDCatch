@@ -41,7 +41,7 @@ def setupRelion(paramDict):
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
-               'do_until_ctf': paramDict['NoCl2D'],
+               'do_until_ctf': False,
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
 
@@ -105,10 +105,8 @@ def setupRelion(paramDict):
     # now use Popen - without waiting for return
     cmdList = list()
     cmdList.append('relion_scheduler --schedule preprocess --run &')
-
-    if mapDict['do_until_ctf'] is False:
-        cmdList.append('relion_scheduler --schedule class2d --run &')
-        cmdList.append('relion_scheduler --schedule class2d_2nd --run &')
+    cmdList.append('relion_scheduler --schedule class2d --run &')
+    cmdList.append('relion_scheduler --schedule class2d_2nd --run &')
 
     for cmd in cmdList:
         if DEBUG:
