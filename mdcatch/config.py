@@ -46,8 +46,8 @@ EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_F
                    'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
                    'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
                    }
-GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC$",
-             'K3': "FoilHole_*_Data_*_gain.tiff$"
+GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC",
+             'K3': "FoilHole_*_Data_*_gain.tiff"
              }
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
 

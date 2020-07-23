@@ -187,7 +187,7 @@ class Parser:
             if camera == 'EF-CCD':
                 movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_DICT[model])
                 movieBaseDir = os.path.join(p1, "DoseFractions", session)
-                gainFiles = iglob(os.path.join(self.getMdPath(), GAIN_DICT[model]))
+                gainFiles = iglob(os.path.join(os.path.dirname(movieDir), GAIN_DICT[model]))
                 gainFn = next(gainFiles, 'None')
             else:
                 movieDir = os.path.join(p1, session, EPU_MOVIES_DICT[model])
