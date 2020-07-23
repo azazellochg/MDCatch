@@ -183,7 +183,7 @@ class Page1(QWizardPage):
         App.model.setPipeline(bt.text())
 
     def browseSlot(self, var):
-        # called when a user press Browse
+        # called when "Browse" is pressed
         folder = METADATA_PATH if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,

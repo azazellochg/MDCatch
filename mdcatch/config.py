@@ -41,6 +41,15 @@ SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schedules"
 JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 JSON_PATH = "workflow.json"
 
+# main dictionary
+# instrumentID: [name, Cs, TFS camera, Gatan camera]
+SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
+              '3413': ['Krios2', 2.7, 'Falcon', 'K2'],
+              '3593': ['Krios3', 2.7, 'Falcon', 'K3'],
+              '9952833': ['Glacios', 2.7, 'Falcon', None]
+              }
+
+###############################################################################
 # EPU 2.4+ patterns
 EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
                    'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
@@ -51,20 +60,14 @@ GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC",
              }
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
 
+###############################################################################
 # SerialEM patterns
 PATTERN_MDOC = ".{1,}\.tif\.mdoc$"
 REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
-# instrumentID: [name, Cs, TFS camera, Gatan camera]
-SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
-              '3413': ['Krios2', 2.7, 'Falcon', 'K2'],
-              '3593': ['Krios3', 2.7, 'Falcon', 'K3'],
-              '9952833': ['Glacios', 2.7, 'Falcon', None]
-              }
-
 # path to MTF files for Relion (300 kV only)
 # examples: Name-count, Name-linear or Name,
-# where Name should match the camera name in SCOPE_DICT
+# camera names should match SCOPE_DICT
 MTF_DICT = {
     'Falcon-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
     'Falcon-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
@@ -74,6 +77,7 @@ MTF_DICT = {
 
 # path to raw movies folder depending on camera name
 # example: /mnt/Data/Krios3/K3/
+# scope and camera names should match SCOPE_DICT
 MOVIE_PATH_DICT = {
     'EF-CCD': '/mnt/Data/%s/%s/',
     'BM-Falcon': '/mnt/Data/%s/%s/'
@@ -106,5 +110,5 @@ help_message = """Select the following folder:\n\n
    1) EPU: the EPU session folder on /mnt/MetaData/
    with Images-DiscX folder inside.\n
    OR\n
-   2) SerialEM: the folder on /mnt/Data/Krios?/K2/ that
+   2) SerialEM: the folder on /mnt/Data/ that
    contains tif movies and mdoc files.\n"""

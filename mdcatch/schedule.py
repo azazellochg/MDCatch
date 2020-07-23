@@ -59,8 +59,8 @@ def setupRelion(paramDict):
     if os.path.islink(movieDir):
         os.remove(movieDir)
     if os.path.exists(movieDir):
-        raise Exception('Destination %s already exists and is not a link' %
-                        movieDir)
+        raise FileExistsError('Destination %s already exists and is not a link' %
+                              movieDir)
 
     if paramDict['Software'] == 'EPU':
         # EPU: Movies -> EPU session folder
