@@ -15,7 +15,7 @@ loop_
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
   do_queue         No 
-    fn_exe    /work/gsharov/relion_testing/project/external_job_sortcl2d.py 
+    fn_exe    /home/gsharov/soft/MDCatch/mdcatch/Schedules/external_job_sortcl2d.py 
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
