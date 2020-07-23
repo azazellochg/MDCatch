@@ -27,6 +27,7 @@
 import re
 import os
 import math
+from glob import iglob
 
 from .config import *
 from .utils import parseXml, parseMrc
@@ -90,27 +91,13 @@ class Parser:
         return self.fn
 
     def guessFn(self, prog="EPU"):
-        img = None
         regex = PATTERN_EPU if prog == "EPU" else PATTERN_MDOC
 
         if DEBUG:
             print("\nUsing regex: ", regex)
 
-        # check if Images-DicsX exists in the path
-        if prog == "EPU":
-            check1 = os.path.exists(os.path.join(self.getMdPath(), 'Images-Disc1'))
-            check2 = os.path.exists(os.path.join(self.getMdPath(), 'Images-Disc2'))
-            if not check1 and not check2:
-                return None
-
-        for root, _, files in os.walk(self.getMdPath()):
-            for f in files:
-                m = re.compile(regex).match(f)
-                if m is not None:
-                    img = os.path.join(root, f)
-                    break
-            if img is not None:
-                break
+        files = iglob(os.path.join(self.getMdPath(), regex))
+        img = next(files, None)
 
         return img
 
@@ -175,9 +162,8 @@ class Parser:
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
-    def guessDataDir(self, fnList):
-        """ Guess folder name with movies, gain and defects for Krios. """
-        # code below may be LMB-specific
+    def guessDataDir(self):
+        """ Guess folder name with movies, gain and defects files. """
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
         scopeID = self.acqDict['MicroscopeID']
@@ -199,19 +185,16 @@ class Parser:
             session = os.path.basename(self.getMdPath())
 
             if camera == 'EF-CCD':
-                movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_PATH)
-                # TODO: use gain_dict instead
-                # regex = GAIN_DICT[model]
-                # with os.scandir(path) as fns:
-                #     for f in fns:
-                #         m = re.compile(regex).match(f)
-                #         if m is not None:
-                #             img = os.path.join(root, f)
-                f1 = fnList.replace('.xml', '-gain-ref.MRC')
-                f2 = f1.split('Images-Disc')[1]
-                gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
+                movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_DICT[model])
+                movieBaseDir = os.path.join(p1, "DoseFractions", session)
+                gainFiles = iglob(os.path.join(self.getMdPath(), GAIN_DICT[model]))
+                gainFn = next(gainFiles, 'None')
             else:
-                movieDir = os.path.join(p1, session, EPU_MOVIES_PATH)
+                movieDir = os.path.join(p1, session, EPU_MOVIES_DICT[model])
+                movieBaseDir = os.path.join(p1, session)
+
+            if not os.path.exists(movieBaseDir):
+                raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
             movieDir = os.path.join(self.getMdPath(), "*.tif")

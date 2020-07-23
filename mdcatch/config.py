@@ -41,12 +41,15 @@ SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schedules"
 JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 JSON_PATH = "workflow.json"
 
-# EPU 2.6.1 patterns
-EPU_MOVIES_PATH = "Images-Disc*/GridSquare_*/Data/FoilHole_*.mrc"
-PATTERN_EPU = "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}.(xml|mrcs)$"
-GAIN_DICT = {'K2': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}-gain-ref.MRC$",
-             'K3': "FoilHole_[0-9]{6,8}_Data_[0-9]{6,8}_[0-9]{6,8}_[0-9]{8}_[0-9]{4,6}_gain.tiff$"
+# EPU 2.4+ patterns
+EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
+                   'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
+                   'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
+                   }
+GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC$",
+             'K3': "FoilHole_*_Data_*_gain.tiff$"
              }
+PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
 
 # SerialEM patterns
 PATTERN_MDOC = ".{1,}\.tif\.mdoc$"
@@ -100,8 +103,8 @@ SERIALEM_PARAMS = [
 
 # error message for path selection
 help_message = """Select the following folder:\n\n
-   1) EPU: the EPU session folder on /mnt/Krios1/Metadata
+   1) EPU: the EPU session folder on /mnt/MetaData/
    with Images-DiscX folder inside.\n
    OR\n
-   2) SerialEM: the folder on /mnt/Krios1/Data/K2/ that
+   2) SerialEM: the folder on /mnt/Data/Krios?/K2/ that
    contains tif movies and mdoc files.\n"""

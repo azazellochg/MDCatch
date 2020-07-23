@@ -286,7 +286,7 @@ class Page2(QWizardPage):
             App.model.parseImgMdoc(fnList)
 
         App.model.calcDose()
-        App.model.guessDataDir(fnList)
+        App.model.guessDataDir()
 
         self.setSubTitle("Found the following metadata from %s session:" % prog)
 
