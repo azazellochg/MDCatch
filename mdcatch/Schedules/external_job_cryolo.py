@@ -83,9 +83,15 @@ def run_job(project_dir, args):
         if mic not in done_mics:
             inputfn = getPath(input_job, mic)
             outfn = getPath(job_dir, mic)
-            os.symlink(inputfn, outfn)
-            if DEBUG:
-                print("Link %s --> %s" % (inputfn, outfn))
+
+            # if mic had no coords picked, symlink still exists
+            if os.path.exists(outfn):
+                os.remove(outfn)
+                continue
+            else:
+                os.symlink(inputfn, outfn)
+                if DEBUG:
+                    print("Link %s --> %s" % (inputfn, outfn))
 
     if len(mic_dict.keys()) == len(done_mics):
         print("All mics picked! Nothing to do.")
