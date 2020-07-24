@@ -15,7 +15,7 @@ loop_
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
   do_queue         No 
-    fn_exe    /home/gsharov/soft/MDCatch/mdcatch/Schedules/external_job_sortcl2d.py 
+    fn_exe    /home/gsharov/soft/MDCatch/mdcatch/Schedules/external_job_cinderella.py 
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
@@ -27,8 +27,8 @@ nr_threads          1
 other_args         "" 
 param10_label         "" 
 param10_value         "" 
-param1_label         "" 
-param1_value         "" 
+param1_label         gpu 
+param1_value         0 
 param2_label         ""
 param2_value         ""
 param3_label         "" 

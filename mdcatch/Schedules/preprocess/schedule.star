@@ -17,7 +17,7 @@ _rlnScheduleFloatVariableValue #2
 _rlnScheduleFloatVariableResetValue #3 
         Cs     1.400000     1.400000 
     angpix     0.885000     0.885000 
-     batch  2500.000000  2500.000000 
+     batch  5000.000000  5000.000000 
   box_size   256.000000   256.000000 
 box_size_bin    64.000000    64.000000 
 count_parts     0.000000     0.000000 
