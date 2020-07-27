@@ -49,6 +49,7 @@ cryolo_model_src Schedules/class2d_2nd/cryolo_train/fine_tuned_model.h5 Schedule
  cryolobox Work/cryolo_params.star,cryolo,rlnOriginalImageSize Work/cryolo_params.star,cryolo,rlnOriginalImageSize 
 cryoloboxbinned Work/cryolo_params.star,cryolo,rlnImageSize Work/cryolo_params.star,cryolo,rlnImageSize 
 cryolodiam Work/cryolo_params.star,cryolo,rlnParticleDiameter Work/cryolo_params.star,cryolo,rlnParticleDiameter 
+cryolostar_src Schedules/class2d_2nd/cryolopicker/output_for_relion.star Schedules/class2d_2nd/cryolopicker/output_for_relion.star 
 cryolostar Work/cryolo_params.star Work/cryolo_params.star 
 mics_to_pick Work/micrographs_ctf.star Work/micrographs_ctf.star 
  
@@ -63,13 +64,14 @@ _rlnScheduleOperatorType #2
 _rlnScheduleOperatorOutput #3 
 _rlnScheduleOperatorInput1 #4 
 _rlnScheduleOperatorInput2 #5 
-COPY_cryolo_model_src_TO_cryolo_model  copy_file  undefined cryolo_model_src cryolo_model 
+MOVE_cryolo_model_src_TO_cryolo_model  move_file  undefined cryolo_model_src cryolo_model 
 WAIT_wait_sec       wait  undefined   wait_sec  undefined 
 box_size=STAR_cryolobox_zero float=read_star   box_size  cryolobox       zero 
 box_size_bin=STAR_cryoloboxbinned_zero float=read_star box_size_bin cryoloboxbinned       zero 
 mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero 
 mics_exist=EXISTS_mics_to_pick bool=file_exists mics_exist mics_to_pick  undefined 
 model_exists=EXISTS_cryolo_model bool=file_exists model_exists cryolo_model  undefined 
+MOVE_cryolostar_src_TO_cryolostar  move_file  undefined cryolostar_src cryolostar 
  
 
 # version 30001
@@ -101,11 +103,12 @@ _rlnScheduleEdgeBooleanVariable #5
 WAIT_wait_sec model_exists=EXISTS_cryolo_model            0  undefined  undefined 
 model_exists=EXISTS_cryolo_model WAIT_wait_sec            1 mics_exist=EXISTS_mics_to_pick model_exists 
 mics_exist=EXISTS_mics_to_pick cryolopicker            0  undefined  undefined 
-cryolopicker mask_diam=STAR_cryolodiam_zero            0  undefined  undefined 
+cryolopicker MOVE_cryolostar_src_TO_cryolostar 0 undefined undefined
+MOVE_cryolostar_src_TO_cryolostar mask_diam=STAR_cryolodiam_zero            0  undefined  undefined 
 mask_diam=STAR_cryolodiam_zero box_size_bin=STAR_cryoloboxbinned_zero            0  undefined  undefined 
 box_size_bin=STAR_cryoloboxbinned_zero    extract            0  undefined  undefined 
    extract    class2d            0  undefined  undefined 
    class2d sort_cls2d            0  undefined  undefined 
 sort_cls2d cryolo_train            0  undefined  undefined 
-cryolo_train COPY_cryolo_model_src_TO_cryolo_model            0  undefined  undefined 
+cryolo_train MOVE_cryolo_model_src_TO_cryolo_model            0  undefined  undefined 
  
