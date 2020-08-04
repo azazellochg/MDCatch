@@ -1,7 +1,7 @@
 MDCatch
 =======
 
-A simple PyQt5 app to fetch acquisition metadata from EPU session or SerialEM.
+A simple app to fetch acquisition metadata from a running EPU session or SerialEM.
 It parses the first found xml/mrc (EPU) or mdoc file (SerialEM) associated with a data collection session and launches Relion or Scipion pipeline.
 In case of SerialEM you need to enable saving mdoc file for each movie.
 
@@ -55,7 +55,7 @@ Running
 -------
 
 To run with a GUI simply type **mdcatch**.
-If you want to run in daemon mode, run **mdcatch --watch /path/to/folder**
+If you want to run in daemon mode, run **mdcatch --watch**
 
 
 Working principle
@@ -69,16 +69,17 @@ The server has to have access to both EPU session folder and movies folder, or t
 
   1. find and parse the first xml/mdoc file, getting all acquisition metadata
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
-  3. create symlinks for movies, gain reference, defects file, MTF in the project folder
+  3. create symlink for movies folder; copy gain reference, defects file, MTF in the project folder
   4. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
   5. *setfacl -R -m u:uid:rwx* is executed on the output folder, where uid is obtained from DEF_USER
 
 Daemon mode
 ###########
 
-From version 0.9.7 it's possible to run the app in daemon mode. It will run in the background watching for a new directories (directory name should start with PREFIX_USERNAME, other folders are ignored).
+From version 0.9.7 it's possible to run the app in daemon mode. It will run in the background watching for a new directories (directory name should start with PREFIX_USERNAME, other folders are ignored) inside METADATA_PATH.
 Once the new directory is found and it has a first xml file (EPU) or a tif movie (SerialEM), the default pipeline will launch.
-The important variables to set in *config.py* are DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX.
+
+Make sure you have set in *config.py*: DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
 
 Screenshots

@@ -34,7 +34,7 @@ from .utils import parseXml, parseMrc
 
 
 class Parser:
-    """ XML / MDOC parser. """
+    """ Main parser class. """
     def __init__(self):
         # set default values
         self.mdPath = METADATA_PATH
@@ -194,7 +194,8 @@ class Parser:
                 movieBaseDir = os.path.join(p1, session)
 
             if not os.path.exists(movieBaseDir):
-                raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
+                pass
+                #raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
             movieDir = os.path.join(self.getMdPath(), "*.tif")

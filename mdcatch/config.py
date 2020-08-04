@@ -27,14 +27,16 @@
 # Config variables
 DEBUG = 1
 
+# daemon mode vars
 DEF_USER = ("gsharov", 26096)  # default name: (username, uid)
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
+DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 
 # path to EPU session or folder with SerialEM mdoc files
-METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
+#METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
 #METADATA_PATH = "/mnt/MetaData/"
-#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU/K3/VPP"
+METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU/K3/VPP"
 
 # path where Relion projects are created
 PROJECT_PATH = "/cephfs"
@@ -63,6 +65,8 @@ EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_F
 GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC",
              'K3': "FoilHole_*_Data_*_gain.tiff"
              }
+
+# change the pattern below if you want to parse movie sums mrc instead
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
 
 ###############################################################################
@@ -102,7 +106,6 @@ SERIALEM_PARAMS = [
     # 'DateTime',
     'DefectFile',
     'GainReference',
-
     # optional vars below can be added to mdoc using "AddToNextFrameStackMdoc key value"
     'OpticalGroup',
     'PhasePlateInserted',
@@ -110,7 +113,7 @@ SERIALEM_PARAMS = [
     'Beamtilt'
 ]
 
-# error message for path selection
+# help message for path selection
 help_message = """Select the following folder:\n\n
    For EPU: the EPU session folder on /mnt/MetaData/
    with Images-DiscX folder inside.\n

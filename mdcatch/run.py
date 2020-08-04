@@ -25,6 +25,8 @@
 # *
 # **************************************************************************
 
+import os
+import sys
 from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
                              QPushButton, QWizard, QGroupBox,
@@ -32,10 +34,10 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QCheckBox, QApplication, QWizardPage,
                              QButtonGroup)
 from PyQt5.QtCore import Qt
-import sys
 
+from .config import *
 from .parser import Parser
-from .schedule import *
+from .schedule import setupRelion, setupScipion
 
 
 class App(QWizard):
@@ -209,7 +211,6 @@ class Page1(QWizardPage):
 
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         rb.setSizePolicy(sizePolicy)
-
         return rb
 
 
@@ -284,7 +285,6 @@ class Page2(QWizardPage):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
-
         return groupBox
 
     def group2(self):
@@ -317,7 +317,6 @@ class Page2(QWizardPage):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
-
         return groupBox
 
     def onFinish(self):
@@ -344,19 +343,19 @@ class Page2(QWizardPage):
         line.setMaximumWidth(size)
         line.setMaxLength(length)
         line.setAlignment(align)
-
         return line
 
 
 def main():
     args = sys.argv
-    help = "mdcatch [--watch /path/to/watch]: by default starts a GUI, use '--watch' for daemon mode."
+    help = "Usage: mdcatch [--watch]\nBy default starts a GUI, "\
+           "use '--watch' for daemon mode. It will watch METADATA_PATH folder."
     if len(args) > 1:
         if args[1] in ['-h', '--help']:
             print(help)
         elif args[1] == '--watch':
-            from .utils.watch_folder import start_daemon
-            start_daemon(args[2])
+            from .watcher import WatchDog
+            WatchDog().start_daemon(METADATA_PATH)
         else:
             print("Unrecognized arguments.\n%s" % help)
     else:
