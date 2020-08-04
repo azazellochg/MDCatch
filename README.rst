@@ -52,11 +52,10 @@ Working principle
 The idea is to launch the app on a processing server as soon as EPU/SerialEM starts data collection and the first movie is acquired.
 The server has to have access to both EPU session folder and movies folder, or to SerialEM movie folder.
 
-  1. check if username exists in the NIS database (``ypmatch username passwd``)
-  2. find and parse the first xml/mdoc file, getting all acquisition metadata
-  3. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
-  4. create symlinks for movies, gain reference, defects file, MTF in the project folder
-  5. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
+  1. find and parse the first xml/mdoc file, getting all acquisition metadata
+  2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
+  3. create symlinks for movies, gain reference, defects file, MTF in the project folder
+  4. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
 
 Screenshots
 -----------

@@ -40,7 +40,7 @@ class Parser:
         self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
         self.software = 'EPU'
-        self.user = 'unknown', 0, 0
+        self.user = USER, 0, 0
         self.fn = None
         self.pipeline = 'Relion'
 

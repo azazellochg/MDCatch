@@ -27,6 +27,9 @@
 # Config variables
 DEBUG = 1
 
+# default username
+USER = "gsharov"
+
 # path to EPU session or folder with SerialEM mdoc files
 # METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
 METADATA_PATH = "/mnt/MetaData/"
@@ -107,8 +110,8 @@ SERIALEM_PARAMS = [
 
 # error message for path selection
 help_message = """Select the following folder:\n\n
-   1) EPU: the EPU session folder on /mnt/MetaData/
+   For EPU: the EPU session folder on /mnt/MetaData/
    with Images-DiscX folder inside.\n
    OR\n
-   2) SerialEM: the folder on /mnt/Data/ that
+   For SerialEM: the folder on /mnt/Data/ that
    contains tif movies and mdoc files.\n"""

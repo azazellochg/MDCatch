@@ -1,5 +1,8 @@
 0.9.6:
     - remove box sizes, replace LoGpicker by cryolo
+    - big schedules update
+    - username requirement removed (to be reimplemented)
+    - minor Qt5 fixes
 0.9.5:
     - add mrc and bigtiff parsers. Xml metadata is preferred over mrc.
     - parsing functions moved to utils/

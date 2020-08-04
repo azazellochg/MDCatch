@@ -42,7 +42,7 @@ class App(QWizard):
     model = Parser()
 
     def __init__(self, parent=None):
-        super(App, self).__init__(parent)
+        super(App, self).__init__(parent, flags=Qt.WindowFlags())
         self.title = 'MDCatch v0.9.6 - metadata parser'
         self.width = 640
         self.height = 480
@@ -56,7 +56,7 @@ class App(QWizard):
         self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
         self.button(QWizard.FinishButton).clicked.connect(self.page2.onFinish)
         self.setWindowTitle(self.title)
-        self.setWindowFlags(self.windowFlags() | Qt.CustomizeWindowHint)
+        # remove Help button from the window
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.resize(self.width, self.height)
 
@@ -82,20 +82,17 @@ class Page1(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addLayout(self.group1(), 0, 0)
         self.mainLayout.addLayout(self.group2(), 0, 1)
-        self.mainLayout.addLayout(self.group3(), 1, 1)
         self.setLayout(self.mainLayout)
 
     def group1(self):
         vbox = QVBoxLayout()
         label1 = QLabel('Software')
         label2 = QLabel('Path')
-        label3 = QLabel('Launch pipeline in')
-        label4 = QLabel('LMB username')
+        label3 = QLabel('Run pipeline in')
 
-        vbox.addWidget(label1)
-        vbox.addWidget(label2)
-        vbox.addWidget(label3)
-        vbox.addWidget(label4)
+        vbox.addWidget(label1, alignment=Qt.Alignment())
+        vbox.addWidget(label2, alignment=Qt.Alignment())
+        vbox.addWidget(label3, alignment=Qt.Alignment())
 
         return vbox
 
@@ -113,25 +110,24 @@ class Page1(QWizardPage):
         btgroup1.addButton(b1)
         btgroup1.addButton(b2)
         btgroup1.buttonClicked.connect(lambda: self.updSoftware(btgroup1))
-        hbox1.addWidget(b1)
-        hbox1.addWidget(b2)
+        hbox1.addWidget(b1, alignment=Qt.Alignment())
+        hbox1.addWidget(b2, alignment=Qt.Alignment())
         grid.addLayout(hbox1)
 
         # path box
         hbox2 = QHBoxLayout()
         self.rawPath = QLineEdit()
+        self.rawPath.setMinimumWidth(300)
         self.rawPath.setReadOnly(True)
         self.rawPath.setText(METADATA_PATH)
+        self.rawPath.setToolTip(help_message)
 
         b3 = QPushButton('Browse')
+        b3.setToolTip(help_message)
         b3.clicked.connect(lambda: self.browseSlot(self.rawPath))
-        b4 = QPushButton('?')
-        b4.setFixedSize(20, 25)
-        b4.clicked.connect(self.helpSlot)
 
-        hbox2.addWidget(self.rawPath)
-        hbox2.addWidget(b3)
-        hbox2.addWidget(b4)
+        hbox2.addWidget(self.rawPath, alignment=Qt.Alignment())
+        hbox2.addWidget(b3, alignment=Qt.Alignment())
         grid.addLayout(hbox2)
 
         # pipeline
@@ -139,40 +135,17 @@ class Page1(QWizardPage):
         hbox3.setAlignment(Qt.AlignLeft)
         btgroup2 = QButtonGroup()
 
-        b5 = self.addRadioButton("Relion", default=True)
-        b6 = self.addRadioButton("Scipion")
+        b4 = self.addRadioButton("Relion", default=True)
+        b5 = self.addRadioButton("Scipion")
 
+        btgroup2.addButton(b4)
         btgroup2.addButton(b5)
-        btgroup2.addButton(b6)
         btgroup2.buttonClicked.connect(lambda: self.updPipeline(btgroup2))
-        hbox3.addWidget(b5)
-        hbox3.addWidget(b6)
+        hbox3.addWidget(b4, alignment=Qt.Alignment())
+        hbox3.addWidget(b5, alignment=Qt.Alignment())
         grid.addLayout(hbox3)
 
-        # username
-        hbox4 = QHBoxLayout()
-        hbox4.setAlignment(Qt.AlignLeft)
-        self.username = QLineEdit()
-        self.username.setFixedSize(200, 25)
-
-        self.b7 = QPushButton('Check!')
-        self.b7.setFixedSize(70, 25)
-        self.b7.clicked.connect(lambda: self.checkLogin(self.username.text()))
-
-        hbox4.addWidget(self.username)
-        hbox4.addWidget(self.b7)
-        grid.addLayout(hbox4)
-
         return grid
-
-    def group3(self):
-        vbox = QVBoxLayout()
-        self.label6 = QLabel('')
-        self.label6.setVisible(False)
-
-        vbox.addWidget(self.label6)
-
-        return vbox
 
     def updSoftware(self, btgroup):
         bt = btgroup.checkedButton()
@@ -187,7 +160,7 @@ class Page1(QWizardPage):
         folder = METADATA_PATH if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,
-                                                QFileDialog.ShowDirsOnly)
+                                                options=QFileDialog.ShowDirsOnly)
         if path:
             self.refreshPath(path)
 
@@ -201,35 +174,10 @@ class Page1(QWizardPage):
         App.showDialog("Help", help_message, 'help')
         return
 
-    def checkLogin(self, login):
-        # match username with NIS database
-        cmd = "/usr/bin/ypmatch %s passwd" % login
-        try:
-            res = subprocess.check_output(cmd.split())
-        except subprocess.CalledProcessError:
-            App.showDialog("ERROR", "Username %s not found!" % login)
-            return False
-        except FileNotFoundError:
-            App.showDialog("ERROR", "Command %s not found!" % cmd.split()[0])
-            return False
-
-        res = str(res)
-        uid, gid = res.split(':')[2], res.split(':')[3]
-        self.label6.setVisible(True)
-        self.label6.setStyleSheet('color: green')
-        self.label6.setText('Check OK: UID=%s, GID=%s' % (uid, gid))
-        App.model.setUser(login, uid, gid)
-        return True
-
     def validatePage(self):
         # Next is pressed, returns True or False
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
-
-        # prevent Check button bypass
-        usrchk = self.checkLogin(self.username.text())
-        if not usrchk:
-            return False
 
         if DEBUG:
             print("\n\nInput params: ",
@@ -315,7 +263,6 @@ class Page2(QWizardPage):
 
     def group1(self):
         groupBox = QGroupBox("Microscope")
-
         name = QLabel("Name")
         kv = QLabel("Voltage (kV)")
         cs = QLabel("Cs (mm)")
@@ -326,7 +273,7 @@ class Page2(QWizardPage):
         self.kv = QLabel()
         self.cs = QLabel()
         self.vpp = QCheckBox()
-        self.px = self.addLine(50, 20, 5, Qt.AlignRight)
+        self.px = self.addLine(50, 5, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name, kv, cs, px, vpp]):
@@ -342,7 +289,6 @@ class Page2(QWizardPage):
 
     def group2(self):
         groupBox = QGroupBox("Detector")
-
         name2 = QLabel("Name")
         mode = QLabel("Mode")
         time = QLabel("Exposure time (s)")
@@ -357,7 +303,7 @@ class Page2(QWizardPage):
         self.frames = QLabel()
         self.gain = QLabel()
         self.defects = QLabel()
-        self.dosepf = self.addLine(50, 20, 4, Qt.AlignRight)
+        self.dosepf = self.addLine(50, 5, Qt.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name2, mode, time, frames,
@@ -392,9 +338,10 @@ class Page2(QWizardPage):
         else:
             setupScipion(App.model.acqDict)
 
-    def addLine(self, sizex, sizey, length, align):
+    def addLine(self, size, length, align):
         line = QLineEdit()
-        line.setFixedSize(sizex, sizey)
+        line.setMinimumWidth(size)
+        line.setMaximumWidth(size)
         line.setMaxLength(length)
         line.setAlignment(align)
 
