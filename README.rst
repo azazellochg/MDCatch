@@ -84,8 +84,8 @@ The important variables to set in *config.py* are DEF_USER, DEF_SOFTWARE, DEF_PI
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/71741099-e2c6d200-2e55-11ea-9c98-66a14dc8cb2e.png
-   :width: 600 px
+.. image:: https://user-images.githubusercontent.com/6952870/89322368-08ca8400-d67c-11ea-925b-60e1233f8e1c.png
+   :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/71741103-e5292c00-2e55-11ea-95c3-4cf51de7382c.png
-   :width: 800 px
+.. image:: https://user-images.githubusercontent.com/6952870/89322396-0ec06500-d67c-11ea-8fd3-90f6015156e4.png
+   :width: 640 px
