@@ -44,7 +44,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='MDCatch',
-    version='0.9.6',
+    version='0.9.7',
     description='Fetch metadata from EPU / SerialEM and launch on-the-fly pre-processing',
     long_description=long_description,
     url='https://github.com/azazellochg/MDCatch',
@@ -57,7 +57,7 @@ setup(
     ],
     keywords='cryo-em python qt5 epu serialem',
     packages=find_packages(),
-    install_requires=['pyqt5', 'numpy'],
+    install_requires=['pyqt5', 'numpy', 'emtable', 'watchdog'],
     entry_points={
         'console_scripts': [
             'mdcatch=mdcatch.run:main'

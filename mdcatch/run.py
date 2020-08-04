@@ -104,8 +104,8 @@ class Page1(QWizardPage):
         hbox1.setAlignment(Qt.AlignLeft)
         btgroup1 = QButtonGroup()
 
-        b1 = self.addRadioButton("EPU", default=True)
-        b2 = self.addRadioButton("SerialEM")
+        b1 = self.addRadioButton("EPU", default=DEF_SOFTWARE=="EPU")
+        b2 = self.addRadioButton("SerialEM", default=DEF_SOFTWARE=="SerialEM")
 
         btgroup1.addButton(b1)
         btgroup1.addButton(b2)
@@ -135,8 +135,8 @@ class Page1(QWizardPage):
         hbox3.setAlignment(Qt.AlignLeft)
         btgroup2 = QButtonGroup()
 
-        b4 = self.addRadioButton("Relion", default=True)
-        b5 = self.addRadioButton("Scipion")
+        b4 = self.addRadioButton("Relion", default=DEF_PIPELINE=="Relion")
+        b5 = self.addRadioButton("Scipion", default=DEF_PIPELINE=="Scipion")
 
         btgroup2.addButton(b4)
         btgroup2.addButton(b5)
@@ -349,8 +349,19 @@ class Page2(QWizardPage):
 
 
 def main():
-    app = QApplication(sys.argv)
-    app.setStyle('Fusion')
-    wizard = App()
-    wizard.show()
-    sys.exit(app.exec_())
+    args = sys.argv
+    help = "mdcatch [--watch /path/to/watch]: by default starts a GUI, use '--watch' for daemon mode."
+    if len(args) > 1:
+        if args[1] in ['-h', '--help']:
+            print(help)
+        elif args[1] == '--watch':
+            from .utils.watch_folder import start_daemon
+            start_daemon(args[2])
+        else:
+            print("Unrecognized arguments.\n%s" % help)
+    else:
+        app = QApplication(sys.argv)
+        app.setStyle('Fusion')
+        wizard = App()
+        wizard.show()
+        sys.exit(app.exec_())

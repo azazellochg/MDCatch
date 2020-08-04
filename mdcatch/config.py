@@ -27,12 +27,14 @@
 # Config variables
 DEBUG = 1
 
-# default username
-USER = "gsharov"
+DEF_USER = ("gsharov", 26096)  # default name: (username, uid)
+DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
+DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 
 # path to EPU session or folder with SerialEM mdoc files
-# METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
-METADATA_PATH = "/mnt/MetaData/"
+METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples"
+#METADATA_PATH = "/mnt/MetaData/"
+#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU/K3/VPP"
 
 # path where Relion projects are created
 PROJECT_PATH = "/cephfs"

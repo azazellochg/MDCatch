@@ -39,10 +39,10 @@ class Parser:
         # set default values
         self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
-        self.software = 'EPU'
-        self.user = USER, 0, 0
+        self.software = DEF_SOFTWARE
+        self.user = DEF_USER
         self.fn = None
-        self.pipeline = 'Relion'
+        self.pipeline = DEF_PIPELINE
 
         self.acqDict = dict()
         self.acqDict['Mode'] = 'Linear'
@@ -75,8 +75,8 @@ class Parser:
     def getUser(self):
         return self.user
 
-    def setUser(self, login, uid, gid):
-        self.user = login, uid, gid
+    def setUser(self, login, uid):
+        self.user = (login, uid)
 
     def getSoftware(self):
         return self.software

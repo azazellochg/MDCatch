@@ -1,8 +1,13 @@
+0.9.7:
+    - add daemon mode for completely automated runs
+    - add folder watcher (inotify-based)
+    - move user, software & pipeline params to config
+    - update README
 0.9.6:
     - remove box sizes, replace LoGpicker by cryolo
     - big schedules update
     - username requirement removed (to be reimplemented)
-    - minor Qt5 fixes
+    - minor Qt5 fixes, replace Help button by a tooltip
 0.9.5:
     - add mrc and bigtiff parsers. Xml metadata is preferred over mrc.
     - parsing functions moved to utils/

@@ -50,7 +50,7 @@ def setupRelion(paramDict):
     os.mkdir(prjPath)
 
     # setup ACL for uid
-    _, uid, gid = paramDict['User']
+    uid = paramDict['User'][0]
     if uid:  # not zero
         cmd = "setfacl -R -m u:%s:rwx %s" % (uid, prjPath)
         subprocess.check_output(cmd.split())
@@ -193,7 +193,7 @@ def setupScipion(paramDict):
 def getPrjName(paramDict):
     """ Util func to get project name. """
     # project name = username_scope_date_time
-    username, uid, gid = paramDict['User']
+    username = paramDict['User'][0]
     scope = SCOPE_DICT[paramDict['MicroscopeID']][0]
     dt = datetime.now()
     dt = dt.strftime('%d-%m-%Y_%H%M')
