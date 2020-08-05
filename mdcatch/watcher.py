@@ -106,7 +106,7 @@ def start_app(mdFn):
 
 
 def mapUserid(login):
-    # match username with YP/NIS database
+    # find uid from a username using NIS database
     cmd = "/usr/bin/ypmatch %s passwd" % login
     try:
         res = subprocess.check_output(cmd.split())

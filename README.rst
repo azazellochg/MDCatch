@@ -76,11 +76,12 @@ The server has to have access to both EPU session folder and movies folder, or t
 Daemon mode
 ###########
 
-From version 0.9.7 it's possible to run the app in daemon mode. It will run in the background watching for a new directories (directory name should start with PREFIX_USERNAME, other folders are ignored) inside METADATA_PATH.
-Once the new directory is found and it has a first xml file (EPU) or a tif movie (SerialEM), the default pipeline will launch.
+From version 0.9.7 onwards it's possible to run the app in daemon mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
+Once an xml (EPU) or a mdoc (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
 Make sure you have set in *config.py*: DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
+It's probably useful to setup a daily cron job for `mdcatch --watch` to detect new EPU/SerialEM sessions.
 
 Screenshots
 -----------
