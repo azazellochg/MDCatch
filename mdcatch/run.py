@@ -355,7 +355,8 @@ def main():
             print(help)
         elif args[1] == '--watch':
             from .watcher import WatchDog
-            WatchDog().start_daemon(METADATA_PATH)
+            watch = WatchDog()
+            watch.start_daemon(METADATA_PATH)
         else:
             print("Unrecognized arguments.\n%s" % help)
     else:

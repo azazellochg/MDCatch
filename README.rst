@@ -69,9 +69,9 @@ The server has to have access to both EPU session folder and movies folder, or t
 
   1. find and parse the first xml/mdoc file, getting all acquisition metadata
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
-  3. create symlink for movies folder; copy gain reference, defects file, MTF in the project folder
+  3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
   4. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
-  5. *setfacl -R -m u:uid:rwx* is executed on the output folder, where uid is obtained from DEF_USER
+  5. *setfacl -R -m u:uid:rwx* is executed for the project folder, where uid is obtained from DEF_USER
 
 Daemon mode
 ###########

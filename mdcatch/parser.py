@@ -194,8 +194,7 @@ class Parser:
                 movieBaseDir = os.path.join(p1, session)
 
             if not os.path.exists(movieBaseDir):
-                pass
-                #raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
+                raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
             movieDir = os.path.join(self.getMdPath(), "*.tif")
