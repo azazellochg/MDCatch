@@ -20,10 +20,10 @@ Installation
 
 You can install either using pip or from sources.
 
-* From pypi (recommended): **pip install MDCatch**
-* From sources - you have two options:
+* from pypi (recommended): **pip install MDCatch**
+* from sources - you have two options:
 
-a) Create python virtualenv:
+a) create python virtualenv:
 
 .. code-block:: python
 
@@ -33,7 +33,7 @@ a) Create python virtualenv:
     cd MDCatch
     pip install -e .
 
-b) Create conda virtualenv (requires miniconda3 installed):
+b) create conda virtualenv (requires conda installed):
 
 .. code-block:: python
 
@@ -55,7 +55,7 @@ Running
 -------
 
 To run with a GUI simply type **mdcatch**.
-If you want to run in daemon mode, run **mdcatch --watch**
+If you want to run in daemon mode, run **mdcatch --watch** (or better setup a daily cron job)
 
 
 Working principle
@@ -76,7 +76,7 @@ The server has to have access to both EPU session folder and movies folder, or t
 Daemon mode
 ###########
 
-From version 0.9.7 onwards it's possible to run the app in daemon mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
+From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml (EPU) or a mdoc (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
 Make sure you have set in *config.py*: DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.

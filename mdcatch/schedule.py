@@ -53,7 +53,10 @@ def setupRelion(paramDict):
     uid = paramDict['User'][0]
     if uid:  # not zero
         cmd = "setfacl -R -m u:%s:rwx %s" % (uid, prjPath)
-        subprocess.check_output(cmd.split())
+        try:
+            subprocess.check_output(cmd.split())
+        except subprocess.CalledProcessError:
+            print("Warning: setfacl command failed, ignoring..")
 
     # Create links
     movieDir = os.path.join(prjPath, "Movies")
@@ -103,7 +106,6 @@ def setupRelion(paramDict):
             print(cmd)
         proc = subprocess.run(cmd.split(), check=True)
 
-    # now use Popen - without waiting for return
     cmdList = list()
     cmdList.append('relion_scheduler --schedule preprocess --run &')
     cmdList.append('relion_scheduler --schedule class2d --run &')
@@ -112,6 +114,7 @@ def setupRelion(paramDict):
     for cmd in cmdList:
         if DEBUG:
             print(cmd)
+        # now use Popen - without waiting for return
         proc = subprocess.Popen(cmd.split(), universal_newlines=True)
 
 

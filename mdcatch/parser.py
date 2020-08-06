@@ -180,6 +180,9 @@ class Parser:
             else:
                 self.acqDict['MTF'] = MTF_DICT['%s-count' % model]
 
+        # update with real camera name
+        self.acqDict['Detector'] = model
+
         if self.getSoftware() == 'EPU':
             p1 = MOVIE_PATH_DICT[camera] % (SCOPE_DICT[scopeID][0], model)
             session = os.path.basename(self.getMdPath())
