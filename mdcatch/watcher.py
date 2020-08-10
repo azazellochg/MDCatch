@@ -50,12 +50,19 @@ class WatchDog:
                                                   ignore_directories=True,
                                                   case_sensitive=True)
         event_handler.on_created = self.on_created
+
+        if DEBUG:
+            print("Watchdog started for: %s\n\tregex: %s" %
+                  (path, regex))
+
         self.observer.schedule(event_handler, path, recursive=True)
         self.observer.start()
         self.observer.join()
 
     def on_created(self, event):
         mdFn = event.src_path
+        if DEBUG:
+            print("File creation detected: %s" % mdFn)
         self.observer.stop()
         start_app(mdFn)
 
