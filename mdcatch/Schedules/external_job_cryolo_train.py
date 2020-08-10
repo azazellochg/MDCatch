@@ -12,7 +12,7 @@ from emtable import Table  # requires pip install emtable
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.4"
+CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_TRAIN = "cryolo_train.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
 TUNE_MODEL = "fine_tuned_model.h5"

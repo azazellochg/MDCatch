@@ -27,6 +27,7 @@
 import re
 import os
 import math
+import time
 from glob import iglob
 
 from .config import *
@@ -162,7 +163,7 @@ class Parser:
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
-    def guessDataDir(self):
+    def guessDataDir(self, wait=False):
         """ Guess folder name with movies, gain and defects files. """
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
@@ -196,8 +197,17 @@ class Parser:
                 movieDir = os.path.join(p1, session, EPU_MOVIES_DICT[model])
                 movieBaseDir = os.path.join(p1, session)
 
-            if not os.path.exists(movieBaseDir):
-                raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
+            if wait:  # in daemon mode wait for movie folder to appear
+                while True:
+                    if not os.path.exists(movieBaseDir):
+                        print("Movie folder %s not found, waiting for 1 min.." % movieBaseDir)
+                        time.sleep(60)
+                    else:
+                        print("Movie folder found! Continuing..")
+                        break
+            else:  # GUI mode
+                if not os.path.exists(movieBaseDir):
+                    raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
             movieDir = os.path.join(self.getMdPath(), "*.tif")

@@ -42,9 +42,9 @@ class WatchDog:
     def start_daemon(self, path):
         """ Watch for new xml/mdoc files in METADATA_PATH. """
         if DEF_SOFTWARE == "EPU":
-            regex = r".*/Images-Disc\d/GridSquare_.*/Data/FoilHole_.*_Data_.*.xml$"
+            regex = r".*/%s.*/Images-Disc\d/GridSquare_.*/Data/FoilHole_.*_Data_.*.xml$" % DEF_PREFIX
         else:
-            regex = r".*/.*.tif.mdoc$"
+            regex = r".*/%s.*/.*.tif.mdoc$" % DEF_PREFIX
         event_handler = RegexMatchingEventHandler(regexes=[regex],
                                                   ignore_regexes=[],
                                                   ignore_directories=True,
@@ -56,10 +56,8 @@ class WatchDog:
 
     def on_created(self, event):
         mdFn = event.src_path
-        mdFolder = mdFn.split("/")[-5]
-        if mdFolder.startswith(DEF_PREFIX):  # check folder name
-            self.observer.stop()
-            start_app(mdFn)
+        self.observer.stop()
+        start_app(mdFn)
 
 
 def start_app(mdFn):
@@ -91,7 +89,7 @@ def start_app(mdFn):
         model.parseImgMdoc(mdFn)
 
     model.calcDose()
-    model.guessDataDir()
+    model.guessDataDir(wait=True)
 
     if DEBUG:
         print("\nFinal parameters:\n")
