@@ -49,15 +49,6 @@ def setupRelion(paramDict):
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
 
-    # setup ACL for uid
-    uid = paramDict['User'][0]
-    if uid:  # not zero
-        cmd = "setfacl -R -m u:%s:rwx %s" % (uid, prjPath)
-        try:
-            subprocess.check_output(cmd.split())
-        except subprocess.CalledProcessError:
-            print("Warning: setfacl command failed, ignoring..")
-
     # Create links
     movieDir = os.path.join(prjPath, "Movies")
     if os.path.islink(movieDir):
@@ -93,6 +84,15 @@ def setupRelion(paramDict):
     except subprocess.CalledProcessError:
         print("ERROR: Relion 3.1 not found in PATH or Schedules not found!")
         exit(1)
+
+    # setup ACL for uid
+    uid = paramDict['User'][0]
+    if uid:  # not zero
+        cmd = "setfacl -R -m u:%s:rwx %s" % (uid, prjPath)
+        try:
+            subprocess.check_output(cmd.split())
+        except subprocess.CalledProcessError:
+            print("Warning: setfacl command failed, ignoring..")
 
     # Run scheduler
     cmdList = list()

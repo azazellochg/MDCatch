@@ -14,7 +14,7 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-bg_diameter $$mask_diam 
+bg_diameter $$mask_diam_px 
 black_dust         -1 
 coords_suffix Schedules/preprocess/cryolopicker/coords_suffix_cryolo.star 
 do_cut_into_segments        Yes 

@@ -25,10 +25,12 @@ cryolo_thresh     0.300000     0.300000
 do_at_most     5.000000     5.000000 
  dose_rate     1.277000     1.277000 
  mask_diam   200.000000   200.000000 
+ mask_diam_px  200.000000   200.000000 
 motioncorr_bin     1.000000     1.000000 
    voltage   200.000000   200.000000 
   wait_sec   110.000000   110.000000 
       zero     0.000000     0.000000 
+      tmp     0.000000     0.000000 
  
 
 # version 30001
@@ -90,6 +92,8 @@ count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts e
 first_batch_ready=count_parts_GE_batch    bool=ge first_batch_ready count_parts      batch 
 has_copied_ptcls=EXISTS_extracted_copy bool=file_exists has_copied_ptcls extracted_copy  undefined 
 mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero 
+tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
+mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin 
  
 
 # version 30001
@@ -124,7 +128,9 @@ motioncorr    ctffind            0  undefined  undefined
    ctffind COPY_mics_to_pick_src_TO_mics_to_pick_dst            1 WAIT_wait_sec do_until_ctf 
 COPY_mics_to_pick_src_TO_mics_to_pick_dst cryolopicker            1 WAIT_wait_sec first_batch_ready 
 cryolopicker mask_diam=STAR_cryolodiam_zero            0  undefined  undefined 
-mask_diam=STAR_cryolodiam_zero box_size=STAR_cryolobox_zero            0  undefined  undefined 
+mask_diam=STAR_cryolodiam_zero tmp=DIVIDE_mask_diam_angpix 0  undefined  undefined 
+tmp=DIVIDE_mask_diam_angpix mask_diam_px=DIVIDE_tmp_motioncorr_bin   0  undefined  undefined 
+mask_diam_px=DIVIDE_tmp_motioncorr_bin box_size=STAR_cryolobox_zero            0  undefined  undefined 
 box_size=STAR_cryolobox_zero box_size_bin=STAR_cryoloboxbinned_zero            0  undefined  undefined 
 box_size_bin=STAR_cryoloboxbinned_zero    extract            0  undefined  undefined 
    extract count_parts=COUNT_IMGS_extracted_star_undefined            0  undefined  undefined 
