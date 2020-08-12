@@ -34,8 +34,8 @@ DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 
 # path to EPU session or folder with SerialEM mdoc files
-#METADATA_PATH = "/mnt/MetaData/Krios2/OTFP"
-METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU"
+METADATA_PATH = "/mnt/MetaData/Krios1/Falcon/OTFP"
+#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples"
 
 # path where Relion projects are created
 PROJECT_PATH = "/cephfs"
