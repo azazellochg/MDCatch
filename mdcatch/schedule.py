@@ -28,6 +28,7 @@ import os
 import shutil
 import subprocess
 import json
+import time
 from datetime import datetime
 
 from .config import *
@@ -88,9 +89,11 @@ def setupRelion(paramDict):
     # setup ACL for uid
     uid = paramDict['User'][0]
     if uid:  # not zero
-        cmd = "setfacl -R -m u:%s:rwx %s" % (uid, prjPath)
+        cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath)]
+        cmdList.append("setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath))
         try:
-            subprocess.check_output(cmd.split())
+            for cmd in cmdList:
+                subprocess.check_output(cmd.split())
         except subprocess.CalledProcessError:
             print("Warning: setfacl command failed, ignoring..")
 
