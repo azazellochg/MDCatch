@@ -91,6 +91,8 @@ def setupRelion(paramDict):
     if uid:  # not zero
         cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath)]
         cmdList.append("setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath))
+        cmdList.append("setfacl -R -m m::rwx %s" % prjPath)
+        cmdList.append("setfacl -R -d -m m::rwx %s" % prjPath)
         try:
             for cmd in cmdList:
                 subprocess.check_output(cmd.split())
