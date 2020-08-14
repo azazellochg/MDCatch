@@ -12,16 +12,16 @@ Submit to queue? == No
 Restrict helical offsets to rise: == Yes
 Mask individual particles with zeros? == Yes
 Perform image alignment? == Yes
-Continue from here:  == Class2D/job036/run_it012_optimiser.star
-Input images STAR file: == $$mybatch
+Continue from here:  == 
+Input images STAR file: == Work/particles_batch1.star
 Which GPUs to use: == 0:1
 Helical rise (A): == 4.75
 Tube diameter (A):  == 200
 Limit resolution E-step to (A):  == -1
 Minimum dedicated cores per node: == 24
-Number of classes: == $$nr_classes
-Number of iterations: == 25
-Number of MPI procs: == 3
+Number of classes: == $$nr_cls1
+Number of iterations: == 20
+Number of MPI procs: == 5
 Number of pooled particles: == 30
 Number of threads: == 8
 Offset search range (pix): == 5
@@ -33,6 +33,6 @@ Queue submit command: == qsub
 Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
 Queue name:  == openmpi
 Angular search range - psi (deg): == 6
-Copy particles to scratch directory: == /ssd
+Copy particles to scratch directory: == /work
 Regularisation parameter T: == 2
 Use GPU acceleration? == Yes

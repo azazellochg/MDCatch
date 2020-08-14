@@ -27,23 +27,23 @@
 import re
 import os
 import math
+import time
+from glob import iglob
 
 from .config import *
 from .utils import parseXml, parseMrc
 
 
 class Parser:
-    """ XML / MDOC parser. """
+    """ Main parser class. """
     def __init__(self):
         # set default values
         self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
-        self.software = 'EPU'
-        self.user = 'unknown', 0, 0
-        self.ptclSizeShort = part_size_short
-        self.ptclSizeLong = part_size_long
+        self.software = DEF_SOFTWARE
+        self.user = DEF_USER
         self.fn = None
-        self.pipeline = 'Relion'
+        self.pipeline = DEF_PIPELINE
 
         self.acqDict = dict()
         self.acqDict['Mode'] = 'Linear'
@@ -76,15 +76,8 @@ class Parser:
     def getUser(self):
         return self.user
 
-    def setUser(self, login, uid, gid):
-        self.user = login, uid, gid
-
-    def getSizes(self):
-        return self.ptclSizeShort, self.ptclSizeLong
-
-    def setSizes(self, size1, size2):
-        self.ptclSizeShort = size1
-        self.ptclSizeLong = size2
+    def setUser(self, login, uid):
+        self.user = (login, uid)
 
     def getSoftware(self):
         return self.software
@@ -99,27 +92,13 @@ class Parser:
         return self.fn
 
     def guessFn(self, prog="EPU"):
-        img = None
         regex = PATTERN_EPU if prog == "EPU" else PATTERN_MDOC
 
         if DEBUG:
             print("\nUsing regex: ", regex)
 
-        # check if Images-DicsX exists in the path
-        if prog == "EPU":
-            check1 = os.path.exists(os.path.join(self.getMdPath(), 'Images-Disc1'))
-            check2 = os.path.exists(os.path.join(self.getMdPath(), 'Images-Disc2'))
-            if not check1 and not check2:
-                return None
-
-        for root, _, files in os.walk(self.getMdPath()):
-            for f in files:
-                m = re.compile(regex).match(f)
-                if m is not None:
-                    img = os.path.join(root, f)
-                    break
-            if img is not None:
-                break
+        files = iglob(os.path.join(self.getMdPath(), regex))
+        img = next(files, None)
 
         return img
 
@@ -184,43 +163,8 @@ class Parser:
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
-    def calcBox(self):
-        """ Calculate box, mask, downsample. """
-        minSize = self.acqDict['PtclSizeShort']
-        maxSize = self.acqDict['PtclSizeLong']
-        ptclSizeAng = max(minSize, maxSize)
-        angpix = float(self.acqDict['PixelSpacing'])
-
-        if self.acqDict['Mode'] == 'Super-resolution':
-            # since we always bin by 2 in mc if using super-res
-            angpix = angpix * 2
-
-        # use +10% for mask size
-        self.acqDict['MaskSize'] = str(math.ceil(1.1 * float(ptclSizeAng) / angpix))
-        ptclSizePx = float(ptclSizeAng) / angpix
-        # use +20% for box size, make it even
-        boxSize = 1.2 * ptclSizePx
-        self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
-
-        # from relion_it.py script
-        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
-        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
-                    360, 384, 400, 420, 450, 480, 512, 640, 768,
-                    896, 1024):
-            # Don't go larger than the original box
-            if box > boxSize:
-                self.acqDict['BoxSizeSmall'] = str(boxSize)
-                break
-            # If Nyquist freq. is better than 8.5 A, use this
-            # downscaled box, otherwise continue to next size up
-            small_box_angpix = angpix * boxSize / box
-            if small_box_angpix < 4.25:
-                self.acqDict['BoxSizeSmall'] = str(box)
-                break
-
-    def guessDataDir(self, fnList):
-        """ Guess folder name with movies, gain and defects for Krios. """
-        # code below may be LMB-specific
+    def guessDataDir(self, wait=False):
+        """ Guess folder name with movies, gain and defects files. """
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
         scopeID = self.acqDict['MicroscopeID']
@@ -237,24 +181,33 @@ class Parser:
             else:
                 self.acqDict['MTF'] = MTF_DICT['%s-count' % model]
 
+        # update with real camera name
+        self.acqDict['Detector'] = model
+
         if self.getSoftware() == 'EPU':
             p1 = MOVIE_PATH_DICT[camera] % (SCOPE_DICT[scopeID][0], model)
             session = os.path.basename(self.getMdPath())
 
             if camera == 'EF-CCD':
-                movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_PATH)
-                # TODO: use gain_dict instead
-                # regex = GAIN_DICT[model]
-                # with os.scandir(path) as fns:
-                #     for f in fns:
-                #         m = re.compile(regex).match(f)
-                #         if m is not None:
-                #             img = os.path.join(root, f)
-                f1 = fnList.replace('.xml', '-gain-ref.MRC')
-                f2 = f1.split('Images-Disc')[1]
-                gainFn = os.path.join(p1, "DoseFractions", session, "Images-Disc" + f2)
+                movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_DICT[model])
+                movieBaseDir = os.path.join(p1, "DoseFractions", session)
+                gainFiles = iglob(os.path.join(os.path.dirname(movieDir), GAIN_DICT[model]))
+                gainFn = next(gainFiles, 'None')
             else:
-                movieDir = os.path.join(p1, session, EPU_MOVIES_PATH)
+                movieDir = os.path.join(p1, session, EPU_MOVIES_DICT[model])
+                movieBaseDir = os.path.join(p1, session)
+
+            if wait:  # in daemon mode wait for movie folder to appear
+                while True:
+                    if not os.path.exists(movieBaseDir):
+                        print("Movie folder %s not found, waiting for 1 min.." % movieBaseDir)
+                        time.sleep(60)
+                    else:
+                        print("Movie folder found! Continuing..")
+                        break
+            else:  # GUI mode
+                if not os.path.exists(movieBaseDir):
+                    raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
             movieDir = os.path.join(self.getMdPath(), "*.tif")

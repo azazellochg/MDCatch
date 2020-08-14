@@ -18,6 +18,8 @@ _rlnJobOptionValue #2
 bin_factor $$motioncorr_bin 
 do_dose_weighting        Yes 
 do_own_motioncor        Yes 
+do_save_ps        Yes 
+do_save_noDW         No 
   do_queue         No 
 dose_per_frame $$dose_rate 
 first_frame_sum          1 
@@ -32,7 +34,7 @@ group_frames          1
 input_star_mics Schedules/preprocess/importmovies/movies.star 
 last_frame_sum         -1 
 min_dedicated         24 
-    nr_mpi          1 
+    nr_mpi          5 
 nr_threads         12 
 other_args "--do_at_most $$do_at_most" 
 other_motioncor2_args         "" 
@@ -42,6 +44,4 @@ pre_exposure          0
       qsub       qsub 
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
- save_noDW         No 
-   save_ps        Yes 
  

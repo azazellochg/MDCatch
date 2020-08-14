@@ -1,42 +1,51 @@
 MDCatch
 =======
 
-Still in development, but you are welcome to try!
+A simple app to fetch acquisition metadata from a running EPU session or SerialEM.
+It parses the first found xml/mrc (EPU) or mdoc file (SerialEM) associated with a data collection session and launches Relion or Scipion pipeline.
+In case of SerialEM you need to enable saving mdoc file for each movie.
 
-A simple PyQt5 app to fetch acquisition metadata from EPU session or SerialEM.
-It parses the first found xml/mrc (EPU) or mdoc file (SerialEM) associated with a data collection session. In case of SerialEM you need to enable saving mdoc file for each movie.
+Dependencies
+------------
+
+Dependencies are installed from pip automatically:
+
+ * pyqt5 (GUI)
+ * numpy (to parse MRC headers)
+ * emtable (for some Relion schedules scripts)
+ * watchdog (watch folder when running in daemon mode)
 
 Installation
 ------------
 
-The app requires python3, numpy and PyQt5 to run.
+You can install either using pip or from sources.
 
-  1) From pypi: **pip install MDCatch** (recommended)
-  2) From sources - you have two options:
+* from pypi (recommended): **pip install MDCatch**
+* from sources - you have two options:
 
-    a) Create python virtualenv:
+a) create python virtualenv:
 
-        .. code-block:: python
+.. code-block:: python
 
-            python3 -m venv mdcatch
-            source mdcatch/bin/activate
-            git clone https://github.com/azazellochg/MDCatch.git
-            cd MDCatch
-            pip install -e .
+    python3 -m venv mdcatch
+    source mdcatch/bin/activate
+    git clone https://github.com/azazellochg/MDCatch.git
+    cd MDCatch
+    pip install -e .
 
-    b) Create conda virtualenv (requires miniconda3 installed):
+b) create conda virtualenv (requires conda installed):
 
-        .. code-block:: python
+.. code-block:: python
 
-            conda create -n mdcatch python=3.8
-            conda activate mdcatch
-            git clone https://github.com/azazellochg/MDCatch.git
-            cd MDCatch
-            pip install -e .
+    conda create -n mdcatch python=3.8
+    conda activate mdcatch
+    git clone https://github.com/azazellochg/MDCatch.git
+    cd MDCatch
+    pip install -e .
 
 
-Configure
----------
+Configuration
+-------------
 
   - Relion 3.1 or Scipion 3.0 is in in your *PATH*
   - Preprocessing templates: *Schedules* folder for Relion, *template.json* for Scipion
@@ -45,32 +54,40 @@ Configure
 Running
 -------
 
- Simply type **mdcatch**
+To run with a GUI simply type **mdcatch**.
+If you want to run in daemon mode, run **mdcatch --watch** (or better setup a daily cron job)
+
 
 Working principle
 -----------------
 
-The idea is to launch the app on a processing server as soon as EPU/SerialEM starts data collection and the first movie is acquired.
+GUI mode (default)
+##################
+
+The idea is to run the app on a processing server once EPU/SerialEM starts data collection and the first movie is acquired.
 The server has to have access to both EPU session folder and movies folder, or to SerialEM movie folder.
 
-  1. check if username exists in the NIS database (``ypmatch username passwd``)
-  2. find and parse the first xml/mdoc file, getting all acquisition metadata
-  3. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
-  4. create symlinks for movies, gain reference, defects file, MTF in the project folder
-  5. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
+  1. find and parse the first xml/mdoc file, getting all acquisition metadata
+  2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
+  3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
+  4. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
+  5. *setfacl -R -m u:uid:rwx* is executed for the project folder, where uid is obtained from DEF_USER
+
+Daemon mode
+###########
+
+From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
+Once an xml (EPU) or a mdoc (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
+
+Make sure you have set in *config.py*: DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
+
+It's probably useful to setup a daily cron job for `mdcatch --watch` to detect new EPU/SerialEM sessions.
 
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/71741099-e2c6d200-2e55-11ea-9c98-66a14dc8cb2e.png
-   :width: 600 px
+.. image:: https://user-images.githubusercontent.com/6952870/89322368-08ca8400-d67c-11ea-925b-60e1233f8e1c.png
+   :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/71741103-e5292c00-2e55-11ea-95c3-4cf51de7382c.png
-   :width: 800 px
-
-TODO
-----
-
-  - beam tilt is parsed but not used since we parse only a single xml/mdoc for the whole session
-  - SerialEM conversions: gain ref dm4->mrc, defects SerialEM->Relion
-  - use GAIN_DICT from config
+.. image:: https://user-images.githubusercontent.com/6952870/89322396-0ec06500-d67c-11ea-8fd3-90f6015156e4.png
+   :width: 640 px

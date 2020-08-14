@@ -1,3 +1,21 @@
+0.9.7:
+    - set ACL
+    - move more vars to config file
+    - major Schedules update for relion 3.1: logpicker replaced by cryolo, cinderella added
+    - replace symlink by copy for small files
+    - remove boxsizes and until_ctf options
+    - speed up recursive file search (replace os.walk by iglob)
+    - fix gain file detection
+    - fix wrong mask size
+    - update README
+    - add daemon mode
+    - fix schedules abort/stop
+    - new deps: emtable, watchdog
+0.9.6:
+    - remove box sizes, replace LoGpicker by cryolo
+    - big schedules update
+    - username requirement removed (to be reimplemented)
+    - minor Qt5 fixes, replace Help button by a tooltip
 0.9.5:
     - add mrc and bigtiff parsers. Xml metadata is preferred over mrc.
     - parsing functions moved to utils/

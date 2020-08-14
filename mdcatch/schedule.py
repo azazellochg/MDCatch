@@ -28,6 +28,7 @@ import os
 import shutil
 import subprocess
 import json
+import time
 from datetime import datetime
 
 from .config import *
@@ -38,15 +39,9 @@ def setupRelion(paramDict):
     bin, gain, defect = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
-               'LOG_mind': paramDict['PtclSizeShort'],
-               'LOG_maxd': paramDict['PtclSizeLong'],
-               'boxsize_logpick': paramDict['BoxSizeSmall'],
-               'mask_diam': paramDict['MaskSize'],
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
-               'box_size': paramDict['BoxSize'],
-               'do_until_ctf': paramDict['NoCl2D'],
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
 
@@ -59,8 +54,8 @@ def setupRelion(paramDict):
     if os.path.islink(movieDir):
         os.remove(movieDir)
     if os.path.exists(movieDir):
-        raise Exception('Destination %s already exists and is not a link' %
-                        movieDir)
+        raise FileExistsError('Destination %s already exists and is not a link' %
+                              movieDir)
 
     if paramDict['Software'] == 'EPU':
         # EPU: Movies -> EPU session folder
@@ -75,7 +70,7 @@ def setupRelion(paramDict):
     os.chdir(prjPath)
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
-            os.symlink(i, os.path.basename(i))
+            shutil.copyfile(i, os.path.basename(i))
 
     mapDict['gainref'] = os.path.basename(gain) or '""'
     mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
@@ -90,6 +85,19 @@ def setupRelion(paramDict):
         print("ERROR: Relion 3.1 not found in PATH or Schedules not found!")
         exit(1)
 
+    # setup ACL for uid
+    uid = paramDict['User'][0]
+    if uid:  # not zero
+        cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath)]
+        cmdList.append("setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath))
+        cmdList.append("setfacl -R -m m::rwx %s" % prjPath)
+        cmdList.append("setfacl -R -d -m m::rwx %s" % prjPath)
+        try:
+            for cmd in cmdList:
+                subprocess.check_output(cmd.split())
+        except subprocess.CalledProcessError:
+            print("Warning: setfacl command failed, ignoring..")
+
     # Run scheduler
     cmdList = list()
     for key in mapDict:
@@ -97,26 +105,22 @@ def setupRelion(paramDict):
             'preprocess', key, str(mapDict[key]))
         cmdList.append(cmd)
 
-    # mask for cl2d is in Angstroms
-    diam = float(mapDict['angpix']) * float(mapDict['mask_diam'])
-    cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %f' %
-                   diam)
-
     for cmd in cmdList:
         if DEBUG:
             print(cmd)
         proc = subprocess.run(cmd.split(), check=True)
 
-    # now use Popen - without waiting for return
     cmdList = list()
-    cmdList.append('relion_scheduler --schedule preprocess --run &')
-
-    if mapDict['do_until_ctf'] is False:
-        cmdList.append('relion_scheduler --schedule class2d --run &')
+    cmdList.append('relion_scheduler --schedule preprocess --run --pipeline_control Schedules/preprocess/ &')
+    cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
+    cmdList.append('relion_scheduler --schedule round2 --set_var angpix --value %s' % mapDict['angpix'])
+    cmdList.append('relion_scheduler --schedule round2 --set_var motioncorr_bin --value %s' % mapDict['motioncorr_bin'])
+    cmdList.append('relion_scheduler --schedule round2 --run --pipeline_control Schedules/round2/ &')
 
     for cmd in cmdList:
         if DEBUG:
             print(cmd)
+        # now use Popen - without waiting for return
         proc = subprocess.Popen(cmd.split(), universal_newlines=True)
 
 
@@ -163,7 +167,7 @@ def setupScipion(paramDict):
     ctfProt = protocolsList[protNames["ProtGctf"]]
     ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
 
-    # relion Log picker
+    # relion Log picker TODO: replace by cryolo!
     pickProt = protocolsList[protNames["ProtRelionAutopickLoG"]]
     pickProt["minDiameter"] = paramDict["PtclSizeShort"]
     pickProt["maxDiameter"] = paramDict["PtclSizeLong"]
@@ -198,7 +202,7 @@ def setupScipion(paramDict):
 def getPrjName(paramDict):
     """ Util func to get project name. """
     # project name = username_scope_date_time
-    username, uid, gid = paramDict['User']
+    username = paramDict['User'][0]
     scope = SCOPE_DICT[paramDict['MicroscopeID']][0]
     dt = datetime.now()
     dt = dt.strftime('%d-%m-%Y_%H%M')

@@ -44,7 +44,7 @@ with open(file, 'rb') as fin:
 
     version = unpack(byteorder + 'H', header[2:4])[0]  # 43 = BigTIFF
     if version == 42:
-        raise Exception('Only BigTIFF files are supported!')
+        raise NotImplemented('Only BigTIFF files are supported!')
 
     ifd_offset = unpack(byteorder + 'Q', header[8:16])[0]  # offset to the first IFD
     # find number of tags in the first IFD
