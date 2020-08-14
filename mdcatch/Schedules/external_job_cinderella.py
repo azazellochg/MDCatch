@@ -71,6 +71,10 @@ def run_job(project_dir, args):
     if DEBUG:
         print("Parsing output file: %s\nGood classes: %s" % (outpath, goodcls))
 
+    if len(goodcls) == 0:
+        open(RELION_JOB_FAILURE_FILENAME, "w").close()
+        exit(1)
+
     # Create output star file for Relion to use
     optics = Table(fileName=getPath(in_parts), tableName='optics')
     ptcls = Table(fileName=getPath(in_parts), tableName='particles')

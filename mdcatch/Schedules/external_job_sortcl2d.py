@@ -31,6 +31,10 @@ def run_job(project_dir, args):
     if DEBUG:
         print("Classes selected: ", good_cls)
 
+    if len(good_cls) == 0:
+        open(RELION_JOB_FAILURE_FILENAME, "w").close()
+        exit(1)
+
     optics = Table(fileName=getPath(in_parts), tableName='optics')
     ptcls = Table(fileName=getPath(in_parts), tableName='particles')
     cols = ptcls.getColumnNames()

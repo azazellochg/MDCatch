@@ -46,9 +46,6 @@ data_pipeline_input_edges
 loop_ 
 _rlnPipeLineEdgeFromNode #1 
 _rlnPipeLineEdgeProcess #2 
-Work/particles_batch1.star Schedules/class2d/class2d_batch1/
-Work/particles_batch2.star Schedules/class2d/class2d_batch2/
-Work/particles_batch3.star Schedules/class2d/class2d_batch3/
 Schedules/class2d/class2d_batch3/run_it020_data.star Schedules/class2d/sort_cls2d/
 Schedules/class2d/sort_cls2d/particles_for_training.star Schedules/class2d/cryolo_train/ 
  

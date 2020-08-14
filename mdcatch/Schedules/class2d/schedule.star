@@ -112,7 +112,7 @@ class2d_batch1 batch2_ready=EXISTS_extracted_batch2 0 undefined undefined
 batch2_ready=EXISTS_extracted_batch2 WAIT_delay1 1 class2d_batch2 batch2_ready
 WAIT_delay1 batch2_ready=EXISTS_extracted_batch2 0 undefined undefined
 class2d_batch2 batch3_ready=EXISTS_extracted_batch3 0 undefined undefined
-batch3_ready=EXISTS_extracted_batch2 WAIT_delay2 1 class2d_batch3 batch3_ready
+batch3_ready=EXISTS_extracted_batch3 WAIT_delay2 1 class2d_batch3 batch3_ready
 WAIT_delay2 batch3_ready=EXISTS_extracted_batch3 0 undefined undefined
 class2d_batch3 sort_cls2d            0  undefined  undefined
 sort_cls2d cryolo_train            0  undefined  undefined 
