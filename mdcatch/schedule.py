@@ -42,7 +42,6 @@ def setupRelion(paramDict):
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
-               'do_until_ctf': False,
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup']}
 

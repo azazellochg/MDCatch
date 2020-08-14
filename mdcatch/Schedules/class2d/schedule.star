@@ -31,7 +31,8 @@ _rlnScheduleBooleanVariableName #1
 _rlnScheduleBooleanVariableValue #2 
 _rlnScheduleBooleanVariableResetValue #3 
 first_batch_ready            0            0 
-has_done_cryolo            0            0 
+has_done_cryolo            0            0
+
  
 
 # version 30001
