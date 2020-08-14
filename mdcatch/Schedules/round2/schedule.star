@@ -19,7 +19,8 @@ _rlnScheduleFloatVariableResetValue #3
   box_size   256.000000   256.000000 
 box_size_bin    64.000000    64.000000 
 cryolo_thresh     0.300000     0.300000 
- mask_diam   200.000000   200.000000 
+ mask_diam   200.000000   200.000000
+ mask_diam_px  200.000000   200.000000
 nr_cls   100.000000   100.000000
   wait_sec    30.000000    30.000000
 motioncorr_bin     1.000000     1.000000

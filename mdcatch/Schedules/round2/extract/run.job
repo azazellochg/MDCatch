@@ -1,7 +1,7 @@
 job_type == 5
 is_continue == false
 Pixel size (A) == 1
-Diameter background circle (pix):  == $$mask_diam
+Diameter background circle (pix):  == $$mask_diam_px
 Stddev for black dust removal:  == -1
 Input coordinates:  == Schedules/round2/cryolopicker/coords_suffix_cryolo.star
 Cut helical tubes into segments? == Yes
