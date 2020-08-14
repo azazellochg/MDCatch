@@ -21,7 +21,7 @@ _rlnJobOptionValue #2
    in_mask         "" 
     in_mic         ""
     in_mov         "" 
-   in_part         Schedules/class2d/class2d_first/run_it020_data.star 
+   in_part         Schedules/class2d/class2d_batch3/run_it020_data.star
 min_dedicated          1 
 nr_threads          1 
 other_args         "" 
