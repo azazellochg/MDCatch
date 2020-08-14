@@ -3,7 +3,7 @@ is_continue == false
 Pixel size (A) == 1
 Diameter background circle (pix):  == $$mask_diam
 Stddev for black dust removal:  == -1
-Input coordinates:  == Schedules/class2d_2nd/cryolopicker/coords_suffix_cryolo.star
+Input coordinates:  == Schedules/round2/cryolopicker/coords_suffix_cryolo.star
 Cut helical tubes into segments? == Yes
 Coordinates are start-end only? == Yes
 Extract helical segments? == No

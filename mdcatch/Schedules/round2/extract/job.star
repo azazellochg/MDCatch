@@ -16,7 +16,7 @@ _rlnJobOptionVariable #1
 _rlnJobOptionValue #2 
 bg_diameter $$mask_diam 
 black_dust         -1 
-coords_suffix Schedules/class2d_2nd/cryolopicker/coords_suffix_cryolo.star 
+coords_suffix Schedules/round2/cryolopicker/coords_suffix_cryolo.star
 do_cut_into_segments        Yes 
 do_extract_helical_tubes        Yes 
 do_extract_helix         No 

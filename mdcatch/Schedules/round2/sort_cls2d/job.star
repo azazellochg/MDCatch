@@ -15,13 +15,13 @@ loop_
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
   do_queue         No 
-    fn_exe    /home/gsharov/soft/MDCatch/mdcatch/Schedules/external_job_cryolo_train.py 
+    fn_exe    /home/gsharov/soft/MDCatch/mdcatch/Schedules/external_job_cinderella.py 
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
     in_mic         ""
     in_mov         "" 
-   in_part         Schedules/class2d_2nd/sort_cls2d/particles_for_training.star 
+   in_part         Schedules/round2/class2d/run_it020_data.star
 min_dedicated          1 
 nr_threads          1 
 other_args         "" 
@@ -29,8 +29,8 @@ param10_label         ""
 param10_value         "" 
 param1_label         gpu 
 param1_value         0 
-param2_label         box_size
-param2_value         $$box_size
+param2_label         ""
+param2_value         ""
 param3_label         "" 
 param3_value         "" 
 param4_label         "" 

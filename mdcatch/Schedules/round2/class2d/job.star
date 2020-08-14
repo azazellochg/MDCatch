@@ -28,13 +28,13 @@ do_restrict_xoff        Yes
 do_zero_mask        Yes 
 dont_skip_align        Yes 
    fn_cont         "" 
-    fn_img Schedules/class2d_2nd/extract/particles.star 
+    fn_img Schedules/round2/extract/particles.star
    gpu_ids        0:1 
 helical_rise       4.75 
 helical_tube_outer_diameter        200 
 highres_limit         -1 
 min_dedicated         24 
-nr_classes $$nr_classes 
+nr_classes $$nr_cls
    nr_iter         20 
     nr_mpi          5 
    nr_pool         30 
@@ -51,4 +51,3 @@ qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
 scratch_dir      /work 
  tau_fudge          2 
    use_gpu        Yes 
- 

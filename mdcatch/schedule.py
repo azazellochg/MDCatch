@@ -113,7 +113,9 @@ def setupRelion(paramDict):
     cmdList = list()
     cmdList.append('relion_scheduler --schedule preprocess --run --pipeline_control Schedules/preprocess/ &')
     cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
-    cmdList.append('relion_scheduler --schedule class2d_2nd --run --pipeline_control Schedules/class2d_2nd/ &')
+    cmdList.append('relion_scheduler --schedule round2 --set_var angpix --value %s' % mapDict['angpix'])
+    cmdList.append('relion_scheduler --schedule round2 --set_var motioncorr_bin --value %s' % mapDict['motioncorr_bin'])
+    cmdList.append('relion_scheduler --schedule round2 --run --pipeline_control Schedules/round2/ &')
 
     for cmd in cmdList:
         if DEBUG:
