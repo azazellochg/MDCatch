@@ -112,9 +112,9 @@ def setupRelion(paramDict):
         proc = subprocess.run(cmd.split(), check=True)
 
     cmdList = list()
-    cmdList.append('relion_scheduler --schedule preprocess --run &')
-    cmdList.append('relion_scheduler --schedule class2d --run &')
-    cmdList.append('relion_scheduler --schedule class2d_2nd --run &')
+    cmdList.append('relion_scheduler --schedule preprocess --run --pipeline_control Schedules/preprocess/ &')
+    cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
+    cmdList.append('relion_scheduler --schedule class2d_2nd --run --pipeline_control Schedules/class2d_2nd/ &')
 
     for cmd in cmdList:
         if DEBUG:
