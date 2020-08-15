@@ -1,3 +1,5 @@
+0.9.8:
+    - update Scipion template, fixes for SerialEM option
 0.9.7:
     - set ACL
     - move more vars to config file

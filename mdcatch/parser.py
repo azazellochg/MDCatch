@@ -53,7 +53,7 @@ class Parser:
         self.acqDict['PhasePlateUsed'] = 'false'
         self.acqDict['GainReference'] = 'None'
         self.acqDict['DefectFile'] = 'None'
-        self.acqDict['MTF'] = ''
+        self.acqDict['MTF'] = 'None'
 
     def setMdPath(self, path):
         self.mdPath = path

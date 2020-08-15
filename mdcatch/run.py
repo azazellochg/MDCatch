@@ -45,7 +45,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent, flags=Qt.WindowFlags())
-        self.title = 'MDCatch v0.9.7 - metadata parser'
+        self.title = 'MDCatch v0.9.8 - metadata parser'
         self.width = 640
         self.height = 320
         self.initUI()

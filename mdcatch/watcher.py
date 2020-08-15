@@ -69,7 +69,10 @@ class WatchDog:
 
 def start_app(mdFn):
     """ Simulate GUI mode, setup acqDict and run parsers. """
-    mdPath = "/".join(mdFn.split("/")[:-4])
+    if DEF_SOFTWARE == "EPU":
+        mdPath = "/".join(mdFn.split("/")[:-4])
+    else:
+        mdPath = "/".join(mdFn.split("/")[:-1])
     mdFolder = os.path.basename(mdPath)
     model = Parser()
     model.setSoftware(DEF_SOFTWARE)
