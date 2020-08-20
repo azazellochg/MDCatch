@@ -6,6 +6,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
+import time
 from glob import glob
 import subprocess
 import math
@@ -17,11 +18,13 @@ RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
 CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_PREDICT = "cryolo_predict.py"
-CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
+CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
+CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
 DEBUG = 1
 
 
 def run_job(project_dir, args):
+    start = time.time()
     in_mics = args.in_mics
     job_dir = args.out_dir
     thresh = args.threshold
@@ -42,6 +45,10 @@ def run_job(project_dir, args):
         "architecture": "PhosaurusNet",
         "input_size": 1024,
         "max_box_per_image": 600,
+        "filter": [
+            0.1,
+            "filtered_tmp/"
+        ]
     }}
 
     if box_size:  # is not 0
@@ -103,9 +110,9 @@ def run_job(project_dir, args):
         '--conf': "config.json",
         '--output': 'output',
         '--weights': model,
-        '--gpu': gpus,
+        '--gpu': "%s" % gpus.replace('"', ''),
         '--threshold': thresh,
-        '-nc': threads
+        '-nc': -1 #threads
     }
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
@@ -193,12 +200,16 @@ def run_job(project_dir, args):
         with open(outputFn, "w") as f:
             tableCryolo.writeStar(f, tableName='cryolo')
 
+    end = time.time()
+    diff = end - start
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+
 
 def main():
     """Change to the job working directory, then call run_job()"""
     help = """
 External job for calling cryolo within Relion 3.1.0. Run it in the main Relion project directory, e.g.:
-    external_job_cryolo.py --o External/cryolo_picking --in_mics CtfFind/job004/micrographs_ctf.star --box_size 128 --threshold 0.3
+    external_job_cryolo.py --o External/cryolo_picking --in_mics CtfFind/job004/micrographs_ctf.star --box_size 128 --threshold 0.3 --gpu "0 1"
 """
     parser = argparse.ArgumentParser(usage=help)
     parser.add_argument("--in_mics", help="Input micrographs STAR file")

@@ -15,7 +15,7 @@ Gctf executable: == /public/EM/Gctf/bin/Gctf
 Which GPUs to use: == 
 Input micrographs STAR file: == Schedules/preprocess/motioncorr/corrected_micrographs.star
 Minimum dedicated cores per node: == 24
-Number of MPI procs: == 1
+Number of MPI procs: == 15
 Additional arguments: == 
 Other Gctf options: == 
 Phase shift (deg) - Max: == 180
@@ -30,4 +30,4 @@ Use exhaustive search? == No
 Use CTFFIND-4.1? == Yes
 Use Gctf instead? == No
 Use power spectra from MotionCorr job? == Yes
-Use micrograph without dose-weighting? == Yes
+Use micrograph without dose-weighting? == No

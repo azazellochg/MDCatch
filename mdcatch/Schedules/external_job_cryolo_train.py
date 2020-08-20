@@ -6,6 +6,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
+import time
 import subprocess
 from emtable import Table  # requires pip install emtable
 
@@ -14,7 +15,8 @@ RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_TRAIN = "cryolo_train.py"
-CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
+CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
+CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
 TUNE_MODEL = "fine_tuned_model.h5"
 IMG_FOLDER = "train_image"
 ANNOT_FOLDER = "train_annot"
@@ -22,6 +24,7 @@ DEBUG = 1
 
 
 def run_job(project_dir, args):
+    start = time.time()
     in_parts = args.in_parts
     job_dir = args.out_dir
     box_size = args.box_size
@@ -132,6 +135,10 @@ def run_job(project_dir, args):
     nodes.addRow(os.path.join(job_dir, "_manualpick.star"), "2")
     with open("RELION_OUTPUT_NODES.star", "w") as nodes_star:
         nodes.writeStar(nodes_star, tableName="output_nodes")
+
+    end = time.time()
+    diff = end - start
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
 
 
 def main():

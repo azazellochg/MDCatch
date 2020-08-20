@@ -5,6 +5,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 
 import argparse
 import os
+import time
 import subprocess
 from emtable import Table
 
@@ -18,6 +19,7 @@ DEBUG = 1
 
 
 def run_job(project_dir, args):
+    start = time.time()
     in_parts = args.in_parts
     job_dir = args.out_dir
     thresh = args.threshold
@@ -93,6 +95,10 @@ def run_job(project_dir, args):
     with open(out_star, "w") as f:
         optics.writeStar(f, tableName="optics")
         out_ptcls.writeStar(f, tableName="particles")
+
+    end = time.time()
+    diff = end - start
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
 
 
 def main():

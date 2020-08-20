@@ -29,7 +29,7 @@ fn_gctf_exe /public/EM/Gctf/bin/Gctf
    gpu_ids         "" 
 input_star_mics Schedules/preprocess/motioncorr/corrected_micrographs.star 
 min_dedicated         24 
-    nr_mpi          5
+    nr_mpi         15
 other_args         "" 
 other_gctf_args         "" 
  phase_max        180 
@@ -44,5 +44,5 @@ slow_search         No
 use_ctffind4        Yes 
   use_gctf         No 
 use_given_ps        Yes 
-  use_noDW        Yes 
+  use_noDW        No 
  

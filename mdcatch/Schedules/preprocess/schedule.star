@@ -25,7 +25,7 @@ count_parts     0.000000     0.000000
 count_mics      0.000000     0.000000
 count_mics_curr      0.000000     0.000000
 cryolo_thresh     0.300000     0.300000 
-do_at_most     5.000000     5.000000 
+do_at_most     15.000000    15.000000 
  dose_rate     1.000000     1.000000
  mask_diam   200.000000   200.000000 
  mask_diam_px  200.000000   200.000000 
