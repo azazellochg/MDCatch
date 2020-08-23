@@ -116,7 +116,7 @@ def run_job(project_dir, args):
 
     # Launching topaz extract
     args_dict = {
-        '--radius': int(diam / angpix / scale // 2),
+        '--radius': int(diam / angpix // 2),  # angpix is already downsampled!
         '--up-scale': scale,
         '--threshold': thresh,
         '--output': 'output/coords.txt',
