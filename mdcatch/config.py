@@ -56,7 +56,7 @@ SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
               }
 
 ###############################################################################
-# EPU 2.4+ patterns
+# EPU params
 EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
                    'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
                    'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
@@ -67,11 +67,6 @@ GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC",
 
 # change the pattern below if you want to parse movie sums mrc instead
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
-
-###############################################################################
-# SerialEM patterns
-PATTERN_MDOC = "*.tif.mdoc"
-REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # path to MTF files for Relion (300 kV only)
 # examples: Name-count, Name-linear or Name,
@@ -90,6 +85,11 @@ MOVIE_PATH_DICT = {
     'EF-CCD': '/mnt/Data/%s/%s/',
     'BM-Falcon': '/mnt/Data/%s/%s/'
 }
+
+###############################################################################
+# SerialEM params
+PATTERN_MDOC = "*.tif.mdoc"
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # SerialEM mdoc vars to parse
 SERIALEM_PARAMS = [

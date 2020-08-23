@@ -174,7 +174,7 @@ def run_job(project_dir, args):
         # from relion_it.py script
         # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
         boxSizeSmall = None
-        for box in (64, 96, 128, 160, 192, 256, 288, 300, 320,
+        for box in (32, 48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
                     360, 384, 400, 420, 450, 480, 512, 640, 768,
                     896, 1024):
             # Don't go larger than the original box
