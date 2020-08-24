@@ -45,10 +45,9 @@ def run_job(project_dir, args):
     mictable = Table(fileName=getPath(in_mics), tableName='micrographs')
 
     # calculate downscale factor to get to 4-8 A/px
-    scale = 1
     for scale in range(1, 21):
-        angpix *= scale
-        if 4.0 <= angpix <= 8.0 or angpix > 8.0:
+        angpix_bin = angpix * scale
+        if 4.0 <= angpix_bin <= 8.0 or angpix_bin > 8.0:
             if DEBUG:
                 print("Using downscale factor: %d" % scale)
             break
@@ -116,7 +115,7 @@ def run_job(project_dir, args):
 
     # Launching topaz extract
     args_dict = {
-        '--radius': int(diam / angpix // 2),  # angpix is already downsampled!
+        '--radius': int(diam / angpix_bin // 2),
         '--up-scale': scale,
         '--threshold': thresh,
         '--output': 'output/coords.txt',
@@ -232,7 +231,7 @@ def main():
     """Change to the job working directory, then call run_job()"""
     help = """
 External job for calling topaz within Relion 3.1.0. Run it in the main Relion project directory, e.g.:
-    external_job_topaz.py --o External/topaz_picking --in_mics CtfFind/job004/micrographs_ctf.star --box_size 64 --threshold 0 --gpu 0
+    external_job_topaz.py --o External/topaz_picking --in_mics CtfFind/job004/micrographs_ctf.star --diam 120 --threshold 0 --gpu 0
 """
     parser = argparse.ArgumentParser(usage=help)
     parser.add_argument("--in_mics", help="Input micrographs STAR file")
