@@ -45,12 +45,15 @@ def run_job(project_dir, args):
     mictable = Table(fileName=getPath(in_mics), tableName='micrographs')
 
     # calculate downscale factor to get to 4-8 A/px
-    for scale in range(1, 21):
+    for scale in range(2, 20):
         angpix_bin = angpix * scale
-        if 4.0 <= angpix_bin <= 8.0 or angpix_bin > 8.0:
-            if DEBUG:
-                print("Using downscale factor: %d" % scale)
+        if diam < 300 and (4.0 <= angpix_bin <= 6.0 or angpix > 6.0):
             break
+        elif diam >= 300 and (6.0 <= angpix_bin <= 8.0 or angpix > 8.0):
+            break
+
+    print("Using downscale factor %d to get %0.2f A/pix for %d A particle" % (
+        scale, angpix_bin, diam))
 
     # Arranging files for topaz: making symlinks for mics
     done_mics = []
