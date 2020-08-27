@@ -19,7 +19,7 @@ _rlnJobOptionValue #2
   in_3dref         "" 
  in_coords         "" 
    in_mask         "" 
-    in_mic         Schedules/preprocess/ctffind/micrographs_ctf.star
+    in_mic         Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star
     in_mov         "" 
    in_part         "" 
 min_dedicated          1 

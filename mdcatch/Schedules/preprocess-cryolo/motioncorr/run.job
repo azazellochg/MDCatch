@@ -15,7 +15,7 @@ Gain rotation: == No rotation (0)
 Which GPUs to use: == 0:1
 Sum power spectra every e/A2: == 4
 Group frames: == 1
-Input movies STAR file: == Schedules/preprocess/importmovies/movies.star
+Input movies STAR file: == Schedules/preprocess-cryolo/importmovies/movies.star
 Last frame for corrected sum: == -1
 Minimum dedicated cores per node: == 24
 Number of MPI procs: == 5

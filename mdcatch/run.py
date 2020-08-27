@@ -32,7 +32,7 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QPushButton, QWizard, QGroupBox,
                              QSizePolicy, QLineEdit, QFileDialog,
                              QCheckBox, QApplication, QWizardPage,
-                             QButtonGroup)
+                             QButtonGroup, QSpinBox)
 from PyQt5.QtCore import Qt
 
 from .config import *
@@ -91,10 +91,15 @@ class Page1(QWizardPage):
         label1 = QLabel('Software')
         label2 = QLabel('Path')
         label3 = QLabel('Run pipeline in')
+        label4 = QLabel('Particle picker')
+        label5 = QLabel('Particle size (A)')
+        label5.setToolTip(help_picker)
 
         vbox.addWidget(label1, alignment=Qt.Alignment())
         vbox.addWidget(label2, alignment=Qt.Alignment())
         vbox.addWidget(label3, alignment=Qt.Alignment())
+        vbox.addWidget(label4, alignment=Qt.Alignment())
+        vbox.addWidget(label5, alignment=Qt.Alignment())
 
         return vbox
 
@@ -147,6 +152,52 @@ class Page1(QWizardPage):
         hbox3.addWidget(b5, alignment=Qt.Alignment())
         grid.addLayout(hbox3)
 
+        # particle picker
+        hbox4 = QHBoxLayout()
+        hbox4.setAlignment(Qt.AlignLeft)
+        btgroup3 = QButtonGroup()
+
+        self.b6 = self.addRadioButton("crYOLO", default=DEF_PICKER == "crYOLO")
+        self.b7 = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
+        self.b8 = self.addRadioButton("LogPicker", default=DEF_PICKER == "LogPicker")
+
+        btgroup3.addButton(self.b6)
+        btgroup3.addButton(self.b7)
+        btgroup3.addButton(self.b8)
+        btgroup3.buttonClicked.connect(lambda: self.updPicker(btgroup3))
+        hbox4.addWidget(self.b6, alignment=Qt.Alignment())
+        hbox4.addWidget(self.b7, alignment=Qt.Alignment())
+        hbox4.addWidget(self.b8, alignment=Qt.Alignment())
+        grid.addLayout(hbox4)
+
+        # size box
+        hbox5 = QHBoxLayout()
+        self.labelSizeMin = QLabel('')
+        self.labelSizeMin.setToolTip(help_picker)
+        hbox5.addWidget(self.labelSizeMin)
+
+        self.size_short = QSpinBox()
+        self.size_short.setToolTip(help_picker)
+        self.size_short.setRange(0, 9999)
+        self.size_short.setValue(LOGPICKER_SIZES[0] if DEF_PICKER != "crYOLO" else 0)
+        self.size_short.setFixedSize(60, 25)
+        hbox5.addWidget(self.size_short)
+
+        self.labelSizeMax = QLabel('max')
+        self.labelSizeMax.setToolTip(help_picker)
+        self.labelSizeMax.setVisible(self.b8.isChecked())
+        hbox5.addWidget(self.labelSizeMax)
+
+        self.size_long = QSpinBox()
+        self.size_long.setToolTip(help_picker)
+        self.size_long.setVisible(self.b8.isChecked())
+        self.size_long.setRange(10, 9999)
+        self.size_long.setValue(LOGPICKER_SIZES[1])
+        self.size_long.setFixedSize(60, 25)
+        hbox5.addWidget(self.size_long)
+        hbox5.setAlignment(Qt.AlignLeft)
+        grid.addLayout(hbox5)
+
         return grid
 
     def updSoftware(self, btgroup):
@@ -156,6 +207,27 @@ class Page1(QWizardPage):
     def updPipeline(self, btgroup):
         bt = btgroup.checkedButton()
         App.model.setPipeline(bt.text())
+
+    def updPicker(self, btgroup):
+        bt = btgroup.checkedButton()
+        if self.b6.isChecked():  # crYOLO
+            self.labelSizeMin.setText("")
+            self.size_short.setValue(0)
+            self.labelSizeMax.setVisible(False)
+            self.size_long.setVisible(False)
+        elif self.b7.isChecked():  # Topaz
+            self.labelSizeMin.setText("")
+            self.size_short.setValue(LOGPICKER_SIZES[0])
+            self.labelSizeMax.setVisible(False)
+            self.size_long.setVisible(False)
+        elif self.b8.isChecked():  # LogPicker
+            self.labelSizeMin.setText("min")
+            self.size_short.setValue(LOGPICKER_SIZES[0])
+            self.labelSizeMax.setVisible(True)
+            self.size_long.setVisible(True)
+
+        App.model.setPicker(bt.text())
+        App.model.setSize(self.size_short.value(), self.size_long.value())
 
     def browseSlot(self, var):
         # called when "Browse" is pressed
@@ -186,7 +258,9 @@ class Page1(QWizardPage):
                   [App.model.getSoftware(),
                    App.model.getMdPath(),
                    App.model.getUser(),
-                   App.model.getPipeline()])
+                   App.model.getPipeline(),
+                   App.model.getPicker(),
+                   App.model.getSize()])
 
         prog = App.model.getSoftware()
         fnList = App.model.guessFn(prog)
@@ -233,6 +307,8 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
+        acqDict['Picker'] = App.model.getPicker()
+        acqDict['PtclSizes'] = App.model.getSize()
         App.model.calcDose()
         App.model.guessDataDir()
 

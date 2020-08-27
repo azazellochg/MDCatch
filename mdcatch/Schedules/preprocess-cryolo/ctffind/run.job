@@ -13,7 +13,7 @@ Submit to queue? == No
 CTFFIND-4.1 executable: == /usr/local/bin/ctffind
 Gctf executable: == /public/EM/Gctf/bin/Gctf
 Which GPUs to use: == 
-Input micrographs STAR file: == Schedules/preprocess/motioncorr/corrected_micrographs.star
+Input micrographs STAR file: == Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star
 Minimum dedicated cores per node: == 24
 Number of MPI procs: == 15
 Additional arguments: == 

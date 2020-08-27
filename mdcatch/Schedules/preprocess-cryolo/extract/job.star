@@ -16,7 +16,7 @@ _rlnJobOptionVariable #1
 _rlnJobOptionValue #2 
 bg_diameter $$mask_diam_px 
 black_dust         -1 
-coords_suffix Schedules/preprocess/cryolopicker/coords_suffix_cryolo.star 
+coords_suffix Schedules/preprocess-cryolo/cryolopicker/coords_suffix_cryolo.star
 do_cut_into_segments        Yes 
 do_extract_helical_tubes        Yes 
 do_extract_helix         No 
@@ -43,6 +43,6 @@ recenter_x          0
 recenter_y          0 
 recenter_z          0 
    rescale $$box_size_bin 
- star_mics Schedules/preprocess/ctffind/micrographs_ctf.star 
+ star_mics Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star
 white_dust         -1 
  

@@ -3,7 +3,7 @@
 
 data_schedule_general
 
-_rlnScheduleName                       Schedules/preprocess/
+_rlnScheduleName                       Schedules/preprocess-cryolo/
 _rlnScheduleCurrentNodeName            WAIT_wait_sec
  
 
@@ -19,6 +19,8 @@ _rlnScheduleFloatVariableResetValue #3
     angpix     1.000000     1.000000
     batch1  10000.000000  10000.000000
     batch2  20000.000000  20000.000000
+  size_min  0.000000   0.000000
+  size_max  0.000000   0.000000
   box_size   256.000000   256.000000
 box_size_bin    64.000000    64.000000 
 count_parts     0.000000     0.000000
@@ -62,18 +64,18 @@ loop_
 _rlnScheduleStringVariableName #1 
 _rlnScheduleStringVariableValue #2 
 _rlnScheduleStringVariableResetValue #3 
- cryolobox Schedules/preprocess/cryolopicker/output_for_relion.star,cryolo,rlnOriginalImageSize Schedules/preprocess/cryolopicker/output_for_relion.star,cryolo,rlnOriginalImageSize 
-cryoloboxbinned Schedules/preprocess/cryolopicker/output_for_relion.star,cryolo,rlnImageSize Schedules/preprocess/cryolopicker/output_for_relion.star,cryolo,rlnImageSize 
-cryolodiam Schedules/preprocess/cryolopicker/output_for_relion.star,cryolo,rlnParticleDiameter Schedules/preprocess/cryolopicker/output_for_relion.star,cryolo,rlnParticleDiameter 
-cryolostar Schedules/preprocess/cryolopicker/output_for_relion.star Schedules/preprocess/cryolopicker/output_for_relion.star 
+ cryolobox Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star,cryolo,rlnOriginalImageSize Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star,cryolo,rlnOriginalImageSize
+cryoloboxbinned Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star,cryolo,rlnImageSize Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star,cryolo,rlnImageSize
+cryolodiam Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star,cryolo,rlnParticleDiameter Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star,cryolo,rlnParticleDiameter
+cryolostar Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star Schedules/preprocess-cryolo/cryolopicker/output_for_relion.star
 cryolostar_copy Work/cryolo_params.star Work/cryolo_params.star 
 defect_file         ""         "" 
 extracted_batch1 Work/particles_batch1.star Work/particles_batch1.star
 extracted_batch2 Work/particles_batch2.star Work/particles_batch2.star
-extracted_star Schedules/preprocess/extract/particles.star Schedules/preprocess/extract/particles.star
+extracted_star Schedules/preprocess-cryolo/extract/particles.star Schedules/preprocess-cryolo/extract/particles.star
    gainref Movies/gain.mrc Movies/gain.mrc 
 mics_to_pick_dst Work/micrographs_ctf.star Work/micrographs_ctf.star 
-mics_to_pick_src Schedules/preprocess/ctffind/micrographs_ctf.star Schedules/preprocess/ctffind/micrographs_ctf.star 
+mics_to_pick_src Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star
 movies_wildcard Movies/*.tiff Movies/*.tiff 
   mtf_file mtf_K3_300kv_nocds.star mtf_K3_300kv_nocds.star
 optics_group  opticsGroup1  opticsGroup1

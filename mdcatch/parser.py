@@ -44,6 +44,8 @@ class Parser:
         self.user = DEF_USER
         self.fn = None
         self.pipeline = DEF_PIPELINE
+        self.picker = DEF_PICKER
+        self.size = (LOGPICKER_SIZES[0], LOGPICKER_SIZES[1])
 
         self.acqDict = dict()
         self.acqDict['Mode'] = 'Linear'
@@ -66,6 +68,18 @@ class Parser:
 
     def getPipeline(self):
         return self.pipeline
+
+    def setPicker(self, choice):
+        self.picker = choice
+
+    def getPicker(self):
+        return self.picker
+
+    def getSize(self):
+        return self.size
+
+    def setSize(self, *args):
+        self.size = args
 
     def getPrjPath(self):
         return self.prjPath

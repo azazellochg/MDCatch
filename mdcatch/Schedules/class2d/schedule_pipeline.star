@@ -28,7 +28,7 @@ data_pipeline_nodes
 loop_ 
 _rlnPipeLineNodeName #1 
 _rlnPipeLineNodeType #2 
-Schedules/preprocess/extract/particles.star            3 
+Schedules/preprocess-cryolo/extract/particles.star            3
 Schedules/class2d/class2d_batch1/run_it020_data.star            3
 Schedules/class2d/class2d_batch1/run_it020_model.star            8
 Schedules/class2d/class2d_batch2/run_it020_data.star            3

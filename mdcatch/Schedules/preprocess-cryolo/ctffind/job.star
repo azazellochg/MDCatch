@@ -27,7 +27,7 @@ do_phaseshift   $$is_VPP
 fn_ctffind_exe /usr/local/bin/ctffind 
 fn_gctf_exe /public/EM/Gctf/bin/Gctf 
    gpu_ids         "" 
-input_star_mics Schedules/preprocess/motioncorr/corrected_micrographs.star 
+input_star_mics Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star
 min_dedicated         24 
     nr_mpi         15
 other_args         "" 

@@ -42,7 +42,14 @@ def setupRelion(paramDict):
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
                'is_VPP': paramDict['PhasePlateUsed'],
-               'optics_group': paramDict['OpticalGroup']}
+               'optics_group': paramDict['OpticalGroup'],
+               'size_min': paramDict['PtclSizes'][0],
+               'size_max': paramDict['PtclSizes'][1]}
+
+    pickerSchedule = {'crYOLO': 'preprocess-cryolo',
+                      'Topaz': 'preprocess-topaz',
+                      'LogPicker': 'preprocess-logpicker'}
+    preprocess_schd = pickerSchedule[paramDict['Picker']]
 
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
@@ -101,7 +108,7 @@ def setupRelion(paramDict):
     cmdList = list()
     for key in mapDict:
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
-            'preprocess', key, str(mapDict[key]))
+            preprocess_schd, key, str(mapDict[key]))
         cmdList.append(cmd)
 
     for cmd in cmdList:
@@ -110,7 +117,8 @@ def setupRelion(paramDict):
         proc = subprocess.run(cmd.split(), check=True)
 
     cmdList = list()
-    cmdList.append('relion_scheduler --schedule preprocess --run --pipeline_control Schedules/preprocess/ &')
+    cmdList.append('relion_scheduler --schedule %s --run --pipeline_control Schedules/%s/ &' % (
+        preprocess_schd, preprocess_schd))
     cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
     cmdList.append('relion_scheduler --schedule round2 --set_var angpix --value %s' % mapDict['angpix'])
     cmdList.append('relion_scheduler --schedule round2 --set_var motioncorr_bin --value %s' % mapDict['motioncorr_bin'])

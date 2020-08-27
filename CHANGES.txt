@@ -1,5 +1,6 @@
 0.9.8:
     - update Scipion template, fixes for SerialEM option
+    - add different picker options: cryolo, topaz, logpicker (relion)
 0.9.7:
     - set ACL
     - move more vars to config file
