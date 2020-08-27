@@ -111,8 +111,8 @@ class Page1(QWizardPage):
         hbox1.setAlignment(Qt.AlignLeft)
         btgroup1 = QButtonGroup()
 
-        b1 = self.addRadioButton("EPU", default=DEF_SOFTWARE=="EPU")
-        b2 = self.addRadioButton("SerialEM", default=DEF_SOFTWARE=="SerialEM")
+        b1 = self.addRadioButton("EPU", default=DEF_SOFTWARE == "EPU")
+        b2 = self.addRadioButton("SerialEM", default=DEF_SOFTWARE == "SerialEM")
 
         btgroup1.addButton(b1)
         btgroup1.addButton(b2)
@@ -243,13 +243,10 @@ class Page1(QWizardPage):
         App.model.setMdPath(path)
         self.rawPath.setText(App.model.getMdPath())
 
-    def helpSlot(self):
-        # called when "?" is pressed
-        App.showDialog("Help", help_message, 'help')
-        return
-
     def validatePage(self):
         # Next is pressed, returns True or False
+        App.model.setSize(self.size_short.value(), self.size_long.value())
+
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
 
@@ -277,6 +274,8 @@ class Page1(QWizardPage):
         # "Back" is pressed
         App.model.acqDict.clear()
         App.model.__init__()
+        # keep the old path until updated
+        App.model.setMdPath(self.rawPath.text())
 
     def addRadioButton(self, choice, default=False):
         rb = QRadioButton(choice)

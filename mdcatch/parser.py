@@ -45,7 +45,7 @@ class Parser:
         self.fn = None
         self.pipeline = DEF_PIPELINE
         self.picker = DEF_PICKER
-        self.size = (LOGPICKER_SIZES[0], LOGPICKER_SIZES[1])
+        self.size = (0, 0)
 
         self.acqDict = dict()
         self.acqDict['Mode'] = 'Linear'
