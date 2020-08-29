@@ -4,10 +4,9 @@
 Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 
 import argparse
-import json
 import os
+import shutil
 import time
-from glob import glob
 import subprocess
 import math
 from emtable import Table  # requires pip install emtable
@@ -16,10 +15,11 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.5"
-CRYOLO_PREDICT = "cryolo_predict.py"
-CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
-CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
+CONDA_ENV = ". ~/rc/conda.rc && conda activate topaz-0.2.4"
+TOPAZ_PREPROCESS = "topaz preprocess"
+TOPAZ_EXTRACT = "topaz extract"
+TOPAZ_CONVERT = "topaz convert"
+TOPAZ_SPLIT = "topaz split"
 DEBUG = 1
 
 
@@ -28,42 +28,34 @@ def run_job(project_dir, args):
     in_mics = args.in_mics
     job_dir = args.out_dir
     thresh = args.threshold
-    box_size = args.box_size
+    diam = args.diam
     model = args.model
-    gpus = args.gpu
+    gpu = args.gpu
     threads = args.threads
+    workers = args.workers
 
     getPath = lambda *arglist: os.path.join(project_dir, *arglist)
 
-    if model == "None":
-        model = CRYOLO_GEN_MODEL
-    else:
+    if model != "None":
         model = getPath(model)
 
-    # Making a cryolo config file
-    json_dict = {"model": {
-        "architecture": "PhosaurusNet",
-        "input_size": 1024,
-        "max_box_per_image": 600,
-        "filter": [
-            0.1,
-            "filtered_tmp/"
-        ]
-    }}
-
-    if box_size:  # is not 0
-        json_dict["model"]["anchors"] = [int(box_size), int(box_size)]
-
-    if DEBUG:
-        print("Using following config.json: ", json_dict)
-
-    with open("config.json", "w") as json_file:
-        json.dump(json_dict, json_file, indent=4)
-
     # Reading the micrographs star file from relion
+    optics = Table(fileName=getPath(in_mics), tableName='optics')
+    angpix = float(optics[0].rlnMicrographPixelSize)
     mictable = Table(fileName=getPath(in_mics), tableName='micrographs')
 
-    # Arranging files for cryolo: making symlinks for mics
+    # calculate downscale factor to get to 4-8 A/px
+    for scale in range(2, 20):
+        angpix_bin = angpix * scale
+        if diam < 300 and (4.0 <= angpix_bin <= 6.0 or angpix > 6.0):
+            break
+        elif diam >= 300 and (6.0 <= angpix_bin <= 8.0 or angpix > 8.0):
+            break
+
+    print("Using downscale factor %d to get %0.2f A/pix for %d A particle" % (
+        scale, angpix_bin, diam))
+
+    # Arranging files for topaz: making symlinks for mics
     done_mics = []
     mic_dirs = []
     if os.path.exists(DONE_MICS):
@@ -75,7 +67,7 @@ def run_job(project_dir, args):
     mic_fns = mictable.getColumnValues("rlnMicrographName")
     input_job = "/".join(mic_fns[0].split("/")[:2])
     keys = ["/".join(i.split("/")[2:]) for i in mic_fns]  # remove JobType/jobXXX
-    values = [os.path.splitext(i)[0] + "_cryolo.star" for i in keys]  # _cryolo.star
+    values = [os.path.splitext(i)[0] + "_topaz.star" for i in keys]  # _topaz.star
     mic_dict = {k: v for k, v in zip(keys, values)}
 
     for mic in mic_dict:
@@ -105,19 +97,17 @@ def run_job(project_dir, args):
         open(RELION_JOB_SUCCESS_FILENAME, "w").close()
         exit(0)
 
-    # Launching cryolo
+    # Launching topaz preprocess
     args_dict = {
-        '--conf': "config.json",
-        '--output': 'output',
-        '--weights': model,
-        '--gpu': "%s" % gpus.replace('"', ''),
-        '--threshold': thresh,
-        '-nc': -1 #threads
+        '--scale': scale,
+        '--destdir': 'preprocessed',
+        '--num-workers': workers,
+        '--num-threads': threads
     }
-    cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
+    cmd = "%s && %s " % (CONDA_ENV, TOPAZ_PREPROCESS)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " --input %s" % i
+        cmd += " %s/*" % i
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -126,51 +116,87 @@ def run_job(project_dir, args):
     if proc.returncode:
         raise Exception("Command failed with return code %d" % proc.returncode)
 
-    # Moving output star files for Relion to use
+    # Launching topaz extract
+    args_dict = {
+        '--radius': int(diam / angpix_bin // 2),
+        '--up-scale': scale,
+        '--threshold': thresh,
+        '--output': 'output/coords.txt',
+        '--num-workers': workers,
+        '--num-threads': threads,
+        '--device': gpu
+    }
+
+    if model != "None":
+        args_dict.update({'--model': model})
+
+    cmd = "%s && %s " % (CONDA_ENV, TOPAZ_EXTRACT)
+    cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
+    cmd += " preprocessed/*.mrc"
+    os.makedirs("output")
+
+    print("Running command:\n{}".format(cmd))
+    proc = subprocess.Popen(cmd, shell=True)
+    proc.communicate()
+
+    if proc.returncode:
+        raise Exception("Command failed with return code %d" % proc.returncode)
+
+    # clean preprocessed dir
+    shutil.rmtree("preprocessed")
+
+    # Launching topaz convert
+    cmd = "%s && %s " % (CONDA_ENV, TOPAZ_CONVERT)
+    cmd += " -o output/coords.star output/coords.txt"
+    print("Running command:\n{}".format(cmd))
+    proc = subprocess.Popen(cmd, shell=True)
+    proc.communicate()
+
+    if proc.returncode:
+        raise Exception("Command failed with return code %d" % proc.returncode)
+
+    # Launching topaz split
+    cmd = "%s && %s " % (CONDA_ENV, TOPAZ_SPLIT)
+    cmd += " --output output output/coords.star"
+    print("Running command:\n{}".format(cmd))
+    proc = subprocess.Popen(cmd, shell=True)
+    proc.communicate()
+
+    if proc.returncode:
+        raise Exception("Command failed with return code %d" % proc.returncode)
+
+    # Move output star files for Relion to use
     with open(DONE_MICS, "a+") as f:
         for mic in mic_dict:
             mic_base = os.path.basename(mic)
-            coord_cryolo = os.path.splitext(mic_base)[0] + ".star"
-            coord_cryolo = getPath(job_dir, "output", "STAR", coord_cryolo)
+            coord_topaz = "output/" + os.path.splitext(mic_base)[0] + ".star"
             coord_relion = mic_dict[mic]
-            # To ensure that cryolo doesn't pick from already done mics
-            if os.path.exists(coord_cryolo):
+            # To ensure that topaz doesn't pick from already done mics
+            if os.path.exists(coord_topaz):
                 f.write("%s\n" % mic)
-                os.rename(coord_cryolo, getPath(job_dir, coord_relion))
+                os.rename(coord_topaz, getPath(job_dir, coord_relion))
                 os.remove(mic)  # clean up
                 if DEBUG:
-                    print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
+                    print("Moved %s to %s" % (coord_topaz, getPath(job_dir, coord_relion)))
 
     # Required output mics star file
-    with open("coords_suffix_cryolo.star", "w") as mics_star:
+    with open("coords_suffix_topaz.star", "w") as mics_star:
         mics_star.write(in_mics)
 
     # Required output nodes star file
     nodes = Table(columns=['rlnPipeLineNodeName', 'rlnPipeLineNodeType'])
-    nodes.addRow(os.path.join(job_dir, "coords_suffix_cryolo.star"), "2")
+    nodes.addRow(os.path.join(job_dir, "coords_suffix_topaz.star"), "2")
     with open("RELION_OUTPUT_NODES.star", "w") as nodes_star:
         nodes.writeStar(nodes_star, tableName="output_nodes")
 
     outputFn = getPath(job_dir, "output_for_relion.star")
     if not os.path.exists(outputFn):
-        # get estimated box size
-        summaryfn = getPath(job_dir, "output/DISTR",
-                            'size_distribution_summary*.txt')
-        with open(glob(summaryfn)[0]) as f:
-            for line in f:
-                if line.startswith("MEAN,"):
-                    estim_sizepx = int(line.split(",")[-1])
-        print("\nFound estimated box size %d px from %s" % (estim_sizepx, f.name))
-    
         # calculate diameter, original (boxSize) and downsampled (boxSizeSmall) box
         optics = Table(fileName=getPath(in_mics), tableName='optics')
         angpix = float(optics[0].rlnMicrographPixelSize)
-        # use + 20% for diameter
-        diam = int(estim_sizepx * angpix * 1.2)
-        # use +30% for box size, make it even
-        boxSize = 1.3 * estim_sizepx
-        boxSize = math.ceil(boxSize / 2.) * 2
-    
+        # use +10% for box size, make it even
+        boxSize = math.ceil(diam * 1.1 / angpix / 2.) * 2
+
         # from relion_it.py script
         # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
         boxSizeSmall = None
@@ -187,17 +213,17 @@ def run_job(project_dir, args):
             if small_box_angpix < 4.25:
                 boxSizeSmall = box
                 break
-    
+
         print("\nEstimated parameters:\n\tDiameter (A): %d\n\tBox size (px): %d\n"
               "\tBox size binned (px): %d" % (diam, boxSize, boxSizeSmall))
-    
+
         # output all params into a star file
-        tableCryolo = Table(columns=['rlnParticleDiameter',
-                                     'rlnOriginalImageSize',
-                                     'rlnImageSize'])
-        tableCryolo.addRow(diam, boxSize, boxSizeSmall)
+        tableTopaz = Table(columns=['rlnParticleDiameter',
+                                    'rlnOriginalImageSize',
+                                    'rlnImageSize'])
+        tableTopaz.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableCryolo.writeStar(f, tableName='cryolo')
+            tableTopaz.writeStar(f, tableName='topaz')
 
     end = time.time()
     diff = end - start
@@ -207,17 +233,18 @@ def run_job(project_dir, args):
 def main():
     """Change to the job working directory, then call run_job()"""
     help = """
-External job for calling cryolo within Relion 3.1.0. Run it in the main Relion project directory, e.g.:
-    external_job_cryolo.py --o External/cryolo_picking --in_mics CtfFind/job004/micrographs_ctf.star --box_size 128 --threshold 0.3 --gpu "0 1"
+External job for calling topaz within Relion 3.1.0. Run it in the main Relion project directory, e.g.:
+    external_job_topaz.py --o External/topaz_picking --in_mics CtfFind/job004/micrographs_ctf.star --diam 120 --threshold 0 --gpu 0
 """
     parser = argparse.ArgumentParser(usage=help)
     parser.add_argument("--in_mics", help="Input micrographs STAR file")
     parser.add_argument("--o", dest="out_dir", help="Output directory name")
     parser.add_argument("--j", dest="threads", help="Number of CPU threads (default = 1)", type=int, default=1)
-    parser.add_argument("--box_size", help="Box size (default = 0 means it's estimated)", type=int, default=0)
-    parser.add_argument("--threshold", help="Threshold for picking (default = 0.3)", type=float, default=0.3)
-    parser.add_argument("--model", help="Cryolo training model (if not specified general is used)", default="None")
-    parser.add_argument("--gpu", help='GPUs to use (e.g. "0 1 2 3")', default="0")
+    parser.add_argument("--workers", dest="workers", help="Number of worker processes (default = 1)", type=int, default=1)
+    parser.add_argument("--diam", help="Particle diameter in A (default = 120)", type=int, default=120)
+    parser.add_argument("--threshold", help="Threshold for picking (default = -6)", type=float, default=-6)
+    parser.add_argument("--model", help="Topaz training model (if not specified default is used)", default="None")
+    parser.add_argument("--gpu", help='GPU to use (default = 0)', default="0")
     parser.add_argument("--pipeline_control", help="Not used here. Required by relion")
 
     args = parser.parse_args()

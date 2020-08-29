@@ -34,18 +34,18 @@ DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 
 # path to EPU session or folder with SerialEM mdoc files
-METADATA_PATH = "/mnt/MetaData/Krios1/Falcon/OTFP"
-#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples"
+METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
+#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU"
 
 # path where Relion projects are created
+# for Scipion mtf, defects, gain and template files are copied here
 PROJECT_PATH = "/cephfs"
 
 # Folder with Relion 3.1 schedules
 SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schedules"
 
-# Scipion pre-processing template and output file
+# Scipion pre-processing template
 JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
-JSON_PATH = "workflow.json"
 
 # main dictionary
 # instrumentID: [name, Cs, TFS camera, Gatan camera]
@@ -56,7 +56,7 @@ SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
               }
 
 ###############################################################################
-# EPU 2.4+ patterns
+# EPU params
 EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
                    'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
                    'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
@@ -67,11 +67,6 @@ GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC",
 
 # change the pattern below if you want to parse movie sums mrc instead
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
-
-###############################################################################
-# SerialEM patterns
-PATTERN_MDOC = ".{1,}\.tif\.mdoc$"
-REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # path to MTF files for Relion (300 kV only)
 # examples: Name-count, Name-linear or Name,
@@ -90,6 +85,11 @@ MOVIE_PATH_DICT = {
     'EF-CCD': '/mnt/Data/%s/%s/',
     'BM-Falcon': '/mnt/Data/%s/%s/'
 }
+
+###############################################################################
+# SerialEM params
+PATTERN_MDOC = "*.tif.mdoc"
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # SerialEM mdoc vars to parse
 SERIALEM_PARAMS = [

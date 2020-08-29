@@ -28,7 +28,6 @@ import os
 import shutil
 import subprocess
 import json
-import time
 from datetime import datetime
 
 from .config import *
@@ -82,7 +81,7 @@ def setupRelion(paramDict):
         if not os.path.exists('Schedules'):
             shutil.copytree(SCHEDULE_PATH, os.getcwd() + '/Schedules')
     except subprocess.CalledProcessError:
-        print("ERROR: Relion 3.1 not found in PATH or Schedules not found!")
+        print("ERROR: relion command not found in PATH or Schedules not found!")
         exit(1)
 
     # setup ACL for uid
@@ -132,67 +131,58 @@ def setupScipion(paramDict):
     os.chdir(prjPath)
     with open(JSON_TEMPLATE, 'r') as f:
         protocolsList = json.load(f)
-        protNames = dict()
+    protNames = dict()
 
-        for i, protDict in enumerate(protocolsList):
-            protClassName = protDict['object.className']
-            protNames[protClassName] = i
+    for i, protDict in enumerate(protocolsList):
+        protClassName = protDict['object.className']
+        protNames[protClassName] = i
 
     bin, gain, defect = precalculateVars(paramDict)
+    for i in [gain, defect, paramDict['MTF']]:
+        if os.path.exists(i):
+            shutil.copyfile(i, os.path.basename(i))
 
     # import movies
     importProt = protocolsList[protNames["ProtImportMovies"]]
-    importProt["filesPath"] = "%s/" % "/".join(paramDict['MoviePath'].split('/')[:-1])
-    if paramDict['MoviePath'].endswith('mrc'):
-        importProt["filesPattern"] = "FoilHole*.mrc"
+
+    if paramDict['Software'] == 'EPU':
+        # get EPU session folder
+        origPath1, origPath2 = paramDict['MoviePath'].split('Images-Disc')
+        importProt["filesPath"] = origPath1
+        importProt["filesPattern"] = "Images-Disc%s" % origPath2
     else:
-        importProt["filesPattern"] = "*.tif"
+        # SerialEM
+        importProt["filesPath"] = "%s/" % "/".join(paramDict['MoviePath'].split('/')[:-1])
+        importProt["filesPattern"] = paramDict['MoviePath'].split('/')[-1]
+
     importProt["voltage"] = float(paramDict['Voltage'])
     importProt["sphericalAberration"] = float(paramDict['Cs'])
     importProt["samplingRate"] = float(paramDict['PixelSpacing'])
     importProt["dosePerFrame"] = float(paramDict['DosePerFrame'])
-    importProt["gainFile"] = gain
-
-    # assign optics
-    opticsProt = protocolsList[protNames["ProtRelionAssignOpticsGroup"]]
-    opticsProt["opticsGroupName"] = paramDict['OpticalGroup']
-    opticsProt["mtfFile"] = paramDict['MTF']
+    importProt["gainFile"] = os.path.join(os.getcwd(), os.path.basename(gain)) if gain else ""
 
     # motioncorr
     movieProt = protocolsList[protNames["ProtMotionCorr"]]
     movieProt["binFactor"] = bin
-    movieProt["defectFile"] = defect
+    movieProt["defectFile"] = os.path.join(os.getcwd(), os.path.basename(defect)) if defect else ""
 
     # gctf
     ctfProt = protocolsList[protNames["ProtGctf"]]
     ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
 
-    # relion Log picker TODO: replace by cryolo!
-    pickProt = protocolsList[protNames["ProtRelionAutopickLoG"]]
-    pickProt["minDiameter"] = paramDict["PtclSizeShort"]
-    pickProt["maxDiameter"] = paramDict["PtclSizeLong"]
-    pickProt["boxSize"] = paramDict['BoxSize']
-
-    # relion extract ptcls
-    extrProt = protocolsList[protNames["ProtRelionExtractParticles"]]
-    extrProt["boxSize"] = paramDict['BoxSize']
-    extrProt["rescaledSize"] = paramDict['BoxSizeSmall']
-    extrProt["backDiameter"] = paramDict['MaskSize']
-
-    if os.path.exists(JSON_PATH):
-        os.remove(JSON_PATH)
-    with open(JSON_PATH, "w") as f:
+    jsonFn = "%s.json" % prjName
+    with open(jsonFn, "w") as f:
         jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
         f.write(jsonStr)
 
     try:
         subprocess.check_output(["which", "scipion"], stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-        print("ERROR: Scipion 3.0 not found in PATH!")
+        print("ERROR: scipion command not found in PATH!")
         exit(1)
 
     cmd = 'scipion python -m pyworkflow.project.scripts.create %s %s' % (
-        prjName, os.path.abspath(JSON_PATH))
+        prjName, os.path.abspath(jsonFn))
     proc = subprocess.run(cmd.split(), check=True)
 
     cmd2 = 'scipion python -m pyworkflow.project.scripts.schedule %s' % prjName
