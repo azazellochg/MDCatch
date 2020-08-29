@@ -1,5 +1,11 @@
 0.9.8:
-    - update Scipion template, fixes for SerialEM option
+    - update Scipion template, fixes for SerialEM option after 0.9.7
+    - prints job time for external jobs
+    - fix "wrong" cryolo model, gpu args
+    - batch increased to 15
+    - add topaz external job (not used yet)
+    - fix save_noDW
+    - use MPIs for ctffind job
 0.9.7:
     - set ACL
     - move more vars to config file
