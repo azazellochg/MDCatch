@@ -55,10 +55,9 @@ def setupRelion(paramDict):
     if paramDict['PtclSizes'][0] != 0:
         mapDict.update({
             'box_size': paramDict['BoxSize'],
-            'mask_size': paramDict['MaskSize'],
-            'box_size_small': paramDict['BoxSizeSmall'],
+            'mask_diam_px': paramDict['MaskSize'],
+            'box_size_bin': paramDict['BoxSizeSmall'],
         })
-
 
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
