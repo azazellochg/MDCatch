@@ -1,7 +1,7 @@
 0.9.9:
     - add different picker options: cryolo, topaz, logpicker (relion)
 0.9.8:
-    - SerialEM / Scipion launch fixes
+    - update Scipion template, fixes for SerialEM option after 0.9.7
     - prints job time for external jobs
     - fix "wrong" cryolo model, gpu args
     - batch increased to 15
