@@ -41,11 +41,12 @@ from .schedule import setupRelion, setupScipion
 
 
 class App(QWizard):
+    """ Main class that runs the GUI. """
     model = Parser()
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent, flags=Qt.WindowFlags())
-        self.title = 'MDCatch v0.9.8 - metadata parser'
+        self.title = 'MDCatch v0.9.9 - metadata parser'
         self.width = 640
         self.height = 320
         self.initUI()
@@ -64,6 +65,7 @@ class App(QWizard):
 
     @staticmethod
     def showDialog(title, text, mtype='error', extra=None):
+        """ Dialog message with a warning or an error. """
         msg = QMessageBox()
         if mtype == 'error':
             msg.setIcon(QMessageBox.Critical)
@@ -78,6 +80,7 @@ class App(QWizard):
 
 
 class Page1(QWizardPage):
+    """ Page 1 with user input params. """
     def __init__(self, parent=None):
         super(Page1, self).__init__(parent)
         self.setSubTitle("Input parameters")
@@ -87,116 +90,118 @@ class Page1(QWizardPage):
         self.setLayout(self.mainLayout)
 
     def group1(self):
+        """ Label widgets at row 0, col 0. """
         vbox = QVBoxLayout()
-        label1 = QLabel('Software')
-        label2 = QLabel('Path')
-        label3 = QLabel('Run pipeline in')
-        label4 = QLabel('Particle picker')
-        label5 = QLabel('Particle size (A)')
-        label5.setToolTip(help_picker)
+        label_soft = QLabel('Software')
+        label_path = QLabel('Path')
+        label_pipeline = QLabel('Run pipeline in')
+        label_picker = QLabel('Particle picker')
+        label_diam = QLabel('Particle diameter (A)')
+        label_diam.setToolTip(help_picker)
 
-        vbox.addWidget(label1, alignment=Qt.Alignment())
-        vbox.addWidget(label2, alignment=Qt.Alignment())
-        vbox.addWidget(label3, alignment=Qt.Alignment())
-        vbox.addWidget(label4, alignment=Qt.Alignment())
-        vbox.addWidget(label5, alignment=Qt.Alignment())
+        vbox.addWidget(label_soft, alignment=Qt.Alignment())
+        vbox.addWidget(label_path, alignment=Qt.Alignment())
+        vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
+        vbox.addWidget(label_picker, alignment=Qt.Alignment())
+        vbox.addWidget(label_diam, alignment=Qt.Alignment())
 
         return vbox
 
     def group2(self):
+        """ Actual input widgets at row 0, col 1. """
         grid = QVBoxLayout()
 
         # software type
-        hbox1 = QHBoxLayout()
-        hbox1.setAlignment(Qt.AlignLeft)
-        btgroup1 = QButtonGroup()
+        hbox_soft = QHBoxLayout()
+        hbox_soft.setAlignment(Qt.AlignLeft)
+        btgroup_soft = QButtonGroup()
 
-        b1 = self.addRadioButton("EPU", default=DEF_SOFTWARE == "EPU")
-        b2 = self.addRadioButton("SerialEM", default=DEF_SOFTWARE == "SerialEM")
+        button_epu = self.addRadioButton("EPU", default=DEF_SOFTWARE == "EPU")
+        button_sem = self.addRadioButton("SerialEM", default=DEF_SOFTWARE == "SerialEM")
 
-        btgroup1.addButton(b1)
-        btgroup1.addButton(b2)
-        btgroup1.buttonClicked.connect(lambda: self.updSoftware(btgroup1))
-        hbox1.addWidget(b1, alignment=Qt.Alignment())
-        hbox1.addWidget(b2, alignment=Qt.Alignment())
-        grid.addLayout(hbox1)
+        btgroup_soft.addButton(button_epu)
+        btgroup_soft.addButton(button_sem)
+        btgroup_soft.buttonClicked.connect(lambda: self.updSoftware(btgroup_soft))
+        hbox_soft.addWidget(button_epu, alignment=Qt.Alignment())
+        hbox_soft.addWidget(button_sem, alignment=Qt.Alignment())
+        grid.addLayout(hbox_soft)
 
         # path box
-        hbox2 = QHBoxLayout()
+        hbox_path = QHBoxLayout()
         self.rawPath = QLineEdit()
         self.rawPath.setMinimumWidth(300)
         self.rawPath.setReadOnly(True)
         self.rawPath.setText(METADATA_PATH)
         self.rawPath.setToolTip(help_message)
 
-        b3 = QPushButton('Browse')
-        b3.setToolTip(help_message)
-        b3.clicked.connect(lambda: self.browseSlot(self.rawPath))
+        button_browse = QPushButton('Browse')
+        button_browse.setToolTip(help_message)
+        button_browse.clicked.connect(lambda: self.browseSlot(self.rawPath))
 
-        hbox2.addWidget(self.rawPath, alignment=Qt.Alignment())
-        hbox2.addWidget(b3, alignment=Qt.Alignment())
-        grid.addLayout(hbox2)
+        hbox_path.addWidget(self.rawPath, alignment=Qt.Alignment())
+        hbox_path.addWidget(button_browse, alignment=Qt.Alignment())
+        grid.addLayout(hbox_path)
 
         # pipeline
-        hbox3 = QHBoxLayout()
-        hbox3.setAlignment(Qt.AlignLeft)
-        btgroup2 = QButtonGroup()
+        hbox_pipeline = QHBoxLayout()
+        hbox_pipeline.setAlignment(Qt.AlignLeft)
+        btgroup_pipeline = QButtonGroup()
 
-        b4 = self.addRadioButton("Relion", default=DEF_PIPELINE=="Relion")
-        b5 = self.addRadioButton("Scipion", default=DEF_PIPELINE=="Scipion")
+        button_relion = self.addRadioButton("Relion", default=DEF_PIPELINE == "Relion")
+        button_scipion = self.addRadioButton("Scipion", default=DEF_PIPELINE == "Scipion")
 
-        btgroup2.addButton(b4)
-        btgroup2.addButton(b5)
-        btgroup2.buttonClicked.connect(lambda: self.updPipeline(btgroup2))
-        hbox3.addWidget(b4, alignment=Qt.Alignment())
-        hbox3.addWidget(b5, alignment=Qt.Alignment())
-        grid.addLayout(hbox3)
+        btgroup_pipeline.addButton(button_relion)
+        btgroup_pipeline.addButton(button_scipion)
+        btgroup_pipeline.buttonClicked.connect(lambda: self.updPipeline(btgroup_pipeline))
+        hbox_pipeline.addWidget(button_relion, alignment=Qt.Alignment())
+        hbox_pipeline.addWidget(button_scipion, alignment=Qt.Alignment())
+        grid.addLayout(hbox_pipeline)
 
         # particle picker
-        hbox4 = QHBoxLayout()
-        hbox4.setAlignment(Qt.AlignLeft)
-        btgroup3 = QButtonGroup()
+        hbox_picker = QHBoxLayout()
+        hbox_picker.setAlignment(Qt.AlignLeft)
+        btgroup_picker = QButtonGroup()
 
-        self.b6 = self.addRadioButton("crYOLO", default=DEF_PICKER == "crYOLO")
-        self.b7 = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
-        self.b8 = self.addRadioButton("LogPicker", default=DEF_PICKER == "LogPicker")
+        self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "crYOLO")
+        self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
+        self.button_logpick = self.addRadioButton("LogPicker", default=DEF_PICKER == "LogPicker")
 
-        btgroup3.addButton(self.b6)
-        btgroup3.addButton(self.b7)
-        btgroup3.addButton(self.b8)
-        btgroup3.buttonClicked.connect(lambda: self.updPicker(btgroup3))
-        hbox4.addWidget(self.b6, alignment=Qt.Alignment())
-        hbox4.addWidget(self.b7, alignment=Qt.Alignment())
-        hbox4.addWidget(self.b8, alignment=Qt.Alignment())
-        grid.addLayout(hbox4)
+        btgroup_picker.addButton(self.button_cryolo)
+        btgroup_picker.addButton(self.button_topaz)
+        btgroup_picker.addButton(self.button_logpick)
+        btgroup_picker.buttonClicked.connect(lambda: self.updPicker(btgroup_picker))
+        hbox_picker.addWidget(self.button_cryolo, alignment=Qt.Alignment())
+        hbox_picker.addWidget(self.button_topaz, alignment=Qt.Alignment())
+        hbox_picker.addWidget(self.button_logpick, alignment=Qt.Alignment())
+        grid.addLayout(hbox_picker)
 
         # size box
-        hbox5 = QHBoxLayout()
-        self.labelSizeMin = QLabel('')
-        self.labelSizeMin.setToolTip(help_picker)
-        hbox5.addWidget(self.labelSizeMin)
+        hbox_diam = QHBoxLayout()
+        self.label_diamMin = QLabel('')
+        self.label_diamMin.setToolTip(help_picker)
+        hbox_diam.addWidget(self.label_diamMin)
 
-        self.size_short = QSpinBox()
-        self.size_short.setToolTip(help_picker)
-        self.size_short.setRange(0, 9999)
-        self.size_short.setValue(LOGPICKER_SIZES[0] if DEF_PICKER != "crYOLO" else 0)
-        self.size_short.setFixedSize(60, 25)
-        hbox5.addWidget(self.size_short)
+        self.spbox_diamMin = QSpinBox()
+        self.spbox_diamMin.setToolTip(help_picker)
+        self.spbox_diamMin.setRange(0, 9999)
+        self.spbox_diamMin.setValue(LOGPICKER_SIZES[0] if DEF_PICKER != "crYOLO" else 0)
+        self.spbox_diamMin.setFixedSize(60, 25)
+        hbox_diam.addWidget(self.spbox_diamMin)
 
-        self.labelSizeMax = QLabel('max')
-        self.labelSizeMax.setToolTip(help_picker)
-        self.labelSizeMax.setVisible(self.b8.isChecked())
-        hbox5.addWidget(self.labelSizeMax)
+        self.label_diamMax = QLabel('max')
+        self.label_diamMax.setToolTip(help_picker)
+        self.label_diamMax.setVisible(self.button_logpick.isChecked())
+        hbox_diam.addWidget(self.label_diamMax)
 
-        self.size_long = QSpinBox()
-        self.size_long.setToolTip(help_picker)
-        self.size_long.setVisible(self.b8.isChecked())
-        self.size_long.setRange(10, 9999)
-        self.size_long.setValue(LOGPICKER_SIZES[1])
-        self.size_long.setFixedSize(60, 25)
-        hbox5.addWidget(self.size_long)
-        hbox5.setAlignment(Qt.AlignLeft)
-        grid.addLayout(hbox5)
+        self.spbox_diamMax = QSpinBox()
+        self.spbox_diamMax.setToolTip(help_picker)
+        self.spbox_diamMax.setVisible(self.button_logpick.isChecked())
+        self.spbox_diamMax.setRange(10, 9999)
+        self.spbox_diamMax.setValue(LOGPICKER_SIZES[1])
+        self.spbox_diamMax.setFixedSize(60, 25)
+        hbox_diam.addWidget(self.spbox_diamMax)
+        hbox_diam.setAlignment(Qt.AlignLeft)
+        grid.addLayout(hbox_diam)
 
         return grid
 
@@ -210,27 +215,27 @@ class Page1(QWizardPage):
 
     def updPicker(self, btgroup):
         bt = btgroup.checkedButton()
-        if self.b6.isChecked():  # crYOLO
-            self.labelSizeMin.setText("")
-            self.size_short.setValue(0)
-            self.labelSizeMax.setVisible(False)
-            self.size_long.setVisible(False)
-        elif self.b7.isChecked():  # Topaz
-            self.labelSizeMin.setText("")
-            self.size_short.setValue(LOGPICKER_SIZES[0])
-            self.labelSizeMax.setVisible(False)
-            self.size_long.setVisible(False)
-        elif self.b8.isChecked():  # LogPicker
-            self.labelSizeMin.setText("min")
-            self.size_short.setValue(LOGPICKER_SIZES[0])
-            self.labelSizeMax.setVisible(True)
-            self.size_long.setVisible(True)
+        if self.button_cryolo.isChecked():  # crYOLO
+            self.label_diamMin.setText("")
+            self.spbox_diamMin.setValue(0)
+            self.label_diamMax.setVisible(False)
+            self.spbox_diamMax.setVisible(False)
+        elif self.button_topaz.isChecked():  # Topaz
+            self.label_diamMin.setText("")
+            self.spbox_diamMin.setValue(LOGPICKER_SIZES[0])
+            self.label_diamMax.setVisible(False)
+            self.spbox_diamMax.setVisible(False)
+        elif self.button_logpick.isChecked():  # LogPicker
+            self.label_diamMin.setText("min")
+            self.spbox_diamMin.setValue(LOGPICKER_SIZES[0])
+            self.label_diamMax.setVisible(True)
+            self.spbox_diamMax.setVisible(True)
 
         App.model.setPicker(bt.text())
-        App.model.setSize(self.size_short.value(), self.size_long.value())
+        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
 
     def browseSlot(self, var):
-        # called when "Browse" is pressed
+        """ Called when "Browse" is pressed. """
         folder = METADATA_PATH if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,
@@ -239,13 +244,14 @@ class Page1(QWizardPage):
             self.refreshPath(path)
 
     def refreshPath(self, path):
-        # update line widget with selected path
+        """ Update line widget with selected path. """
         App.model.setMdPath(path)
         self.rawPath.setText(App.model.getMdPath())
 
     def validatePage(self):
-        # Next is pressed, returns True or False
-        App.model.setSize(self.size_short.value(), self.size_long.value())
+        """ Executed when Next is pressed.
+        Returns True or False. """
+        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
 
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
@@ -271,13 +277,14 @@ class Page1(QWizardPage):
             return True
 
     def reset(self):
-        # "Back" is pressed
+        """ Executed when "Back" is pressed. """
         App.model.acqDict.clear()
         App.model.__init__()
         # keep the old path until updated
         App.model.setMdPath(self.rawPath.text())
 
     def addRadioButton(self, choice, default=False):
+        """ Util func to add QRadioButton widget. """
         rb = QRadioButton(choice)
         if default:
             rb.setChecked(True)
@@ -288,11 +295,13 @@ class Page1(QWizardPage):
 
 
 class Page2(QWizardPage):
+    """ Page 2 with parsed results. """
     def __init__(self, parent=None):
         super(Page2, self).__init__(parent)
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
+        self.doCalcBox = False
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -306,8 +315,7 @@ class Page2(QWizardPage):
         else:  # SerialEM
             App.model.parseImgMdoc(fnList)
 
-        acqDict['Picker'] = App.model.getPicker()
-        acqDict['PtclSizes'] = App.model.getSize()
+        self.addPtclSizeWidgets(acqDict)
         App.model.calcDose()
         App.model.guessDataDir()
 
@@ -318,7 +326,7 @@ class Page2(QWizardPage):
         dosepf = round(float(acqDict['DosePerFrame']), 2)
         px = round(float(acqDict['PixelSpacing']), 4)
 
-        self.name.setText(SCOPE_DICT[scopeID][0])
+        self.scope_name.setText(SCOPE_DICT[scopeID][0])
         self.kv.setText(acqDict['Voltage'])
         self.cs.setText(acqDict['Cs'])
         self.px.setText(str(px))
@@ -329,7 +337,7 @@ class Page2(QWizardPage):
         else:
             self.vpp.setChecked(False)
 
-        self.name2.setText(acqDict['Detector'])
+        self.camera_name.setText(acqDict['Detector'])
         self.mode.setText(acqDict['Mode'])
         self.time.setText(str(time))
         self.frames.setText(acqDict['NumSubFrames'])
@@ -338,6 +346,7 @@ class Page2(QWizardPage):
         self.defects.setText(os.path.basename(acqDict['DefectFile']))
 
     def group1(self):
+        """ Widgets at row 0, col 0. """
         groupBox = QGroupBox("Microscope")
         name = QLabel("Name")
         kv = QLabel("Voltage (kV)")
@@ -345,7 +354,7 @@ class Page2(QWizardPage):
         vpp = QLabel("Phase plate")
         px = QLabel("Pixel size (A)")
 
-        self.name = QLabel()
+        self.scope_name = QLabel()
         self.kv = QLabel()
         self.cs = QLabel()
         self.vpp = QCheckBox()
@@ -355,7 +364,7 @@ class Page2(QWizardPage):
         for num, i in enumerate([name, kv, cs, px, vpp]):
             vbox.addWidget(i, num, 0)
 
-        for num, i in enumerate([self.name, self.kv,
+        for num, i in enumerate([self.scope_name, self.kv,
                                  self.cs, self.px, self.vpp]):
             vbox.addWidget(i, num, 1)
 
@@ -363,8 +372,9 @@ class Page2(QWizardPage):
         return groupBox
 
     def group2(self):
+        """ Widgets at row 0, col 1. """
         groupBox = QGroupBox("Detector")
-        name2 = QLabel("Name")
+        name = QLabel("Name")
         mode = QLabel("Mode")
         time = QLabel("Exposure time (s)")
         frames = QLabel("Frames")
@@ -372,7 +382,7 @@ class Page2(QWizardPage):
         gain = QLabel("Gain reference")
         defects = QLabel("Defects file")
 
-        self.name2 = QLabel()
+        self.camera_name = QLabel()
         self.mode = QLabel()
         self.time = QLabel()
         self.frames = QLabel()
@@ -381,11 +391,11 @@ class Page2(QWizardPage):
         self.dosepf = self.addLine(50, 5, Qt.AlignRight)
 
         vbox = QGridLayout()
-        for num, i in enumerate([name2, mode, time, frames,
+        for num, i in enumerate([name, mode, time, frames,
                                  dosepf, gain, defects]):
             vbox.addWidget(i, num, 0)
 
-        for num, i in enumerate([self.name2, self.mode,
+        for num, i in enumerate([self.camera_name, self.mode,
                                  self.time, self.frames,
                                  self.dosepf, self.gain,
                                  self.defects]):
@@ -394,18 +404,61 @@ class Page2(QWizardPage):
         groupBox.setLayout(vbox)
         return groupBox
 
+    def group3(self):
+        groupBox = QGroupBox("Recommended options")
+
+        box = QLabel("Box size (px)")
+        mask = QLabel("Mask size (px)")
+        box2 = QLabel("Downscale to (px)")
+
+        self.box = self.addLine(50, 4, Qt.AlignRight)
+        self.mask = self.addLine(50, 4, Qt.AlignRight)
+        self.box_bin = self.addLine(50, 4, Qt.AlignRight)
+
+        vbox = QGridLayout()
+        for num, i in enumerate([box, mask, box2]):
+            vbox.addWidget(i, num, 0)
+
+        for num, i in enumerate([self.box, self.mask,
+                                 self.box_bin]):
+            vbox.addWidget(i, num, 1)
+
+        groupBox.setLayout(vbox)
+
+        return groupBox
+
+    def addPtclSizeWidgets(self, acqDict):
+        picker = App.model.getPicker()
+        sizes = App.model.getSize()
+        acqDict['PtclSizes'] = sizes
+        acqDict['Picker'] = picker
+
+        if picker == 'crYOLO' and sizes[0] == 0:
+            pass  # automated estimation, no params needed
+        else:
+            self.doCalcBox = True
+            App.model.calcBox(picker)
+            self.mainLayout.addWidget(self.group3(), 1, 0)
+            self.box.setText(acqDict['BoxSize'])
+            self.mask.setText(acqDict['MaskSize'])
+            self.box_bin.setText(acqDict['BoxSizeSmall'])
+
     def onFinish(self):
-        # Finish pressed, we need to update all editable vars
+        """ Finish is pressed, we need to update all editable vars. """
         App.model.acqDict['User'] = App.model.getUser()
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
 
-        if DEBUG:
-            print("\nFinal parameters:\n")
-            for k, v in sorted(App.model.acqDict.items()):
-                print(k, v)
-            print('\n')
+        if self.doCalcBox:
+            App.model.acqDict['BoxSize'] = self.box.text()
+            App.model.acqDict['MaskSize'] = self.mask.text()
+            App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
+
+        print("\nFinal parameters:\n")
+        for k, v in sorted(App.model.acqDict.items()):
+            print(k, v)
+        print('\n')
 
         if App.model.getPipeline() == 'Relion':
             setupRelion(App.model.acqDict)
@@ -413,6 +466,7 @@ class Page2(QWizardPage):
             setupScipion(App.model.acqDict)
 
     def addLine(self, size, length, align):
+        """ Util func to add LineEdit widget. """
         line = QLineEdit()
         line.setMinimumWidth(size)
         line.setMaximumWidth(size)

@@ -39,7 +39,7 @@ TOPAZ_SIZE = 150  # diameter in A for Topaz
 
 # path to EPU session or folder with SerialEM mdoc files
 METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
-#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU"
+#METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples/EPU"
 
 # path where Relion projects are created
 # for Scipion mtf, defects, gain and template files are copied here
@@ -126,6 +126,6 @@ help_message = """Select the following folder:\n\n
 
 # help message for particle size
 help_picker = """Provide particle size in Angstroms.\n\n
-   - crYOLO can estimate it automatically (default=0)\n
-   - Topaz requires the size to remove neighboring picks\n
-   - LogPicker requires min and max diameter"""
+   - crYOLO can estimate it automatically (set this to 0)\n
+   - Topaz requires this parameter to remove neighboring picks\n
+   - LogPicker requires Min and Max diameter"""

@@ -177,6 +177,39 @@ class Parser:
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
+    def calcBox(self, picker):
+        """ Calculate box, mask, downsample. """
+        minSize, maxSize = self.acqDict['PtclSizes']
+        ptclSizeAng = max(minSize, maxSize) if picker == 'LogPicker' else minSize
+        angpix = float(self.acqDict['PixelSpacing'])
+
+        if self.acqDict['Mode'] == 'Super-resolution':
+            # since we always bin by 2 in mc if using super-res
+            angpix = angpix * 2
+
+        ptclSizePx = float(ptclSizeAng) / angpix
+        # use +20% for mask size
+        self.acqDict['MaskSize'] = str(math.ceil(1.2 * ptclSizePx))
+        # use +30% for box size, make it even
+        boxSize = 1.3 * ptclSizePx
+        self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
+
+        # from relion_it.py script
+        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
+        for box in (32, 48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+                    360, 384, 400, 420, 450, 480, 512, 640, 768,
+                    896, 1024):
+            # Don't go larger than the original box
+            if box > boxSize:
+                self.acqDict['BoxSizeSmall'] = str(boxSize)
+                break
+            # If Nyquist freq. is better than 8.5 A, use this
+            # downscaled box, otherwise continue to next size up
+            small_box_angpix = angpix * boxSize / box
+            if small_box_angpix < 4.25:
+                self.acqDict['BoxSizeSmall'] = str(box)
+                break
+
     def guessDataDir(self, wait=False):
         """ Guess folder name with movies, gain and defects files. """
         movieDir, gainFn, defFn = 'None', 'None', 'None'

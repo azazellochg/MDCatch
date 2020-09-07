@@ -44,12 +44,21 @@ def setupRelion(paramDict):
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup'],
                'size_min': paramDict['PtclSizes'][0],
-               'size_max': paramDict['PtclSizes'][1]}
+               'size_max': paramDict['PtclSizes'][1],
+               }
 
     pickerSchedule = {'crYOLO': 'preprocess-cryolo',
                       'Topaz': 'preprocess-topaz',
                       'LogPicker': 'preprocess-logpicker'}
     preprocess_schd = pickerSchedule[paramDict['Picker']]
+
+    if paramDict['PtclSizes'][0] != 0:
+        mapDict.update({
+            'box_size': paramDict['BoxSize'],
+            'mask_size': paramDict['MaskSize'],
+            'box_size_small': paramDict['BoxSizeSmall'],
+        })
+
 
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
@@ -71,6 +80,9 @@ def setupRelion(paramDict):
         # SerialEM: Movies -> Raw path folder
         origPath1 = paramDict['MoviePath'].split('*.tif')[0]
         mapDict['movies_wildcard'] = 'Movies/*.tif'
+
+    if DEBUG:
+        print("Params passed to Relion: ", mapDict)
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
