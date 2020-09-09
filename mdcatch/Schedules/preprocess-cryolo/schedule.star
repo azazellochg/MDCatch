@@ -22,7 +22,8 @@ _rlnScheduleFloatVariableResetValue #3
   box_size   0.000000   0.000000
 box_size_bin    64.000000    64.000000 
 cryolo_thresh     0.300000     0.300000
-do_at_most     15.000000    15.000000 
+do_at_most     5.000000    5.000000
+count_parts    0.000000    0.000000
  dose_rate     1.000000     1.000000
  mask_diam   200.000000   200.000000 
  mask_diam_px  200.000000   200.000000 
@@ -92,6 +93,7 @@ box_size_bin=STAR_cryoloboxbinned_zero float=read_star box_size_bin cryoloboxbin
 mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero
 tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
 mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin
+count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star undefined
 
 
 # version 30001

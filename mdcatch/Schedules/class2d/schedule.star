@@ -14,7 +14,9 @@ data_schedule_floats
 loop_ 
 _rlnScheduleFloatVariableName #1 
 _rlnScheduleFloatVariableValue #2 
-_rlnScheduleFloatVariableResetValue #3 
+_rlnScheduleFloatVariableResetValue #3
+count_parts    0.000000    0.000000
+batch_min  5000.000000 5000.000000
  mask_diam   0.000000   0.000000
 nr_cls    20.000000    20.000000
   wait_sec    60.000000   60.000000
@@ -28,7 +30,8 @@ data_schedule_bools
 loop_ 
 _rlnScheduleBooleanVariableName #1 
 _rlnScheduleBooleanVariableValue #2 
-_rlnScheduleBooleanVariableResetValue #3 
+_rlnScheduleBooleanVariableResetValue #3
+batch_exists            0            0
 batch_ready            0            0
 size_provided          0            0
 
@@ -56,7 +59,9 @@ _rlnScheduleOperatorOutput #3
 _rlnScheduleOperatorInput1 #4 
 _rlnScheduleOperatorInput2 #5 
 WAIT_wait_sec       wait  undefined   wait_sec  undefined
-batch_ready=EXISTS_extracted_batch bool=file_exists batch_ready extracted_batch  undefined
+batch_exists=EXISTS_extracted_batch bool=file_exists batch_ready extracted_batch  undefined
+batch_ready=count_parts_GT_batch_min bool=gt batch_ready count_parts batch_min
+count_parts=COUNT_IMGS_extracted_batch_undefined float=count_images count_parts extracted_batch undefined
 size_provided=mask_diam_GT_zero bool=gt size_provided mask_diam zero
 mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero
 
@@ -83,8 +88,10 @@ _rlnScheduleEdgeOutputNodeName #2
 _rlnScheduleEdgeIsFork #3 
 _rlnScheduleEdgeOutputNodeNameIfTrue #4 
 _rlnScheduleEdgeBooleanVariable #5 
-WAIT_wait_sec batch_ready=EXISTS_extracted_batch 0 undefined  undefined
-batch_ready=EXISTS_extracted_batch WAIT_wait_sec 1 size_provided=mask_diam_GT_zero batch_ready
+WAIT_wait_sec batch_exists=EXISTS_extracted_batch 0 undefined  undefined
+batch_exists=EXISTS_extracted_batch count_parts=COUNT_IMGS_extracted_batch_undefined 0 undefined  undefined
+count_parts=COUNT_IMGS_extracted_batch_undefined batch_ready=count_parts_GT_batch_min 0 undefined undefined
+batch_ready=count_parts_GT_batch_min WAIT_wait_sec 1 size_provided=mask_diam_GT_zero batch_ready
 size_provided=mask_diam_GT_zero mask_diam=STAR_cryolodiam_zero 1 class2d size_provided
 mask_diam=STAR_cryolodiam_zero class2d 0 undefined  undefined
 class2d WAIT_wait_sec 0  undefined  undefined

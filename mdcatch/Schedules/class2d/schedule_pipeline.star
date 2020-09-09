@@ -32,15 +32,6 @@ Schedules/class2d/class2d/run_it020_model.star            8
 
 # version 30001
 
-data_pipeline_input_edges
-
-loop_ 
-_rlnPipeLineEdgeFromNode #1 
-_rlnPipeLineEdgeProcess #2 
-
-
-# version 30001
-
 data_pipeline_output_edges
 
 loop_ 

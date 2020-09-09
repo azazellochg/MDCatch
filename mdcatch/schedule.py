@@ -56,7 +56,7 @@ def setupRelion(paramDict):
         mapDict.update({
             'box_size': paramDict['BoxSize'],
             'mask_diam_px': paramDict['MaskSize'],
-            'mask_diam': int(int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])),
+            'mask_diam': int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing']),
             'box_size_bin': paramDict['BoxSizeSmall'],
         })
 
@@ -138,7 +138,9 @@ def setupRelion(paramDict):
         if DEBUG:
             print(cmd)
         # now use Popen - without waiting for return
-        proc = subprocess.Popen(cmd.split(), universal_newlines=True)
+        with open("relion_schedules.log", "w") as fnLog:
+            proc = subprocess.Popen(cmd.split(), universal_newlines=True,
+                                    stdout=fnLog, stderr=subprocess.STDOUT)
 
 
 def setupScipion(paramDict):
