@@ -20,7 +20,7 @@ _rlnScheduleFloatVariableResetValue #3
     batch   20000.000000  20000.000000
   size_min  0.000000   0.000000
   size_max  0.000000   0.000000
-  box_size   256.000000   256.000000
+  box_size   0.000000   0.000000
 box_size_bin    64.000000    64.000000 
 count_parts     0.000000     0.000000
 count_mics      0.000000     0.000000
@@ -91,19 +91,14 @@ has_copied_cryolostar=EXISTS_cryolostar_copy bool=file_exists has_copied_cryolos
 COPY_cryolostar_TO_cryolostar_copy  copy_file  undefined cryolostar cryolostar_copy 
 COPY_extracted_star_TO_extracted_batch  copy_file  undefined extracted_star extracted_batch
 COPY_mics_to_pick_src_TO_mics_to_pick_dst  copy_file  undefined mics_to_pick_src mics_to_pick_dst
+batch_ready=count_parts_GE_batch    bool=ge batch_ready count_parts      batch
 WAIT_wait_sec       wait  undefined   wait_sec  undefined
-size_provided=size_min_GT_zero bool=gt size_provided size_min zero
+size_provided=box_size_GT_zero bool=gt size_provided box_size zero
 box_size=STAR_cryolobox_zero float=read_star   box_size  cryolobox       zero
 box_size_bin=STAR_cryoloboxbinned_zero float=read_star box_size_bin cryoloboxbinned       zero
-count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs float=count_images count_mics_curr mics_to_pick_src  micrographs
-count_mics=SET_count_mics_curr float=set count_mics count_mics_curr  undefined
-count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star  undefined 
-batch_ready=count_parts_GE_batch    bool=ge batch_ready count_parts      batch
 mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero
 tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
-mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin 
-end=count_mics_curr_EQ_count_mics bool=eq end count_mics_curr count_mics
-EXIT exit undefined undefined undefined
+mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin
 
 
 # version 30001
@@ -137,8 +132,8 @@ importmovies motioncorr            0  undefined  undefined
 motioncorr    ctffind            0  undefined  undefined 
 ctffind COPY_mics_to_pick_src_TO_mics_to_pick_dst            0 undefined undefined
 COPY_mics_to_pick_src_TO_mics_to_pick_dst cryolopicker importmovies 1 batch_ready
-cryolopicker size_provided=size_min_GT_zero 0 undefined undefined
-size_provided=size_min_GT_zero has_copied_cryolostar=EXISTS_cryolostar_copy 1 extract size_provided
+cryolopicker size_provided=box_size_GT_zero 0 undefined undefined
+size_provided=box_size_GT_zero has_copied_cryolostar=EXISTS_cryolostar_copy 1 extract size_provided
 has_copied_cryolostar=EXISTS_cryolostar_copy COPY_cryolostar_TO_cryolostar_copy  1  extract  has_copied_cryolostar
 COPY_cryolostar_TO_cryolostar_copy mask_diam=STAR_cryolodiam_zero 0 undefined undefined
 mask_diam=STAR_cryolodiam_zero tmp=DIVIDE_mask_diam_angpix 0  undefined  undefined
@@ -150,7 +145,3 @@ extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefine
 count_parts=COUNT_IMGS_extracted_star_undefined batch_ready=count_parts_GE_batch   0  undefined  undefined
 batch_ready=count_parts_GE_batch COPY_extracted_star_TO_extracted_batch 1 importmovies batch_ready
 COPY_extracted_star_TO_extracted_batch importmovies 0  undefined  undefined
-
-#count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs end=count_mics_curr_EQ_count_mics 0 undefined undefined
-#end=count_mics_curr_EQ_count_mics count_mics=SET_count_mics_curr 1 EXIT end
-#count_mics=SET_count_mics_curr importmovies 0 undefined undefined

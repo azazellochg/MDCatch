@@ -56,6 +56,7 @@ def setupRelion(paramDict):
         mapDict.update({
             'box_size': paramDict['BoxSize'],
             'mask_diam_px': paramDict['MaskSize'],
+            'mask_diam': int(paramDict['MaskSize'] * bin * paramDict['PixelSpacing']),
             'box_size_bin': paramDict['BoxSizeSmall'],
         })
 
@@ -130,10 +131,8 @@ def setupRelion(paramDict):
     cmdList = list()
     cmdList.append('relion_scheduler --schedule %s --run --pipeline_control Schedules/%s/ &' % (
         preprocess_schd, preprocess_schd))
+    cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %s' % mapDict.get('mask_diam', 0))
     cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
-    cmdList.append('relion_scheduler --schedule round2 --set_var angpix --value %s' % mapDict['angpix'])
-    cmdList.append('relion_scheduler --schedule round2 --set_var motioncorr_bin --value %s' % mapDict['motioncorr_bin'])
-    cmdList.append('relion_scheduler --schedule round2 --run --pipeline_control Schedules/round2/ &')
 
     for cmd in cmdList:
         if DEBUG:
