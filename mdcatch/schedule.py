@@ -56,7 +56,7 @@ def setupRelion(paramDict):
         mapDict.update({
             'box_size': paramDict['BoxSize'],
             'mask_diam_px': paramDict['MaskSize'],
-            'mask_diam': int(paramDict['MaskSize'] * bin * paramDict['PixelSpacing']),
+            'mask_diam': int(int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])),
             'box_size_bin': paramDict['BoxSizeSmall'],
         })
 
