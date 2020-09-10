@@ -75,7 +75,7 @@ _rlnScheduleJobNameOriginal #1
 _rlnScheduleJobName #2 
 _rlnScheduleJobMode #3 
 _rlnScheduleJobHasStarted #4 
-class2d class2d overwrite     0
+class2d_first class2d_first overwrite     0
 
 
 # version 30001
@@ -92,6 +92,6 @@ WAIT_wait_sec batch_exists=EXISTS_extracted_batch 0 undefined  undefined
 batch_exists=EXISTS_extracted_batch WAIT_wait_sec 1 count_parts=COUNT_IMGS_extracted_batch_undefined batch_exists
 count_parts=COUNT_IMGS_extracted_batch_undefined batch_ready=count_parts_GT_batch_min 0 undefined undefined
 batch_ready=count_parts_GT_batch_min WAIT_wait_sec 1 size_provided=mask_diam_GT_zero batch_ready
-size_provided=mask_diam_GT_zero mask_diam=STAR_cryolodiam_zero 1 class2d size_provided
-mask_diam=STAR_cryolodiam_zero class2d 0 undefined  undefined
-class2d WAIT_wait_sec 0  undefined  undefined
+size_provided=mask_diam_GT_zero mask_diam=STAR_cryolodiam_zero 1 class2d_first size_provided
+mask_diam=STAR_cryolodiam_zero class2d_first 0 undefined  undefined
+class2d_first WAIT_wait_sec 0  undefined  undefined
