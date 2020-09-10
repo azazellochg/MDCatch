@@ -6,6 +6,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
+import shutil
 import time
 from glob import glob
 import subprocess
@@ -140,6 +141,9 @@ def run_job(project_dir, args):
                 os.remove(mic)  # clean up
                 if DEBUG:
                     print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
+
+    # clean filtered_tmp dir
+    shutil.rmtree("filtered_tmp")
 
     # Required output mics star file
     with open("coords_suffix_cryolo.star", "w") as mics_star:

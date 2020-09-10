@@ -135,7 +135,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_EXTRACT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     cmd += " preprocessed/*.mrc"
-    os.makedirs("output")
+    os.makedirs("output", exist_ok=True)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -180,6 +180,9 @@ def run_job(project_dir, args):
                 os.remove(mic)  # clean up
                 if DEBUG:
                     print("Moved %s to %s" % (coord_topaz, getPath(job_dir, coord_relion)))
+
+    # clean output dir
+    shutil.rmtree("output")
 
     # Required output mics star file
     with open("coords_suffix_topaz.star", "w") as mics_star:
