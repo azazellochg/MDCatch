@@ -41,7 +41,7 @@ nr_classes $$nr_cls
 nr_threads          8 
 offset_range          5 
 offset_step          1 
-other_args "--free_gpu_memory 2000" 
+other_args "--free_gpu_memory 3000"
 particle_diameter $$mask_diam 
 psi_sampling          6 
       qsub       qsub 
