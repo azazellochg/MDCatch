@@ -59,7 +59,7 @@ _rlnScheduleOperatorOutput #3
 _rlnScheduleOperatorInput1 #4 
 _rlnScheduleOperatorInput2 #5 
 WAIT_wait_sec       wait  undefined   wait_sec  undefined
-batch_exists=EXISTS_extracted_batch bool=file_exists batch_ready extracted_batch  undefined
+batch_exists=EXISTS_extracted_batch bool=file_exists batch_exists extracted_batch  undefined
 batch_ready=count_parts_GT_batch_min bool=gt batch_ready count_parts batch_min
 count_parts=COUNT_IMGS_extracted_batch_undefined float=count_images count_parts extracted_batch undefined
 size_provided=mask_diam_GT_zero bool=gt size_provided mask_diam zero
