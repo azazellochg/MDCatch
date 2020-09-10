@@ -24,8 +24,6 @@
 # *
 # **************************************************************************
 
-import os
-import subprocess
 # use polling as required for watchdog over NFS/CIFS
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import RegexMatchingEventHandler
@@ -73,23 +71,16 @@ def start_app(mdFn):
         mdPath = "/".join(mdFn.split("/")[:-4])
     else:
         mdPath = "/".join(mdFn.split("/")[:-1])
-    mdFolder = os.path.basename(mdPath)
     model = Parser()
     model.setSoftware(DEF_SOFTWARE)
     model.setPipeline(DEF_PIPELINE)
     model.setMdPath(mdPath)
     model.setFn(mdFn)
 
-    username = mdFolder.split("_")[1]
-    uid = mapUserid(username)
-    model.setUser(username, uid)
-    model.acqDict['User'] = model.getUser()
-
     if DEBUG:
         print("\n\nInput params: ",
               model.getSoftware(),
               model.getMdPath(),
-              model.getUser(),
               model.getPipeline())
         print("\nFiles found: %s\n" % mdFn) if DEBUG else ""
 
@@ -111,20 +102,3 @@ def start_app(mdFn):
         setupRelion(model.acqDict)
     else:
         setupScipion(model.acqDict)
-
-
-def mapUserid(login):
-    # find uid from a username using NIS database
-    cmd = "/usr/bin/ypmatch %s passwd" % login
-    try:
-        res = subprocess.check_output(cmd.split())
-    except subprocess.CalledProcessError:
-        print("ERROR: username %s not found! Using default uid: %s" % (
-            login, DEF_USER[1]))
-        return DEF_USER[1]
-    except FileNotFoundError:
-        print("ERROR: command %s not found! Using default uid: %s" % (
-            cmd.split()[0], DEF_USER[1]))
-        return DEF_USER[1]
-    else:
-        return str(res).split(":")[2]

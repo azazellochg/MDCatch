@@ -28,9 +28,9 @@ import os
 import shutil
 import subprocess
 import json
-from datetime import datetime
 
-from .config import *
+from .utils.misc import precalculateVars, getPrjName
+from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH
 
 
 def setupRelion(paramDict):
@@ -208,25 +208,3 @@ def setupScipion(paramDict):
 
     cmd2 = 'scipion python -m pyworkflow.project.scripts.schedule %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
-
-
-def getPrjName(paramDict):
-    """ Util func to get project name. """
-    # project name = username_scope_date_time
-    username = paramDict['User'][0]
-    scope = SCOPE_DICT[paramDict['MicroscopeID']][0]
-    dt = datetime.now()
-    dt = dt.strftime('%d-%m-%Y_%H%M')
-    prjName = username + '_' + scope + '_' + dt
-
-    return prjName
-
-
-def precalculateVars(paramDict):
-    """ Get binning, gain and defect files. """
-    # set motioncor bin to 2 if using super-res data
-    bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-    gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
-    defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-
-    return bin, gain, defect

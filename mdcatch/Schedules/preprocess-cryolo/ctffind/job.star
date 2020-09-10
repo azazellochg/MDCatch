@@ -29,7 +29,7 @@ fn_gctf_exe /public/EM/Gctf/bin/Gctf
    gpu_ids         "" 
 input_star_mics Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star
 min_dedicated         24 
-    nr_mpi         15
+    nr_mpi         5
 other_args         "" 
 other_gctf_args         "" 
  phase_max        180 

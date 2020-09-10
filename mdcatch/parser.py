@@ -47,15 +47,17 @@ class Parser:
         self.picker = DEF_PICKER
         self.size = (0, 0)
 
-        self.acqDict = dict()
-        self.acqDict['Mode'] = 'Linear'
-        self.acqDict['NumSubFrames'] = '0'
-        self.acqDict['Dose'] = '0'
-        self.acqDict['OpticalGroup'] = 'opticsGroup1'
-        self.acqDict['PhasePlateUsed'] = 'false'
-        self.acqDict['GainReference'] = 'None'
-        self.acqDict['DefectFile'] = 'None'
-        self.acqDict['MTF'] = 'None'
+        self.acqDict = {
+            'Mode': 'Linear',
+            'NumSubFrames': '0',
+            'Dose': '0',
+            'OpticalGroup': 'opticsGroup1',
+            'PhasePlateUsed': 'false',
+            'GainReference': 'None',
+            'DefectFile': 'None',
+            'MTF': 'None'
+        }
+
 
     def setMdPath(self, path):
         self.mdPath = path

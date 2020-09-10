@@ -36,6 +36,7 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
 from PyQt5.QtCore import Qt
 
 from .config import *
+from .utils.misc import getUsername
 from .parser import Parser
 from .schedule import setupRelion, setupScipion
 
@@ -255,6 +256,9 @@ class Page1(QWizardPage):
 
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
+
+        username, uid = getUsername(App.model.getMdPath())
+        App.model.setUser(username, uid)
 
         if DEBUG:
             print("\n\nInput params: ",

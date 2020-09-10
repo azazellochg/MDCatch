@@ -15,7 +15,7 @@ Gctf executable: == /public/EM/Gctf/bin/Gctf
 Which GPUs to use: == 
 Input micrographs STAR file: == Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star
 Minimum dedicated cores per node: == 24
-Number of MPI procs: == 15
+Number of MPI procs: == 5
 Additional arguments: == 
 Other Gctf options: == 
 Phase shift (deg) - Max: == 180

@@ -28,7 +28,7 @@
 DEBUG = 1
 
 # daemon mode vars
-DEF_USER = ("gsharov", 26096)  # default name: (username, uid)
+DEF_USER = ("emuser", 11048)  # default name: (username, uid)
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_PICKER = "crYOLO"  # default particle picker: crYOLO or Topaz or LogPicker
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
