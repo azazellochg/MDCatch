@@ -29,6 +29,7 @@ from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import RegexMatchingEventHandler
 
 from .config import *
+from .utils.misc import getUsername
 from .parser import Parser
 from .schedule import setupRelion, setupScipion
 
@@ -77,10 +78,14 @@ def start_app(mdFn):
     model.setMdPath(mdPath)
     model.setFn(mdFn)
 
+    username, uid = getUsername(mdPath)
+    model.setUser(username, uid)
+
     if DEBUG:
         print("\n\nInput params: ",
               model.getSoftware(),
               model.getMdPath(),
+              model.getUser(),
               model.getPipeline())
         print("\nFiles found: %s\n" % mdFn) if DEBUG else ""
 
