@@ -224,7 +224,7 @@ def run_job(project_dir, args):
                                     'rlnImageSize'])
         tableTopaz.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableTopaz.writeStar(f, tableName='topaz')
+            tableTopaz.writeStar(f, tableName='picker')
 
     end = time.time()
     diff = end - start

@@ -197,7 +197,7 @@ def run_job(project_dir, args):
                                      'rlnImageSize'])
         tableCryolo.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableCryolo.writeStar(f, tableName='cryolo')
+            tableCryolo.writeStar(f, tableName='picker')
 
     end = time.time()
     diff = end - start

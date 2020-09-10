@@ -34,7 +34,7 @@ Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star            1
 Schedules/preprocess-cryolo/motioncorr/logfile.pdf           13
 Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star            1
 Schedules/preprocess-cryolo/ctffind/logfile.pdf           13
-Schedules/preprocess-cryolo/cryolopicker/coords_suffix_autopick.star            2
+Schedules/preprocess-cryolo/cryolopicker/coords_suffix_cryolo.star            2
 Schedules/preprocess-cryolo/extract/particles.star            3
  
 
@@ -49,7 +49,7 @@ Schedules/preprocess-cryolo/importmovies/movies.star Schedules/preprocess-cryolo
 Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star Schedules/preprocess-cryolo/ctffind/
 Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star Schedules/preprocess-cryolo/cryolopicker/
 Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star Schedules/preprocess-cryolo/extract/
-Schedules/preprocess-cryolo/cryolopicker/coords_suffix_autopick.star Schedules/preprocess-cryolo/extract/
+Schedules/preprocess-cryolo/cryolopicker/coords_suffix_cryolo.star Schedules/preprocess-cryolo/extract/
  
 
 # version 30001
@@ -63,6 +63,6 @@ Schedules/preprocess-cryolo/importmovies/ Schedules/preprocess-cryolo/importmovi
 Schedules/preprocess-cryolo/motioncorr/ Schedules/preprocess-cryolo/motioncorr/corrected_micrographs.star
 Schedules/preprocess-cryolo/ctffind/ Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star
 Schedules/preprocess-cryolo/ctffind/ Schedules/preprocess-cryolo/ctffind/logfile.pdf
-Schedules/preprocess-cryolo/cryolopicker/ Schedules/preprocess-cryolo/cryolopicker/coords_suffix_autopick.star
+Schedules/preprocess-cryolo/cryolopicker/ Schedules/preprocess-cryolo/cryolopicker/coords_suffix_cryolo.star
 Schedules/preprocess-cryolo/extract/ Schedules/preprocess-cryolo/extract/particles.star
  
