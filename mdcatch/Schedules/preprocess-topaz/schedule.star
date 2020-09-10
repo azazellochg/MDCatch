@@ -55,11 +55,8 @@ loop_
 _rlnScheduleStringVariableName #1 
 _rlnScheduleStringVariableValue #2 
 _rlnScheduleStringVariableResetValue #3 
- topazbox Schedules/preprocess-topaz/topazpicker/output_for_relion.star,picker,rlnOriginalImageSize Schedules/preprocess-topaz/topazpicker/output_for_relion.star,picker,rlnOriginalImageSize
-topazboxbinned Schedules/preprocess-topaz/topazpicker/output_for_relion.star,picker,rlnImageSize Schedules/preprocess-topaz/topazpicker/output_for_relion.star,picker,rlnImageSize
-topazdiam Schedules/preprocess-topaz/topazpicker/output_for_relion.star,picker,rlnParticleDiameter Schedules/preprocess-topaz/topazpicker/output_for_relion.star,picker,rlnParticleDiameter
 topazstar Schedules/preprocess-topaz/topazpicker/output_for_relion.star Schedules/preprocess-topaz/topazpicker/output_for_relion.star
-topazstar_copy Work/picker_params.star Work/picker_params.star 
+topazstar_copy Work/picker_params.star Work/picker_params.star
 defect_file         ""         "" 
 extracted_batch Work/particles_batch.star Work/particles_batch.star
 extracted_star Schedules/preprocess-topaz/extract/particles.star Schedules/preprocess-topaz/extract/particles.star
@@ -86,11 +83,6 @@ COPY_topazstar_TO_topazstar_copy  copy_file  undefined topazstar topazstar_copy
 COPY_extracted_star_TO_extracted_batch  copy_file  undefined extracted_star extracted_batch
 COPY_mics_to_pick_src_TO_mics_to_pick_dst  copy_file  undefined mics_to_pick_src mics_to_pick_dst
 WAIT_wait_sec       wait  undefined   wait_sec  undefined
-box_size=STAR_topazbox_zero float=read_star   box_size  topazbox       zero
-box_size_bin=STAR_topazboxbinned_zero float=read_star box_size_bin topazboxbinned       zero
-mask_diam=STAR_topazdiam_zero float=read_star  mask_diam topazdiam       zero
-tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
-mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin
 count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star undefined
 
 
@@ -127,12 +119,7 @@ ctffind COPY_mics_to_pick_src_TO_mics_to_pick_dst            0 undefined undefin
 COPY_mics_to_pick_src_TO_mics_to_pick_dst topazpicker 0 undefined undefined
 topazpicker has_copied_topazstar=EXISTS_topazstar_copy 0 undefined undefined
 has_copied_topazstar=EXISTS_topazstar_copy COPY_topazstar_TO_topazstar_copy  1  extract  has_copied_topazstar
-COPY_topazstar_TO_topazstar_copy mask_diam=STAR_topazdiam_zero 0 undefined undefined
-mask_diam=STAR_topazdiam_zero tmp=DIVIDE_mask_diam_angpix 0  undefined  undefined
-tmp=DIVIDE_mask_diam_angpix mask_diam_px=DIVIDE_tmp_motioncorr_bin   0  undefined  undefined
-mask_diam_px=DIVIDE_tmp_motioncorr_bin box_size=STAR_topazbox_zero   0  undefined  undefined
-box_size=STAR_topazbox_zero box_size_bin=STAR_topazboxbinned_zero   0  undefined  undefined
-box_size_bin=STAR_topazboxbinned_zero extract 0  undefined  undefined
+COPY_topazstar_TO_topazstar_copy extract 0  undefined  undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
 count_parts=COUNT_IMGS_extracted_star_undefined COPY_extracted_star_TO_extracted_batch 0  undefined  undefined
 COPY_extracted_star_TO_extracted_batch WAIT_wait_sec 0  undefined  undefined
