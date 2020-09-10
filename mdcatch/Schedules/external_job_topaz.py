@@ -66,6 +66,7 @@ def run_job(project_dir, args):
         print("Current done_mics: ", done_mics)
 
     mic_fns = mictable.getColumnValues("rlnMicrographName")
+    mic_ext = os.path.splitext(mic_fns[0])[1]
     input_job = "/".join(mic_fns[0].split("/")[:2])
     keys = ["/".join(i.split("/")[2:]) for i in mic_fns]  # remove JobType/jobXXX
     values = [os.path.splitext(i)[0] + "_topaz.star" for i in keys]  # _topaz.star
@@ -108,7 +109,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_PREPROCESS)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " %s/*" % i
+        cmd += " %s/*%s" % (i, mic_ext)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
