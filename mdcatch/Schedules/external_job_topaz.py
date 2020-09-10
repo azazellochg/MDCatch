@@ -15,7 +15,7 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate topaz-0.2.4"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate topaz-0.2.4"
 TOPAZ_PREPROCESS = "topaz preprocess"
 TOPAZ_EXTRACT = "topaz extract"
 TOPAZ_CONVERT = "topaz convert"

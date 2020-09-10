@@ -21,7 +21,7 @@ _rlnScheduleFloatVariableResetValue #3
   size_max  0.000000   0.000000
   box_size   0.000000   0.000000
 box_size_bin    64.000000    64.000000 
-log_thresh     0.300000     0.300000
+log_thresh     0.000000     0.000000
 do_at_most     5.000000    5.000000
 count_parts    0.000000    0.000000
  dose_rate     1.000000     1.000000

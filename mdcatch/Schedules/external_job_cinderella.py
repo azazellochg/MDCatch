@@ -12,7 +12,7 @@ from emtable import Table
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate cinderella-0.7.0"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cinderella-0.7.0"
 CINDERELLA_PREDICT = "sp_cinderella_predict.py"
 CINDERELLA_GEN_MODEL = "/home/gsharov/soft/cryolo/relion_lmb_cl2d_model_based_on_cinderella.h5"
 DEBUG = 1
