@@ -21,7 +21,7 @@ Limit resolution E-step to (A):  == -1
 Minimum dedicated cores per node: == 24
 Number of classes: == $$nr_cls
 Number of iterations: == 20
-Number of MPI procs: == 5
+Number of MPI procs: == 3
 Number of pooled particles: == 30
 Number of threads: == 8
 Offset search range (pix): == 5

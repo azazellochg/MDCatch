@@ -116,31 +116,32 @@ def setupRelion(paramDict):
         except subprocess.CalledProcessError:
             print("Warning: setfacl command failed, ignoring..")
 
-    # Run scheduler
+    # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
             preprocess_schd, key, str(mapDict[key]))
         cmdList.append(cmd)
 
-    for cmd in cmdList:
-        if DEBUG:
-            print(cmd)
-        proc = subprocess.run(cmd.split(), check=True)
-
-    cmdList = list()
-    cmdList.append('relion_scheduler --schedule %s --run --pipeline_control Schedules/%s/ &' % (
-        preprocess_schd, preprocess_schd))
     cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %s' % mapDict.get('mask_diam', 0))
-    cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
 
     for cmd in cmdList:
-        if DEBUG:
-            print(cmd)
-        # now use Popen - without waiting for return
-        with open("relion_schedules.log", "w") as fnLog:
-            proc = subprocess.Popen(cmd.split(), universal_newlines=True,
-                                    stdout=fnLog, stderr=subprocess.STDOUT)
+        print(cmd)
+        proc = subprocess.check_output(cmd.split())
+
+    # Run scheduler with Popen - without waiting for return
+    cmd1 = 'relion_scheduler --schedule %s --run --pipeline_control Schedules/%s/ &' % (
+        preprocess_schd, preprocess_schd)
+    cmd2 = 'relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &'
+
+    with open("schedules_preprocess.log", "w") as fnLog1:
+        print(cmd1)
+        proc = subprocess.Popen(cmd1.split(), universal_newlines=True,
+                                stdout=fnLog1, stderr=subprocess.STDOUT)
+    with open("schedules_class2d.log", "w") as fnLog2:
+        print(cmd2)
+        proc = subprocess.Popen(cmd2.split(), universal_newlines=True,
+                                stdout=fnLog2, stderr=subprocess.STDOUT)
 
 
 def setupScipion(paramDict):
