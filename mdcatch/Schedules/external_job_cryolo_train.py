@@ -138,7 +138,7 @@ def run_job(project_dir, args):
 
     end = time.time()
     diff = end - start
-    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))
 
 
 def main():

@@ -58,7 +58,6 @@ class Parser:
             'MTF': 'None'
         }
 
-
     def setMdPath(self, path):
         self.mdPath = path
 
@@ -187,7 +186,7 @@ class Parser:
 
         if self.acqDict['Mode'] == 'Super-resolution':
             # since we always bin by 2 in mc if using super-res
-            angpix = angpix * 2
+            angpix *= 2
 
         ptclSizePx = float(ptclSizeAng) / angpix
         # use +20% for mask size

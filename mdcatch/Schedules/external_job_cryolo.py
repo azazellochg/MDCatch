@@ -113,7 +113,7 @@ def run_job(project_dir, args):
         '--weights': model,
         '--gpu': "%s" % gpus.replace('"', ''),
         '--threshold': thresh,
-        '-nc': -1 #threads
+        '-nc': -1  # threads
     }
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
@@ -205,7 +205,7 @@ def run_job(project_dir, args):
 
     end = time.time()
     diff = end - start
-    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))
 
 
 def main():

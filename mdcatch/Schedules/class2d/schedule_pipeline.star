@@ -15,6 +15,7 @@ _rlnPipeLineProcessAlias #2
 _rlnPipeLineProcessType #3 
 _rlnPipeLineProcessStatus #4 
 Schedules/class2d/class2d_first/       None            8            1
+Schedules/class2d/class2d_last/       None            8            1
 
 
 # version 30001
@@ -27,6 +28,8 @@ _rlnPipeLineNodeType #2
 Schedules/preprocess-cryolo/extract/particles.star            3
 Schedules/class2d/class2d_first/run_it020_data.star            3
 Schedules/class2d/class2d_first/run_it020_model.star            8
+Schedules/class2d/class2d_last/run_it020_data.star            3
+Schedules/class2d/class2d_last/run_it020_model.star            8
 
 
 # version 30001
@@ -37,6 +40,7 @@ loop_
 _rlnPipeLineEdgeFromNode #1
 _rlnPipeLineEdgeProcess #2
 Schedules/preprocess-cryolo/extract/particles.star Schedules/class2d/class2d_first/
+Schedules/preprocess-cryolo/extract/particles.star Schedules/class2d/class2d_last/
 
 
 # version 30001
@@ -48,3 +52,5 @@ _rlnPipeLineEdgeProcess #1
 _rlnPipeLineEdgeToNode #2
 Schedules/class2d/class2d_first/ Schedules/class2d/class2d_first/run_it020_data.star
 Schedules/class2d/class2d_first/ Schedules/class2d/class2d_first/run_it020_model.star
+Schedules/class2d/class2d_last/ Schedules/class2d/class2d_last/run_it020_data.star
+Schedules/class2d/class2d_last/ Schedules/class2d/class2d_last/run_it020_model.star

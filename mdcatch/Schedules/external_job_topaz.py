@@ -33,7 +33,6 @@ def run_job(project_dir, args):
     gpu = args.gpu
     threads = args.threads
     workers = args.workers
-    #skip_pick = args.skip_pick
 
     getPath = lambda *arglist: os.path.join(project_dir, *arglist)
 
@@ -248,9 +247,6 @@ External job for calling topaz within Relion 3.1.0. Run it in the main Relion pr
     parser.add_argument("--workers", dest="workers", help="Number of worker processes (default = 1)", type=int, default=1)
     parser.add_argument("--diam", help="Particle diameter in A (default = 120)", type=int, default=120)
     parser.add_argument("--threshold", help="Threshold for picking (default = -6)", type=float, default=-6)
-    #parser.add_argument("--skip_pick", help="Skip picking step to only adjust the threshold. "
-    #                                        "To use as Relion continue job, set this to 'true' "
-    #                                        "(default=false)", default="false")
     parser.add_argument("--model", help="Topaz training model (if not specified default is used)", default="None")
     parser.add_argument("--gpu", help='GPU to use (default = 0)', default="0")
     parser.add_argument("--pipeline_control", help="Not used here. Required by relion")

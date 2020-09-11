@@ -34,7 +34,7 @@ helical_rise       4.75
 helical_tube_outer_diameter        200 
 highres_limit         -1 
 min_dedicated         24 
-nr_classes $$nr_cls1
+nr_classes $$nr_cls2
    nr_iter         20 
     nr_mpi          3
    nr_pool         30 

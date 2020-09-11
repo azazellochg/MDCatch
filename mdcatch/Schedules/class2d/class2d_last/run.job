@@ -19,7 +19,7 @@ Helical rise (A): == 4.75
 Tube diameter (A):  == 200
 Limit resolution E-step to (A):  == -1
 Minimum dedicated cores per node: == 24
-Number of classes: == $$nr_cls1
+Number of classes: == $$nr_cls2
 Number of iterations: == 20
 Number of MPI procs: == 3
 Number of pooled particles: == 30
