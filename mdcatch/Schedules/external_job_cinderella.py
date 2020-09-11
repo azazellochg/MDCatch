@@ -74,12 +74,12 @@ def run_job(project_dir, args):
         print("Parsing output file: %s\nGood classes: %s" % (outpath, goodcls))
 
     if len(goodcls) == 0:
-        print("No good classes found. Job stopped, but not marked as failed.")
+        print("No good classes found. Job stopped.")
         end = time.time()
         diff = end - start
         print("Job duration = %dh %dmin %dsec \n" % (diff // 3600, diff // 60 % 60, diff % 60))
-        #open(RELION_JOB_FAILURE_FILENAME, "w").close()
-        exit(0)
+        open(RELION_JOB_FAILURE_FILENAME, "w").close()
+        exit(1)
 
     # Create output star file for Relion to use
     optics = Table(fileName=getPath(in_parts), tableName='optics')
