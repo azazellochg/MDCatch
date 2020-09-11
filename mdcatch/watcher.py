@@ -97,13 +97,16 @@ def start_app(mdFn):
 
     model.calcDose()
     model.guessDataDir(wait=True)
-    model.acqDict['PtclSizes'] = LOGPICKER_SIZES
     model.acqDict['Picker'] = DEF_PICKER
 
     if DEF_PICKER == 'Topaz':
-        model.acqDict['PtclSizes'][0] = TOPAZ_SIZE
-
-    model.calcBox(DEF_PICKER)
+        model.acqDict['PtclSizes'] = TOPAZ_SIZE, LOGPICKER_SIZES[1]
+        model.calcBox(DEF_PICKER)
+    elif DEF_PICKER == 'LogPicker':
+        model.acqDict['PtclSizes'] = LOGPICKER_SIZES
+        model.calcBox(DEF_PICKER)
+    else:
+        model.acqDict['PtclSizes'] = 0, LOGPICKER_SIZES[1]
 
     if DEBUG:
         print("\nFinal parameters:\n")
