@@ -80,6 +80,7 @@ def start_app(mdFn):
 
     username, uid = getUsername(mdPath)
     model.setUser(username, uid)
+    model.acqDict['User'] = model.getUser()
 
     if DEBUG:
         print("\n\nInput params: ",

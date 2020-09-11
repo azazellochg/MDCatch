@@ -104,7 +104,7 @@ def setupRelion(paramDict):
         exit(1)
 
     # setup ACL for uid
-    uid = paramDict['User'][0]
+    uid = paramDict['User'][1]
     if uid:  # not zero
         cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath)]
         cmdList.append("setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath))
