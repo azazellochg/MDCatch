@@ -43,6 +43,7 @@ _rlnPipeLineEdgeFromNode #1
 _rlnPipeLineEdgeProcess #2
 Schedules/preprocess-cryolo/extract/particles.star Schedules/class2d/class2d_first/
 Schedules/preprocess-cryolo/extract/particles.star Schedules/class2d/class2d_last/
+Schedules/class2d/class2d_last/run_it020_data.star Schedules/class2d/sort_cls2d/
 
 
 # version 30001
