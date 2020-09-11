@@ -26,7 +26,7 @@ Number of pooled particles: == 30
 Number of threads: == 8
 Offset search range (pix): == 5
 Offset search step (pix): == 1
-Additional arguments: == --free_gpu_memory 3000
+Additional arguments: == --free_gpu_memory 2000
 Mask diameter (A): == $$mask_diam
 In-plane angular sampling: == 6
 Queue submit command: == qsub

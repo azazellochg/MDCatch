@@ -16,6 +16,7 @@ _rlnPipeLineProcessType #3
 _rlnPipeLineProcessStatus #4 
 Schedules/class2d/class2d_first/       None            8            1
 Schedules/class2d/class2d_last/       None            8            1
+Schedules/class2d/sort_cls2d/       None           99            1
 
 
 # version 30001
@@ -30,6 +31,7 @@ Schedules/class2d/class2d_first/run_it020_data.star            3
 Schedules/class2d/class2d_first/run_it020_model.star            8
 Schedules/class2d/class2d_last/run_it020_data.star            3
 Schedules/class2d/class2d_last/run_it020_model.star            8
+Schedules/class2d/sort_cls2d/particles_for_training.star            3
 
 
 # version 30001
@@ -54,3 +56,4 @@ Schedules/class2d/class2d_first/ Schedules/class2d/class2d_first/run_it020_data.
 Schedules/class2d/class2d_first/ Schedules/class2d/class2d_first/run_it020_model.star
 Schedules/class2d/class2d_last/ Schedules/class2d/class2d_last/run_it020_data.star
 Schedules/class2d/class2d_last/ Schedules/class2d/class2d_last/run_it020_model.star
+Schedules/class2d/sort_cls2d/ Schedules/class2d/sort_cls2d/particles_for_training.star

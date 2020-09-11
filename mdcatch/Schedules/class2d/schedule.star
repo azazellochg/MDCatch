@@ -82,6 +82,7 @@ _rlnScheduleJobMode #3
 _rlnScheduleJobHasStarted #4 
 class2d_first class2d_first overwrite     0
 class2d_last class2d_last new     0
+sort_cls2d sort_cls2d continue 0
 
 
 # version 30001
@@ -102,4 +103,5 @@ size_provided=mask_diam_GT_zero mask_diam=STAR_partdiam_zero 1 batch_complete=co
 mask_diam=STAR_partdiam_zero batch_complete=count_parts_GE_batch_max 0 undefined  undefined
 batch_complete=count_parts_GE_batch_max class2d_first 1 class2d_last batch_complete
 class2d_first WAIT_wait_sec 0  undefined  undefined
-class2d_last EXIT 0  undefined  undefined
+class2d_last sort_cls2d 0  undefined  undefined
+sort_cls2d EXIT 0 undefined undefined
