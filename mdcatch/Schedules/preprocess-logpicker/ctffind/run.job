@@ -1,0 +1,33 @@
+job_type == 2
+is_continue == false
+FFT box size (pix): == 512
+Estimate CTF on window size (pix)  == -1
+Amount of astigmatism (A): == 100
+Maximum defocus value (A): == 50000
+Minimum defocus value (A): == 5000
+Defocus step size (A): == 500
+Perform equi-phase averaging? == No
+Ignore 'Searches' parameters? == Yes
+Estimate phase shifts? == $$is_VPP
+Submit to queue? == No
+CTFFIND-4.1 executable: == /usr/local/bin/ctffind
+Gctf executable: == /public/EM/Gctf/bin/Gctf
+Which GPUs to use: == 
+Input micrographs STAR file: == Schedules/preprocess-logpicker/motioncorr/corrected_micrographs.star
+Minimum dedicated cores per node: == 24
+Number of MPI procs: == 5
+Additional arguments: == 
+Other Gctf options: == 
+Phase shift (deg) - Max: == 180
+Phase shift (deg) - Min: == 0
+Phase shift (deg) - Step: == 10
+Queue submit command: == qsub
+Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
+Queue name:  == openmpi
+Maximum resolution (A): == 5
+Minimum resolution (A): == 30
+Use exhaustive search? == No
+Use CTFFIND-4.1? == Yes
+Use Gctf instead? == No
+Use power spectra from MotionCorr job? == Yes
+Use micrograph without dose-weighting? == No

@@ -24,13 +24,12 @@
 # *
 # **************************************************************************
 
-import os
-import subprocess
 # use polling as required for watchdog over NFS/CIFS
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import RegexMatchingEventHandler
 
 from .config import *
+from .utils.misc import getUsername
 from .parser import Parser
 from .schedule import setupRelion, setupScipion
 
@@ -73,15 +72,13 @@ def start_app(mdFn):
         mdPath = "/".join(mdFn.split("/")[:-4])
     else:
         mdPath = "/".join(mdFn.split("/")[:-1])
-    mdFolder = os.path.basename(mdPath)
     model = Parser()
     model.setSoftware(DEF_SOFTWARE)
     model.setPipeline(DEF_PIPELINE)
     model.setMdPath(mdPath)
     model.setFn(mdFn)
 
-    username = mdFolder.split("_")[1]
-    uid = mapUserid(username)
+    username, uid = getUsername(mdPath)
     model.setUser(username, uid)
     model.acqDict['User'] = model.getUser()
 
@@ -100,6 +97,16 @@ def start_app(mdFn):
 
     model.calcDose()
     model.guessDataDir(wait=True)
+    model.acqDict['Picker'] = DEF_PICKER
+
+    if DEF_PICKER == 'Topaz':
+        model.acqDict['PtclSizes'] = TOPAZ_SIZE, LOGPICKER_SIZES[1]
+        model.calcBox(DEF_PICKER)
+    elif DEF_PICKER == 'LogPicker':
+        model.acqDict['PtclSizes'] = LOGPICKER_SIZES
+        model.calcBox(DEF_PICKER)
+    else:
+        model.acqDict['PtclSizes'] = 0, LOGPICKER_SIZES[1]
 
     if DEBUG:
         print("\nFinal parameters:\n")
@@ -111,20 +118,3 @@ def start_app(mdFn):
         setupRelion(model.acqDict)
     else:
         setupScipion(model.acqDict)
-
-
-def mapUserid(login):
-    # find uid from a username using NIS database
-    cmd = "/usr/bin/ypmatch %s passwd" % login
-    try:
-        res = subprocess.check_output(cmd.split())
-    except subprocess.CalledProcessError:
-        print("ERROR: username %s not found! Using default uid: %s" % (
-            login, DEF_USER[1]))
-        return DEF_USER[1]
-    except FileNotFoundError:
-        print("ERROR: command %s not found! Using default uid: %s" % (
-            cmd.split()[0], DEF_USER[1]))
-        return DEF_USER[1]
-    else:
-        return str(res).split(":")[2]

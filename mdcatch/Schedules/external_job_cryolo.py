@@ -6,6 +6,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
+import shutil
 import time
 from glob import glob
 import subprocess
@@ -16,7 +17,7 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.5"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
@@ -141,6 +142,9 @@ def run_job(project_dir, args):
                 if DEBUG:
                     print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
 
+    # clean filtered_tmp dir
+    shutil.rmtree("filtered_tmp")
+
     # Required output mics star file
     with open("coords_suffix_cryolo.star", "w") as mics_star:
         mics_star.write(in_mics)
@@ -197,7 +201,7 @@ def run_job(project_dir, args):
                                      'rlnImageSize'])
         tableCryolo.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableCryolo.writeStar(f, tableName='cryolo')
+            tableCryolo.writeStar(f, tableName='picker')
 
     end = time.time()
     diff = end - start

@@ -28,9 +28,9 @@ import os
 import shutil
 import subprocess
 import json
-from datetime import datetime
 
-from .config import *
+from .utils.misc import precalculateVars, getPrjName
+from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH
 
 
 def setupRelion(paramDict):
@@ -42,7 +42,23 @@ def setupRelion(paramDict):
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
                'is_VPP': paramDict['PhasePlateUsed'],
-               'optics_group': paramDict['OpticalGroup']}
+               'optics_group': paramDict['OpticalGroup'],
+               'size_min': paramDict['PtclSizes'][0],
+               'size_max': paramDict['PtclSizes'][1],
+               }
+
+    pickerSchedule = {'crYOLO': 'preprocess-cryolo',
+                      'Topaz': 'preprocess-topaz',
+                      'LogPicker': 'preprocess-logpicker'}
+    preprocess_schd = pickerSchedule[paramDict['Picker']]
+
+    if paramDict['PtclSizes'][0] != 0:
+        mapDict.update({
+            'box_size': paramDict['BoxSize'],
+            'mask_diam_px': paramDict['MaskSize'],
+            'mask_diam': int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing']),
+            'box_size_bin': paramDict['BoxSizeSmall'],
+        })
 
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
@@ -65,6 +81,9 @@ def setupRelion(paramDict):
         origPath1 = paramDict['MoviePath'].split('*.tif')[0]
         mapDict['movies_wildcard'] = 'Movies/*.tif'
 
+    if DEBUG:
+        print("Params passed to Relion: ", mapDict)
+
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
     for i in [gain, defect, paramDict['MTF']]:
@@ -85,7 +104,7 @@ def setupRelion(paramDict):
         exit(1)
 
     # setup ACL for uid
-    uid = paramDict['User'][0]
+    uid = paramDict['User'][1]
     if uid:  # not zero
         cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath)]
         cmdList.append("setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath))
@@ -97,30 +116,32 @@ def setupRelion(paramDict):
         except subprocess.CalledProcessError:
             print("Warning: setfacl command failed, ignoring..")
 
-    # Run scheduler
+    # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
         cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
-            'preprocess', key, str(mapDict[key]))
+            preprocess_schd, key, str(mapDict[key]))
         cmdList.append(cmd)
 
-    for cmd in cmdList:
-        if DEBUG:
-            print(cmd)
-        proc = subprocess.run(cmd.split(), check=True)
-
-    cmdList = list()
-    cmdList.append('relion_scheduler --schedule preprocess --run --pipeline_control Schedules/preprocess/ &')
-    cmdList.append('relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &')
-    cmdList.append('relion_scheduler --schedule round2 --set_var angpix --value %s' % mapDict['angpix'])
-    cmdList.append('relion_scheduler --schedule round2 --set_var motioncorr_bin --value %s' % mapDict['motioncorr_bin'])
-    cmdList.append('relion_scheduler --schedule round2 --run --pipeline_control Schedules/round2/ &')
+    cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %s' % mapDict.get('mask_diam', 0))
 
     for cmd in cmdList:
-        if DEBUG:
-            print(cmd)
-        # now use Popen - without waiting for return
-        proc = subprocess.Popen(cmd.split(), universal_newlines=True)
+        print(cmd)
+        proc = subprocess.check_output(cmd.split())
+
+    # Run scheduler with Popen - without waiting for return
+    cmd1 = 'relion_scheduler --schedule %s --run --pipeline_control Schedules/%s/ &' % (
+        preprocess_schd, preprocess_schd)
+    cmd2 = 'relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &'
+
+    with open("schedules_preprocess.log", "w") as fnLog1:
+        print(cmd1)
+        proc = subprocess.Popen(cmd1.split(), universal_newlines=True,
+                                stdout=fnLog1, stderr=subprocess.STDOUT)
+    with open("schedules_class2d.log", "w") as fnLog2:
+        print(cmd2)
+        proc = subprocess.Popen(cmd2.split(), universal_newlines=True,
+                                stdout=fnLog2, stderr=subprocess.STDOUT)
 
 
 def setupScipion(paramDict):
@@ -187,25 +208,3 @@ def setupScipion(paramDict):
 
     cmd2 = 'scipion python -m pyworkflow.project.scripts.schedule %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
-
-
-def getPrjName(paramDict):
-    """ Util func to get project name. """
-    # project name = username_scope_date_time
-    username = paramDict['User'][0]
-    scope = SCOPE_DICT[paramDict['MicroscopeID']][0]
-    dt = datetime.now()
-    dt = dt.strftime('%d-%m-%Y_%H%M')
-    prjName = username + '_' + scope + '_' + dt
-
-    return prjName
-
-
-def precalculateVars(paramDict):
-    """ Get binning, gain and defect files. """
-    # set motioncor bin to 2 if using super-res data
-    bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
-    gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
-    defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-
-    return bin, gain, defect

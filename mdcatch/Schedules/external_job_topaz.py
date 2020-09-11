@@ -15,7 +15,7 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate topaz-0.2.4"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate topaz-0.2.4"
 TOPAZ_PREPROCESS = "topaz preprocess"
 TOPAZ_EXTRACT = "topaz extract"
 TOPAZ_CONVERT = "topaz convert"
@@ -33,6 +33,7 @@ def run_job(project_dir, args):
     gpu = args.gpu
     threads = args.threads
     workers = args.workers
+    #skip_pick = args.skip_pick
 
     getPath = lambda *arglist: os.path.join(project_dir, *arglist)
 
@@ -65,6 +66,7 @@ def run_job(project_dir, args):
         print("Current done_mics: ", done_mics)
 
     mic_fns = mictable.getColumnValues("rlnMicrographName")
+    mic_ext = os.path.splitext(mic_fns[0])[1]
     input_job = "/".join(mic_fns[0].split("/")[:2])
     keys = ["/".join(i.split("/")[2:]) for i in mic_fns]  # remove JobType/jobXXX
     values = [os.path.splitext(i)[0] + "_topaz.star" for i in keys]  # _topaz.star
@@ -107,7 +109,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_PREPROCESS)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " %s/*" % i
+        cmd += " %s/*%s" % (i, mic_ext)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -133,7 +135,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_EXTRACT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     cmd += " preprocessed/*.mrc"
-    os.makedirs("output")
+    os.makedirs("output", exist_ok=True)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -179,6 +181,9 @@ def run_job(project_dir, args):
                 if DEBUG:
                     print("Moved %s to %s" % (coord_topaz, getPath(job_dir, coord_relion)))
 
+    # clean output dir
+    shutil.rmtree("output")
+
     # Required output mics star file
     with open("coords_suffix_topaz.star", "w") as mics_star:
         mics_star.write(in_mics)
@@ -223,11 +228,11 @@ def run_job(project_dir, args):
                                     'rlnImageSize'])
         tableTopaz.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableTopaz.writeStar(f, tableName='topaz')
+            tableTopaz.writeStar(f, tableName='picker')
 
     end = time.time()
     diff = end - start
-    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))
 
 
 def main():
@@ -243,6 +248,9 @@ External job for calling topaz within Relion 3.1.0. Run it in the main Relion pr
     parser.add_argument("--workers", dest="workers", help="Number of worker processes (default = 1)", type=int, default=1)
     parser.add_argument("--diam", help="Particle diameter in A (default = 120)", type=int, default=120)
     parser.add_argument("--threshold", help="Threshold for picking (default = -6)", type=float, default=-6)
+    #parser.add_argument("--skip_pick", help="Skip picking step to only adjust the threshold. "
+    #                                        "To use as Relion continue job, set this to 'true' "
+    #                                        "(default=false)", default="false")
     parser.add_argument("--model", help="Topaz training model (if not specified default is used)", default="None")
     parser.add_argument("--gpu", help='GPU to use (default = 0)', default="0")
     parser.add_argument("--pipeline_control", help="Not used here. Required by relion")
