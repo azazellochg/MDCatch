@@ -74,9 +74,10 @@ def precalculateVars(paramDict):
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
     # group frames if dose rate < 0.8 e/A^2/frame
     group_frames = 1
-    if paramDict['DosePerFrame'] < 0.8:
+    dpf = float(paramDict['DosePerFrame'])
+    if dpf < 0.8:
         group_frames += 1
-        if group_frames * paramDict['DosePerFrame'] < 0.8:
+        if group_frames * dpf < 0.8:
             group_frames += 1
 
     return bin, gain, defect, group_frames
