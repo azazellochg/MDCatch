@@ -27,7 +27,8 @@ count_parts    0.000000    0.000000
  dose_rate     1.000000     1.000000
  mask_diam   200.000000   200.000000 
  mask_diam_px  200.000000   200.000000 
-motioncorr_bin     1.000000     1.000000 
+motioncorr_bin     1.000000     1.000000
+group_frames       1.000000     1.000000
    voltage   300.000000   200.000000
   wait_sec   100.000000   100.000000
       tmp     0.000000     0.000000

@@ -67,10 +67,16 @@ def getPrjName(paramDict):
 
 
 def precalculateVars(paramDict):
-    """ Returns binning, gain and defect files. """
+    """ Returns binning, gain, defect files and frame grouping. """
     # set motioncor bin to 2 if using super-res data
     bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
     gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
+    # group frames if dose rate < 0.8 e/A^2/frame
+    group_frames = 1
+    if paramDict['DosePerFrame'] < 0.8:
+        group_frames += 1
+        if group_frames * paramDict['DosePerFrame'] < 0.8:
+            group_frames += 1
 
-    return bin, gain, defect
+    return bin, gain, defect, group_frames

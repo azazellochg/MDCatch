@@ -35,12 +35,13 @@ from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH
 
 def setupRelion(paramDict):
     """ Prepare and launch Relion 3.1 schedules. """
-    bin, gain, defect = precalculateVars(paramDict)
+    bin, gain, defect, group_frames = precalculateVars(paramDict)
     mapDict = {'Cs': paramDict['Cs'],
                'dose_rate': paramDict['DosePerFrame'],
                'angpix': paramDict['PixelSpacing'],
                'voltage': paramDict['Voltage'],
                'motioncorr_bin': bin,
+               'group_frames': group_frames,
                'is_VPP': paramDict['PhasePlateUsed'],
                'optics_group': paramDict['OpticalGroup'],
                'size_min': paramDict['PtclSizes'][0],

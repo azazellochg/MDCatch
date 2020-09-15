@@ -30,7 +30,7 @@ fn_motioncor2_exe /public/EM/MOTIONCOR2/MotionCor2
   gain_rot "No rotation (0)" 
    gpu_ids        0:1 
 group_for_ps          4 
-group_frames          1 
+group_frames          $$group_frames
 input_star_mics Schedules/preprocess-cryolo/importmovies/movies.star
 last_frame_sum         -1 
 min_dedicated         24 
