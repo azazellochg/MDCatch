@@ -50,6 +50,8 @@ Configuration
   - Relion 3.1 or Scipion 3.0 is in in your *PATH*
   - Preprocessing templates: *Schedules* folder for Relion, *template.json* for Scipion
   - Edit *config.py* to adjust it to your setup
+
+NOTE: You will need to edit the code in schedule.py if you do not use default provided Schedules
  
 Running
 -------
@@ -70,8 +72,8 @@ The server has to have access to both EPU session folder and movies folder, or t
   1. find and parse the first xml/mdoc file, getting all acquisition metadata
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
   3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
-  4. modify existing Relion Schedules/Scipion templates then launch Relion/Scipion on-the-fly processing
-  5. *setfacl -R -m u:uid:rwx* is executed for the project folder, where uid is obtained from DEF_USER
+  4. modify existing Relion Schedules/Scipion templates, copy them to the project folder then launch Relion/Scipion on-the-fly processing
+  5. ACL Linux commands are executed for the project folder (so that uid has *rwx* permissions), where uid is obtained from DEF_USER
 
 Daemon mode
 ###########
@@ -81,13 +83,15 @@ Once an xml (EPU) or a mdoc (SerialEM) file is created in such folder, the defau
 
 Make sure you have set in *config.py*: DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
+Though all 3 pickers can be run fully automatically, Topaz and LogPicker will most likely require particle size / threshold adjustment, so crYOLO is preferred over other pickers.
+
 It's probably useful to setup a daily cron job for `mdcatch --watch` to detect new EPU/SerialEM sessions.
 
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/89322368-08ca8400-d67c-11ea-925b-60e1233f8e1c.png
+.. image:: https://user-images.githubusercontent.com/6952870/93343573-8c08f900-f828-11ea-9554-65cebe8414ae.png
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/89322396-0ec06500-d67c-11ea-8fd3-90f6015156e4.png
+.. image:: https://user-images.githubusercontent.com/6952870/93343678-afcc3f00-f828-11ea-9cc7-a5848f5d1ee6.png
    :width: 640 px

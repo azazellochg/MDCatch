@@ -1,12 +1,13 @@
 0.9.9:
-    - add different picker options: cryolo, topaz, logpicker (relion)
+    - add different picker options: cryolo, topaz, logpicker
+    - add back the boxsize options to GUI
+    - simplified Schedules: preprocess (3 options) and class2d. No cryolo retraining is used for now.
     - add parser tests
 0.9.8:
     - update Scipion template, fixes for SerialEM option after 0.9.7
     - prints job time for external jobs
     - fix "wrong" cryolo model, gpu args
-    - batch increased to 15
-    - add topaz external job (not used yet)
+    - add topaz external job (not ready yet)
     - fix save_noDW
     - use MPIs for ctffind job
 0.9.7:
@@ -38,7 +39,6 @@
     - Scipion 3 scheduling works, however relion 3.1 is not ready for streaming
     - added more parameters to xml parser: VPP options, gun lens, spot size, beam size
     - fix "do until ctf"
-
 0.9.1:
     - refactored xml parser, now it should not depend on EPU version
     - launching Relion schedules in a separate subprocess, return shell immediately
