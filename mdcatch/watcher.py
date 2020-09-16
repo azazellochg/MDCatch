@@ -29,7 +29,7 @@ from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import RegexMatchingEventHandler
 
 from .config import *
-from .utils.misc import getUsername
+from .utils.misc import getUsername, setParticleSizes
 from .parser import Parser
 from .schedule import setupRelion, setupScipion
 
@@ -98,15 +98,7 @@ def start_app(mdFn):
     model.calcDose()
     model.guessDataDir(wait=True)
     model.acqDict['Picker'] = DEF_PICKER
-
-    if DEF_PICKER == 'Topaz':
-        model.acqDict['PtclSizes'] = TOPAZ_SIZE, LOGPICKER_SIZES[1]
-        model.calcBox(DEF_PICKER)
-    elif DEF_PICKER == 'LogPicker':
-        model.acqDict['PtclSizes'] = LOGPICKER_SIZES
-        model.calcBox(DEF_PICKER)
-    else:
-        model.acqDict['PtclSizes'] = 0, LOGPICKER_SIZES[1]
+    setParticleSizes(model)
 
     if DEBUG:
         print("\nFinal parameters:\n")

@@ -211,7 +211,7 @@ class Parser:
                 self.acqDict['BoxSizeSmall'] = str(box)
                 break
 
-    def guessDataDir(self, wait=False):
+    def guessDataDir(self, wait=False, testmode=False):
         """ Guess folder name with movies, gain and defects files. """
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
@@ -254,7 +254,7 @@ class Parser:
                         print("Movie folder found! Continuing..")
                         break
             else:  # GUI mode
-                if not os.path.exists(movieBaseDir):
+                if not os.path.exists(movieBaseDir) and not testmode:
                     raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
