@@ -1,0 +1,47 @@
+job_type == 4
+is_continue == false
+Pixel size in micrographs (A) == -1
+Pixel size in references (A) == -1
+Pick amyloid segments? == No
+Are References CTF corrected? == Yes
+Ignore CTFs until first peak? == No
+References have inverted contrast? == Yes
+OR: use Laplacian-of-Gaussian? == Yes
+Pick 2D helical segments? == No
+Submit to queue? == No
+Read FOM maps? == No
+OR: provide a 3D reference? == No
+Write FOM maps? == No
+Input micrographs for autopick: == Schedules/preprocess-logpicker/ctffind/micrographs_ctf.star
+3D reference: == 
+2D references: == 
+Which GPUs to use: == 
+Number of unique asymmetrical units: == 1
+Helical rise (A): == -1
+Maximum curvature (kappa):  == 0.1
+Minimum length (A):  == -1
+Tube diameter (A):  == 200
+Highpass filter (A) == -1
+Adjust default threshold (stddev): == $$log_thresh
+Max. diameter for LoG filter (A) == $$size_max
+Min. diameter for LoG filter (A) == $$size_min
+Are the particles white? == No
+Maximum resolution to consider (A) == 20
+Upper threshold (stddev): == 999
+Lowpass filter references (A) == 20
+Maximum stddev noise: == 1.1
+Minimum dedicated cores per node: == 24
+Minimum avg noise: == -999
+Minimum inter-particle distance (A): == 100
+Number of MPI procs: == 1
+Additional arguments: == 
+Mask diameter (A) == -1
+In-plane angular sampling (deg) == 5
+Queue submit command: == qsub
+Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
+Queue name:  == openmpi
+3D angular sampling: == 30 degrees
+Symmetry: == C1
+Shrink factor: == 0
+Picking threshold: == 0.05
+Use GPU acceleration? == No

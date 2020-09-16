@@ -1,0 +1,35 @@
+job_type == 5
+is_continue == false
+Pixel size (A) == 1
+Diameter background circle (pix):  == $$mask_diam_px
+Stddev for black dust removal:  == -1
+Input coordinates:  == Schedules/preprocess-topaz/topazpicker/coords_suffix_topaz.star
+Cut helical tubes into segments? == Yes
+Coordinates are start-end only? == Yes
+Extract helical segments? == No
+Invert contrast? == Yes
+Normalize particles? == Yes
+Submit to queue? == No
+OR: re-center refined coordinates?  == No
+OR re-extract refined particles?  == No
+Rescale particles? == Yes
+Reset the refined offsets to zero?  == No
+Manually set pixel size?  == No
+Particle box size (pix): == $$box_size
+Refined particles STAR file:  == 
+Use bimodal angular priors? == Yes
+Number of unique asymmetrical units: == 1
+Helical rise (A): == 1
+Tube diameter (A):  == 200
+Minimum dedicated cores per node: == 24
+Number of MPI procs: == 1
+Additional arguments: == 
+Queue submit command: == qsub
+Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
+Queue name:  == openmpi
+Re-center on X-coordinate (in pix):  == 0
+Re-center on Y-coordinate (in pix):  == 0
+Re-center on Z-coordinate (in pix):  == 0
+Re-scaled size (pixels):  == $$box_size_bin
+micrograph STAR file:  == Schedules/preprocess-topaz/ctffind/micrographs_ctf.star
+Stddev for white dust removal:  == -1

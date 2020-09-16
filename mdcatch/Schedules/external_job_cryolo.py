@@ -6,6 +6,7 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
+import shutil
 import time
 from glob import glob
 import subprocess
@@ -16,7 +17,7 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate cryolo-1.7.5"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
@@ -112,7 +113,7 @@ def run_job(project_dir, args):
         '--weights': model,
         '--gpu': "%s" % gpus.replace('"', ''),
         '--threshold': thresh,
-        '-nc': -1 #threads
+        '-nc': -1  # threads
     }
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
@@ -140,6 +141,9 @@ def run_job(project_dir, args):
                 os.remove(mic)  # clean up
                 if DEBUG:
                     print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
+
+    # clean filtered_tmp dir
+    shutil.rmtree("filtered_tmp")
 
     # Required output mics star file
     with open("coords_suffix_cryolo.star", "w") as mics_star:
@@ -197,11 +201,11 @@ def run_job(project_dir, args):
                                      'rlnImageSize'])
         tableCryolo.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableCryolo.writeStar(f, tableName='cryolo')
+            tableCryolo.writeStar(f, tableName='picker')
 
     end = time.time()
     diff = end - start
-    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))
 
 
 def main():

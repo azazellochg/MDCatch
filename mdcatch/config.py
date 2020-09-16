@@ -28,14 +28,18 @@
 DEBUG = 1
 
 # daemon mode vars
-DEF_USER = ("gsharov", 26096)  # default name: (username, uid)
+DEF_USER = ("emuser", 11048)  # default name: (username, uid)
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
+DEF_PICKER = "crYOLO"  # default particle picker: crYOLO or Topaz or LogPicker
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 
+LOGPICKER_SIZES = (150, 180)  # min/max size in A for Relion LogPicker
+TOPAZ_SIZE = 150  # diameter in A for Topaz
+
 # path to EPU session or folder with SerialEM mdoc files
 METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
-#METADATA_PATH = "/home/azazello/soft/MDCatch/mdcatch/Metadata-examples/EPU"
+#METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples/EPU"
 
 # path where Relion projects are created
 # for Scipion mtf, defects, gain and template files are copied here
@@ -119,3 +123,9 @@ help_message = """Select the following folder:\n\n
    OR\n
    For SerialEM: the folder on /mnt/Data/ that
    contains tif movies and mdoc files.\n"""
+
+# help message for particle size
+help_picker = """Provide particle size in Angstroms.\n\n
+   - crYOLO can estimate it automatically (set this to 0)\n
+   - Topaz requires this parameter to remove neighboring picks\n
+   - LogPicker requires Min and Max diameter"""

@@ -1,0 +1,38 @@
+job_type == 8
+is_continue == false
+Ignore CTFs until first peak? == No
+Do bimodal angular searches? == Yes
+Combine iterations through disc? == No
+Do CTF-correction? == Yes
+Use fast subsets (for large data sets)? == No
+Classify 2D helical segments? == No
+Use parallel disc I/O? == Yes
+Pre-read all particles into RAM? == No
+Submit to queue? == No
+Restrict helical offsets to rise: == Yes
+Mask individual particles with zeros? == Yes
+Perform image alignment? == Yes
+Continue from here:  == 
+Input images STAR file: == Work/particles_batch.star
+Which GPUs to use: == 0:1
+Helical rise (A): == 4.75
+Tube diameter (A):  == 200
+Limit resolution E-step to (A):  == -1
+Minimum dedicated cores per node: == 24
+Number of classes: == $$nr_cls2
+Number of iterations: == 20
+Number of MPI procs: == 3
+Number of pooled particles: == 30
+Number of threads: == 8
+Offset search range (pix): == 5
+Offset search step (pix): == 1
+Additional arguments: == --free_gpu_memory 2000
+Mask diameter (A): == $$mask_diam
+In-plane angular sampling: == 6
+Queue submit command: == qsub
+Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh
+Queue name:  == openmpi
+Angular search range - psi (deg): == 6
+Copy particles to scratch directory: == /work
+Regularisation parameter T: == 2
+Use GPU acceleration? == Yes

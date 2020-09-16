@@ -4,3 +4,4 @@ include mdcatch/template.json
 
 include README.rst
 include LICENSE
+include CHANGES.txt

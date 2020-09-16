@@ -12,7 +12,7 @@ from emtable import Table
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate cinderella-0.6.0"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cinderella-0.7.0"
 CINDERELLA_PREDICT = "sp_cinderella_predict.py"
 CINDERELLA_GEN_MODEL = "/home/gsharov/soft/cryolo/relion_lmb_cl2d_model_based_on_cinderella.h5"
 DEBUG = 1
@@ -74,6 +74,10 @@ def run_job(project_dir, args):
         print("Parsing output file: %s\nGood classes: %s" % (outpath, goodcls))
 
     if len(goodcls) == 0:
+        print("No good classes found. Job stopped.")
+        end = time.time()
+        diff = end - start
+        print("Job duration = %dh %dmin %dsec \n" % (diff // 3600, diff // 60 % 60, diff % 60))
         open(RELION_JOB_FAILURE_FILENAME, "w").close()
         exit(1)
 
@@ -98,7 +102,7 @@ def run_job(project_dir, args):
 
     end = time.time()
     diff = end - start
-    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))
 
 
 def main():

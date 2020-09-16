@@ -15,7 +15,7 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". ~/rc/conda.rc && conda activate topaz-0.2.4"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate topaz-0.2.4"
 TOPAZ_PREPROCESS = "topaz preprocess"
 TOPAZ_EXTRACT = "topaz extract"
 TOPAZ_CONVERT = "topaz convert"
@@ -65,6 +65,7 @@ def run_job(project_dir, args):
         print("Current done_mics: ", done_mics)
 
     mic_fns = mictable.getColumnValues("rlnMicrographName")
+    mic_ext = os.path.splitext(mic_fns[0])[1]
     input_job = "/".join(mic_fns[0].split("/")[:2])
     keys = ["/".join(i.split("/")[2:]) for i in mic_fns]  # remove JobType/jobXXX
     values = [os.path.splitext(i)[0] + "_topaz.star" for i in keys]  # _topaz.star
@@ -107,7 +108,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_PREPROCESS)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " %s/*" % i
+        cmd += " %s/*%s" % (i, mic_ext)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -133,7 +134,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_EXTRACT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     cmd += " preprocessed/*.mrc"
-    os.makedirs("output")
+    os.makedirs("output", exist_ok=True)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -179,6 +180,9 @@ def run_job(project_dir, args):
                 if DEBUG:
                     print("Moved %s to %s" % (coord_topaz, getPath(job_dir, coord_relion)))
 
+    # clean output dir
+    shutil.rmtree("output")
+
     # Required output mics star file
     with open("coords_suffix_topaz.star", "w") as mics_star:
         mics_star.write(in_mics)
@@ -223,11 +227,11 @@ def run_job(project_dir, args):
                                     'rlnImageSize'])
         tableTopaz.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
-            tableTopaz.writeStar(f, tableName='topaz')
+            tableTopaz.writeStar(f, tableName='picker')
 
     end = time.time()
     diff = end - start
-    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60%60, diff%60))
+    print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))
 
 
 def main():
