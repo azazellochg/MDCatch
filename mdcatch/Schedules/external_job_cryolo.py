@@ -30,6 +30,7 @@ def run_job(project_dir, args):
     job_dir = args.out_dir
     thresh = args.threshold
     box_size = args.box_size
+    distance = 0
     model = args.model
     gpus = args.gpu
     threads = args.threads
