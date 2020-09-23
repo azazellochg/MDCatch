@@ -55,7 +55,7 @@ def run_job(project_dir, args):
 
     if box_size:  # is not 0
         json_dict["model"]["anchors"] = [int(box_size), int(box_size)]
-        distance = int(box_size / 3)  # use 30% of the box_size
+        distance = int(box_size / 2)  # use half the box_size
 
     if DEBUG:
         print("Using following config.json: ", json_dict)
