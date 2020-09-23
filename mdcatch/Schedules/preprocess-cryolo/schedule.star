@@ -22,6 +22,7 @@ _rlnScheduleFloatVariableResetValue #3
   box_size   0.000000   0.000000
 box_size_bin    64.000000    64.000000 
 cryolo_thresh     0.300000     0.300000
+cryolo_dist    0.000000   0.000000
 do_at_most     5.000000    5.000000
 count_parts    0.000000    0.000000
  dose_rate     1.000000     1.000000
@@ -33,6 +34,7 @@ group_frames       1.000000     1.000000
   wait_sec   100.000000   100.000000
       tmp     0.000000     0.000000
      zero     0.000000     0.000000
+     three    3.000000     3.000000
 
 
 # version 30001
@@ -91,6 +93,7 @@ WAIT_wait_sec       wait  undefined   wait_sec  undefined
 size_provided=box_size_GT_zero bool=gt size_provided box_size zero
 box_size=STAR_cryolobox_zero float=read_star   box_size  cryolobox       zero
 box_size_bin=STAR_cryoloboxbinned_zero float=read_star box_size_bin cryoloboxbinned       zero
+cryolo_dist=DIVIDE_box_size_three float=divide cryolo_dist box_size three
 mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero
 tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
 mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin
@@ -136,7 +139,8 @@ mask_diam=STAR_cryolodiam_zero tmp=DIVIDE_mask_diam_angpix 0  undefined  undefin
 tmp=DIVIDE_mask_diam_angpix mask_diam_px=DIVIDE_tmp_motioncorr_bin   0  undefined  undefined
 mask_diam_px=DIVIDE_tmp_motioncorr_bin box_size=STAR_cryolobox_zero   0  undefined  undefined
 box_size=STAR_cryolobox_zero box_size_bin=STAR_cryoloboxbinned_zero   0  undefined  undefined
-box_size_bin=STAR_cryoloboxbinned_zero extract 0  undefined  undefined
+box_size_bin=STAR_cryoloboxbinned_zero cryolo_dist=DIVIDE_box_size_three 0  undefined  undefined
+cryolo_dist=DIVIDE_box_size_three extract 0 undefined undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
 count_parts=COUNT_IMGS_extracted_star_undefined COPY_extracted_star_TO_extracted_batch 0  undefined  undefined
 COPY_extracted_star_TO_extracted_batch WAIT_wait_sec 0  undefined  undefined
