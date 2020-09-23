@@ -30,7 +30,6 @@ def run_job(project_dir, args):
     job_dir = args.out_dir
     thresh = args.threshold
     box_size = args.box_size
-    distance = args.distance
     model = args.model
     gpus = args.gpu
     threads = args.threads
@@ -55,6 +54,7 @@ def run_job(project_dir, args):
 
     if box_size:  # is not 0
         json_dict["model"]["anchors"] = [int(box_size), int(box_size)]
+        distance = int(box_size / 3)  # use 30% of the box_size
 
     if DEBUG:
         print("Using following config.json: ", json_dict)
@@ -145,9 +145,6 @@ def run_job(project_dir, args):
                 if DEBUG:
                     print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
 
-    # clean filtered_tmp dir
-    shutil.rmtree("filtered_tmp")
-
     # Required output mics star file
     with open("coords_suffix_cryolo.star", "w") as mics_star:
         mics_star.write(in_mics)
@@ -222,7 +219,6 @@ External job for calling cryolo within Relion 3.1.0. Run it in the main Relion p
     parser.add_argument("--o", dest="out_dir", help="Output directory name")
     parser.add_argument("--j", dest="threads", help="Number of CPU threads (default = 1)", type=int, default=1)
     parser.add_argument("--box_size", help="Box size (default = 0 means it's estimated)", type=int, default=0)
-    parser.add_argument("--distance", help="Max inter-particle distance in px (default = 0)", type=int, default=0)
     parser.add_argument("--threshold", help="Threshold for picking (default = 0.3)", type=float, default=0.3)
     parser.add_argument("--model", help="Cryolo training model (if not specified general is used)", default="None")
     parser.add_argument("--gpu", help='GPUs to use (e.g. "0 1 2 3")', default="0")
