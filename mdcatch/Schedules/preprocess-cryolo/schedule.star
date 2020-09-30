@@ -23,6 +23,8 @@ _rlnScheduleFloatVariableResetValue #3
 box_size_bin    64.000000    64.000000 
 cryolo_thresh     0.300000     0.300000
 do_at_most     5.000000    5.000000
+count_mics    0.000000     0.000000
+count_mics_curr    0.000000     0.000000
 count_parts    0.000000    0.000000
  dose_rate     1.000000     1.000000
  mask_diam   200.000000   200.000000 
@@ -30,7 +32,9 @@ count_parts    0.000000    0.000000
 motioncorr_bin     1.000000     1.000000
 group_frames       1.000000     1.000000
    voltage   300.000000   200.000000
-  wait_sec   100.000000   100.000000
+       one     1.000000     1.000000
+ wait_count   0.000000     0.000000
+ max_wait_count     3.000000     3.000000
       tmp     0.000000     0.000000
      zero     0.000000     0.000000
 
@@ -46,6 +50,7 @@ _rlnScheduleBooleanVariableResetValue #3
 has_copied_cryolostar   0            0
     is_VPP            0            0
     end               0            0
+    no_new_input      0            0
     size_provided     0            0
  
 
@@ -71,6 +76,7 @@ mics_to_pick_src Schedules/preprocess-cryolo/ctffind/micrographs_ctf.star Schedu
 movies_wildcard Movies/*.tiff Movies/*.tiff 
   mtf_file mtf_K3_300kv_nocds.star mtf_K3_300kv_nocds.star
 optics_group  opticsGroup1  opticsGroup1
+micrographs micrographs micrographs
 
 
 # version 30001
@@ -87,7 +93,6 @@ has_copied_cryolostar=EXISTS_cryolostar_copy bool=file_exists has_copied_cryolos
 COPY_cryolostar_TO_cryolostar_copy  copy_file  undefined cryolostar cryolostar_copy 
 COPY_extracted_star_TO_extracted_batch  copy_file  undefined extracted_star extracted_batch
 COPY_mics_to_pick_src_TO_mics_to_pick_dst  copy_file  undefined mics_to_pick_src mics_to_pick_dst
-WAIT_wait_sec       wait  undefined   wait_sec  undefined
 size_provided=box_size_GT_zero bool=gt size_provided box_size zero
 box_size=STAR_cryolobox_zero float=read_star   box_size  cryolobox       zero
 box_size_bin=STAR_cryoloboxbinned_zero float=read_star box_size_bin cryoloboxbinned       zero
@@ -95,6 +100,10 @@ mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero
 tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
 mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin
 count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star undefined
+EXIT exit  undefined  undefined  undefined
+end=wait_count_GT_max_wait_count    bool=gt        end wait_count max_wait_count
+no_new_input=count_mics_curr_EQ_count_mics    bool=eq no_new_input count_mics_curr count_mics
+wait_count=wait_count_PLUS_one float=plus wait_count wait_count        one
 
 
 # version 30001
@@ -123,10 +132,12 @@ _rlnScheduleEdgeOutputNodeName #2
 _rlnScheduleEdgeIsFork #3 
 _rlnScheduleEdgeOutputNodeNameIfTrue #4 
 _rlnScheduleEdgeBooleanVariable #5 
-WAIT_wait_sec importmovies            0  undefined  undefined 
-importmovies motioncorr            0  undefined  undefined 
+importmovies motioncorr            0  undefined  undefined
 motioncorr    ctffind            0  undefined  undefined 
-ctffind COPY_mics_to_pick_src_TO_mics_to_pick_dst            0 undefined undefined
+ctffind count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs 0 undefined undefined
+count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs no_new_input=count_mics_curr_EQ_count_mics 0 undefined undefined
+no_new_input=count_mics_curr_EQ_count_mics count_mics=SET_count_mics_curr            1 wait_count=wait_count_PLUS_one no_new_input
+count_mics=SET_count_mics_curr COPY_mics_to_pick_src_TO_mics_to_pick_dst            0  undefined  undefined
 COPY_mics_to_pick_src_TO_mics_to_pick_dst cryolopicker 0 undefined undefined
 cryolopicker size_provided=box_size_GT_zero 0 undefined undefined
 size_provided=box_size_GT_zero has_copied_cryolostar=EXISTS_cryolostar_copy 1 extract size_provided
@@ -139,4 +150,6 @@ box_size=STAR_cryolobox_zero box_size_bin=STAR_cryoloboxbinned_zero   0  undefin
 box_size_bin=STAR_cryoloboxbinned_zero extract 0  undefined  undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
 count_parts=COUNT_IMGS_extracted_star_undefined COPY_extracted_star_TO_extracted_batch 0  undefined  undefined
-COPY_extracted_star_TO_extracted_batch WAIT_wait_sec 0  undefined  undefined
+COPY_extracted_star_TO_extracted_batch importmovies 0  undefined  undefined
+wait_count=wait_count_PLUS_one end=wait_count_GT_max_wait_count            0  undefined  undefined
+end=wait_count_GT_max_wait_count importmovies            1       EXIT        end
