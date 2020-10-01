@@ -4,7 +4,7 @@
 data_schedule_general
 
 _rlnScheduleName                       Schedules/preprocess-cryolo/
-_rlnScheduleCurrentNodeName            WAIT_wait_sec
+_rlnScheduleCurrentNodeName            importmovies
  
 
 # version 30001
@@ -100,6 +100,8 @@ mask_diam=STAR_cryolodiam_zero float=read_star  mask_diam cryolodiam       zero
 tmp=DIVIDE_mask_diam_angpix float=divide  tmp mask_diam  angpix 
 mask_diam_px=DIVIDE_tmp_motioncorr_bin float=divide mask_diam_px tmp motioncorr_bin
 count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star undefined
+count_mics=SET_count_mics_curr float=set count_mics count_mics_curr undefined
+count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs float=count_images count_mics_curr mics_to_pick_src micrographs
 EXIT exit  undefined  undefined  undefined
 end=wait_count_GT_max_wait_count    bool=gt        end wait_count max_wait_count
 no_new_input=count_mics_curr_EQ_count_mics    bool=eq no_new_input count_mics_curr count_mics
