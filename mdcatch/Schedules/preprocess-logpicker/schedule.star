@@ -129,6 +129,6 @@ COPY_mics_to_pick_src_TO_mics_to_pick_dst logpicker 0 undefined undefined
 logpicker extract 0  undefined  undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
 count_parts=COUNT_IMGS_extracted_star_undefined COPY_extracted_star_TO_extracted_batch 0  undefined  undefined
-COPY_extracted_star_TO_extracted_batch WAIT_wait_sec 0  undefined  undefined
+COPY_extracted_star_TO_extracted_batch importmovies 0  undefined  undefined
 wait_count=wait_count_PLUS_one end=wait_count_GT_max_wait_count            0  undefined  undefined
 end=wait_count_GT_max_wait_count importmovies            1       EXIT        end

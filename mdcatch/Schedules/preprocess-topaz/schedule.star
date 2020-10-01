@@ -4,7 +4,7 @@
 data_schedule_general
 
 _rlnScheduleName                       Schedules/preprocess-topaz/
-_rlnScheduleCurrentNodeName            mportmovies
+_rlnScheduleCurrentNodeName            importmovies
  
 
 # version 30001
@@ -136,6 +136,6 @@ has_copied_topazstar=EXISTS_topazstar_copy COPY_topazstar_TO_topazstar_copy  1  
 COPY_topazstar_TO_topazstar_copy extract 0  undefined  undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
 count_parts=COUNT_IMGS_extracted_star_undefined COPY_extracted_star_TO_extracted_batch 0  undefined  undefined
-COPY_extracted_star_TO_extracted_batch WAIT_wait_sec 0  undefined  undefined
+COPY_extracted_star_TO_extracted_batch importmovies 0  undefined  undefined
 wait_count=wait_count_PLUS_one end=wait_count_GT_max_wait_count            0  undefined  undefined
 end=wait_count_GT_max_wait_count importmovies            1       EXIT        end
