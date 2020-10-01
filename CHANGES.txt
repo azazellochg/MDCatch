@@ -1,3 +1,8 @@
+0.9.10:
+    - cleanup filtered mics for topaz and cryolo
+    - add distance arg = half box size (when provided) to cryolo job
+    - remove wait time
+    - add a counter to stop preprocess schedule if no new mics after 2 hours
 0.9.9:
     - add different picker options: cryolo, topaz, logpicker
     - add back the boxsize options to GUI
