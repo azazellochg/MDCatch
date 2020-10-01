@@ -90,6 +90,7 @@ EXIT exit  undefined  undefined  undefined
 end=wait_count_GT_max_wait_count    bool=gt        end wait_count max_wait_count
 no_new_input=count_mics_curr_EQ_count_mics    bool=eq no_new_input count_mics_curr count_mics
 wait_count=wait_count_PLUS_one float=plus wait_count wait_count        one
+wait_count=SET_zero float=set wait_count zero undefined
 count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star undefined
 
 
@@ -124,7 +125,8 @@ motioncorr    ctffind            0  undefined  undefined
 ctffind count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs 0 undefined undefined
 count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs no_new_input=count_mics_curr_EQ_count_mics 0 undefined undefined
 no_new_input=count_mics_curr_EQ_count_mics count_mics=SET_count_mics_curr            1 wait_count=wait_count_PLUS_one no_new_input
-count_mics=SET_count_mics_curr COPY_mics_to_pick_src_TO_mics_to_pick_dst            0  undefined  undefined
+count_mics=SET_count_mics_curr wait_count=SET_zero 0 undefined undefined
+wait_count=SET_zero COPY_mics_to_pick_src_TO_mics_to_pick_dst            0  undefined  undefined
 COPY_mics_to_pick_src_TO_mics_to_pick_dst logpicker 0 undefined undefined
 logpicker extract 0  undefined  undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
