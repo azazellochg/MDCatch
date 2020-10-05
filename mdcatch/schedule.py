@@ -202,14 +202,14 @@ def setupScipion(paramDict):
         f.write(jsonStr)
 
     try:
-        subprocess.check_output(["which", "scipion"], stderr=subprocess.DEVNULL)
+        subprocess.check_output(["which", "scipion3"], stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-        print("ERROR: scipion command not found in PATH!")
+        print("ERROR: scipion3 command not found in PATH!")
         exit(1)
 
-    cmd = 'scipion python -m pyworkflow.project.scripts.create %s %s' % (
+    cmd = 'scipion3 python -m pyworkflow.project.scripts.create %s %s' % (
         prjName, os.path.abspath(jsonFn))
     proc = subprocess.run(cmd.split(), check=True)
 
-    cmd2 = 'scipion python -m pyworkflow.project.scripts.schedule %s' % prjName
+    cmd2 = 'scipion3 python -m pyworkflow.project.scripts.schedule %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
