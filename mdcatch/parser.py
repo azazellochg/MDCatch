@@ -258,7 +258,7 @@ class Parser:
                     raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
-            movieDir = os.path.join(self.getMdPath(), "*.tif")
+            movieDir = os.path.join(self.getMdPath(), PATTERN_SEM_MOVIES)
             gainFn = os.path.join(self.getMdPath(), self.acqDict['GainReference'])
             defFn = os.path.join(self.getMdPath(), self.acqDict['DefectFile'])
 

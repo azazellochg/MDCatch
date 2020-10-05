@@ -25,6 +25,7 @@
 # **************************************************************************
 
 # Config variables
+VERSION = "0.9.10"
 DEBUG = 1
 
 # daemon mode vars
@@ -92,6 +93,7 @@ MOVIE_PATH_DICT = {
 
 ###############################################################################
 # SerialEM params
+PATTERN_SEM_MOVIES = "*.tif"  # movie pattern for Gatan K2/K3 cameras
 PATTERN_MDOC = "*.tif.mdoc"
 REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 

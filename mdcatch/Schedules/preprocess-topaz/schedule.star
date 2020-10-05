@@ -4,7 +4,7 @@
 data_schedule_general
 
 _rlnScheduleName                       Schedules/preprocess-topaz/
-_rlnScheduleCurrentNodeName            WAIT_wait_sec
+_rlnScheduleCurrentNodeName            importmovies
  
 
 # version 30001
@@ -24,13 +24,17 @@ box_size_bin    64.000000    64.000000
 topaz_thresh     0.000000     0.000000
 do_at_most     5.000000    5.000000
 count_parts    0.000000    0.000000
+count_mics    0.000000     0.000000
+count_mics_curr    0.000000     0.000000
  dose_rate     1.000000     1.000000
  mask_diam   200.000000   200.000000 
  mask_diam_px  200.000000   200.000000 
 motioncorr_bin     1.000000     1.000000
 group_frames       1.000000     1.000000
    voltage   300.000000   200.000000
-  wait_sec   100.000000   100.000000
+      one     1.000000     1.000000
+ wait_count   0.000000     0.000000
+ max_wait_count  240.000000  240.000000
       tmp     0.000000     0.000000
      zero     0.000000     0.000000
 
@@ -46,6 +50,7 @@ _rlnScheduleBooleanVariableResetValue #3
 has_copied_topazstar   0            0
     is_VPP            0            0
     end               0            0
+    no_new_input      0            0
 
 
 # version 30001
@@ -67,6 +72,7 @@ mics_to_pick_src Schedules/preprocess-topaz/ctffind/micrographs_ctf.star Schedul
 movies_wildcard Movies/*.tiff Movies/*.tiff 
   mtf_file mtf_K3_300kv_nocds.star mtf_K3_300kv_nocds.star
 optics_group  opticsGroup1  opticsGroup1
+micrographs micrographs micrographs
 
 
 # version 30001
@@ -83,7 +89,13 @@ has_copied_topazstar=EXISTS_topazstar_copy bool=file_exists has_copied_topazstar
 COPY_topazstar_TO_topazstar_copy  copy_file  undefined topazstar topazstar_copy 
 COPY_extracted_star_TO_extracted_batch  copy_file  undefined extracted_star extracted_batch
 COPY_mics_to_pick_src_TO_mics_to_pick_dst  copy_file  undefined mics_to_pick_src mics_to_pick_dst
-WAIT_wait_sec       wait  undefined   wait_sec  undefined
+count_mics=SET_count_mics_curr float=set count_mics count_mics_curr undefined
+count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs float=count_images count_mics_curr mics_to_pick_src micrographs
+EXIT exit  undefined  undefined  undefined
+end=wait_count_GT_max_wait_count    bool=gt        end wait_count max_wait_count
+no_new_input=count_mics_curr_EQ_count_mics    bool=eq no_new_input count_mics_curr count_mics
+wait_count=wait_count_PLUS_one float=plus wait_count wait_count        one
+wait_count=SET_zero float=set wait_count zero undefined
 count_parts=COUNT_IMGS_extracted_star_undefined float=count_images count_parts extracted_star undefined
 
 
@@ -113,14 +125,19 @@ _rlnScheduleEdgeOutputNodeName #2
 _rlnScheduleEdgeIsFork #3 
 _rlnScheduleEdgeOutputNodeNameIfTrue #4 
 _rlnScheduleEdgeBooleanVariable #5 
-WAIT_wait_sec importmovies            0  undefined  undefined 
-importmovies motioncorr            0  undefined  undefined 
+importmovies motioncorr            0  undefined  undefined
 motioncorr    ctffind            0  undefined  undefined 
-ctffind COPY_mics_to_pick_src_TO_mics_to_pick_dst            0 undefined undefined
+ctffind count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs 0 undefined undefined
+count_mics_curr=COUNT_IMGS_mics_to_pick_src_micrographs no_new_input=count_mics_curr_EQ_count_mics 0 undefined undefined
+no_new_input=count_mics_curr_EQ_count_mics count_mics=SET_count_mics_curr            1 wait_count=wait_count_PLUS_one no_new_input
+count_mics=SET_count_mics_curr wait_count=SET_zero 0 undefined undefined
+wait_count=SET_zero COPY_mics_to_pick_src_TO_mics_to_pick_dst            0  undefined  undefined
 COPY_mics_to_pick_src_TO_mics_to_pick_dst topazpicker 0 undefined undefined
 topazpicker has_copied_topazstar=EXISTS_topazstar_copy 0 undefined undefined
 has_copied_topazstar=EXISTS_topazstar_copy COPY_topazstar_TO_topazstar_copy  1  extract  has_copied_topazstar
 COPY_topazstar_TO_topazstar_copy extract 0  undefined  undefined
 extract count_parts=COUNT_IMGS_extracted_star_undefined   0  undefined  undefined
 count_parts=COUNT_IMGS_extracted_star_undefined COPY_extracted_star_TO_extracted_batch 0  undefined  undefined
-COPY_extracted_star_TO_extracted_batch WAIT_wait_sec 0  undefined  undefined
+COPY_extracted_star_TO_extracted_batch importmovies 0  undefined  undefined
+wait_count=wait_count_PLUS_one end=wait_count_GT_max_wait_count            0  undefined  undefined
+end=wait_count_GT_max_wait_count importmovies            1       EXIT        end

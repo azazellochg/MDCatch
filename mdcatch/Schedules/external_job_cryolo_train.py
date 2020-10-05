@@ -114,7 +114,8 @@ def run_job(project_dir, args):
         '--conf': "config.json",
         '--gpu': gpus,
         '--warmup': 0,
-        '--fine_tune': ""
+        '--fine_tune': "",
+        '--cleanup': ""
     }
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_TRAIN)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])

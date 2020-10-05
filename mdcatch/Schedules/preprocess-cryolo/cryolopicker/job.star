@@ -33,8 +33,8 @@ param2_label         threshold
 param2_value         $$cryolo_thresh 
 param3_label         box_size
 param3_value         $$box_size
-param4_label         "" 
-param4_value         "" 
+param4_label         ""
+param4_value         ""
 param5_label         "" 
 param5_value         "" 
 param6_label         "" 

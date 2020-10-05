@@ -52,6 +52,11 @@ Configuration
   - Edit *config.py* to adjust it to your setup
 
 NOTE: You will need to edit the code in schedule.py if you do not use default provided Schedules
+
+Testing
+-------
+
+`python -m unittest mdcatch.tests`
  
 Running
 -------

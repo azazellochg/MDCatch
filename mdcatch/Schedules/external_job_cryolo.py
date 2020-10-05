@@ -30,6 +30,7 @@ def run_job(project_dir, args):
     job_dir = args.out_dir
     thresh = args.threshold
     box_size = args.box_size
+    distance = 0
     model = args.model
     gpus = args.gpu
     threads = args.threads
@@ -54,6 +55,7 @@ def run_job(project_dir, args):
 
     if box_size:  # is not 0
         json_dict["model"]["anchors"] = [int(box_size), int(box_size)]
+        distance = int(box_size / 2)  # use half the box_size
 
     if DEBUG:
         print("Using following config.json: ", json_dict)
@@ -113,6 +115,8 @@ def run_job(project_dir, args):
         '--weights': model,
         '--gpu': "%s" % gpus.replace('"', ''),
         '--threshold': thresh,
+        '--distance': distance,
+        '--cleanup': "",
         '-nc': -1  # threads
     }
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
@@ -141,9 +145,6 @@ def run_job(project_dir, args):
                 os.remove(mic)  # clean up
                 if DEBUG:
                     print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
-
-    # clean filtered_tmp dir
-    shutil.rmtree("filtered_tmp")
 
     # Required output mics star file
     with open("coords_suffix_cryolo.star", "w") as mics_star:

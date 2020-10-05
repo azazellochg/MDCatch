@@ -146,7 +146,10 @@ def setupRelion(paramDict):
 
 
 def setupScipion(paramDict):
-    """ Prepare and schedule Scipion 3 workflow. """
+    """ Prepare and schedule Scipion 3 workflow.
+    The default template will run import movies, motioncor2,
+    gctf, cryolo picking, extraction and summary monitor protocols.
+    """
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
@@ -159,7 +162,7 @@ def setupScipion(paramDict):
         protClassName = protDict['object.className']
         protNames[protClassName] = i
 
-    bin, gain, defect = precalculateVars(paramDict)
+    bin, gain, defect, group_frames = precalculateVars(paramDict)
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
@@ -186,6 +189,7 @@ def setupScipion(paramDict):
     # motioncorr
     movieProt = protocolsList[protNames["ProtMotionCorr"]]
     movieProt["binFactor"] = bin
+    movieProt["group"] = group_frames
     movieProt["defectFile"] = os.path.join(os.getcwd(), os.path.basename(defect)) if defect else ""
 
     # gctf
@@ -198,14 +202,14 @@ def setupScipion(paramDict):
         f.write(jsonStr)
 
     try:
-        subprocess.check_output(["which", "scipion"], stderr=subprocess.DEVNULL)
+        subprocess.check_output(["which", "scipion3"], stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-        print("ERROR: scipion command not found in PATH!")
+        print("ERROR: scipion3 command not found in PATH!")
         exit(1)
 
-    cmd = 'scipion python -m pyworkflow.project.scripts.create %s %s' % (
+    cmd = 'scipion3 python -m pyworkflow.project.scripts.create %s %s' % (
         prjName, os.path.abspath(jsonFn))
     proc = subprocess.run(cmd.split(), check=True)
 
-    cmd2 = 'scipion python -m pyworkflow.project.scripts.schedule %s' % prjName
+    cmd2 = 'scipion3 python -m pyworkflow.project.scripts.schedule %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
