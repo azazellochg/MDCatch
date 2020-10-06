@@ -30,7 +30,7 @@
 from struct import unpack
 
 from .dtypes import bigtiff_tags
-from ..config import DEBUG
+from ..config import DEBUG, SCOPE_DICT
 
 
 def parseTif(fn):
@@ -115,8 +115,8 @@ def _standardizeDict(acqDict):
         'OpticalGroup': 'opticsGroup1',
         'PhasePlateUsed': 'false',
         'MTF': 'None',
-        'Voltage': 'unknown',
-        'Cs': 'unknown'
+        'Voltage': 300,
+        'Cs': SCOPE_DICT[acqDict['MicroscopeID']][1]
     }
 
     sr = 1.0
