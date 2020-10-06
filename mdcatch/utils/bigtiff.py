@@ -105,15 +105,18 @@ def _standardizeDict(acqDict):
     """Convert values to expected format. """
     stdDict = {
         'MicroscopeID': "unknown",
-        'Detector': "unknown",
+        'Detector': "EF-CCD",
         'Mode': 'Counting',
         'NumSubFrames': acqDict['nimg'],
+        'ExposureTime': 1,
         'GainReference': acqDict['ImageDescription'].split("\n")[1].strip(),
         'DefectFile': acqDict['ImageDescription'].split("\n")[2].strip(),
         'Dose': '0',
         'OpticalGroup': 'opticsGroup1',
         'PhasePlateUsed': 'false',
-        'MTF': 'None'
+        'MTF': 'None',
+        'Voltage': 'unknown',
+        'Cs': 'unknown'
     }
 
     sr = 1.0
@@ -122,13 +125,6 @@ def _standardizeDict(acqDict):
         stdDict["Mode"] = 'Super-resolution'
 
     stdDict['PixelSpacing'] = float(acqDict['XResolution']) / 2.54e+8 / sr
-
-    if acqDict['ImageLength'] in ["3838", "7676"]:
-        stdDict['Detector'] = "K2"
-    elif acqDict['ImageLength'] in ["5760", "11520"]:
-        stdDict['Detector'] = "K3"
-    elif acqDict['ImageLength'] == "4096":
-        stdDict['Detector'] = "Falcon"
 
     # convert all to str
     for key in stdDict:

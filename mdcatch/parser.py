@@ -106,7 +106,7 @@ class Parser:
         return self.fn
 
     def guessFn(self, prog="EPU"):
-        regex = PATTERN_EPU if prog == "EPU" else PATTERN_MDOC
+        regex = PATTERN_EPU if prog == "EPU" else PATTERN_SEM
 
         if DEBUG:
             print("\nUsing regex: ", regex)

@@ -52,7 +52,7 @@ class TestParser(unittest.TestCase):
 
     def test_mdoc(self):
         print("=" * 80, "\nTesting mdoc parser...")
-        mdocFns = glob(os.path.join(self.semDir, PATTERN_MDOC))
+        mdocFns = glob(os.path.join(self.semDir, PATTERN_SEM))
         mdocFns = [os.path.abspath(x) for x in mdocFns]
 
         for mdFn in mdocFns:

@@ -57,7 +57,8 @@ JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
               '3413': ['Krios2', 2.7, 'Falcon', 'K2'],
               '3593': ['Krios3', 2.7, 'Falcon', 'K3'],
-              '9952833': ['Glacios', 2.7, 'Falcon', None]
+              '9952833': ['Glacios', 2.7, 'Falcon', None],
+              'unknown': ['unknown', 2.7, 'Falcon', 'K2']
               }
 
 ###############################################################################
@@ -93,8 +94,10 @@ MOVIE_PATH_DICT = {
 
 ###############################################################################
 # SerialEM params
-PATTERN_SEM_MOVIES = "*.tif"  # movie pattern for Gatan K2/K3 cameras
-PATTERN_MDOC = "*.tif.mdoc"
+
+PATTERN_SEM_MOVIES = "*.tif"
+# change the pattern below if you want to parse movie tif instead
+PATTERN_SEM = "*.tif.mdoc"
 REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # SerialEM mdoc vars to parse
