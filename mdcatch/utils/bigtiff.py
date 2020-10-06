@@ -116,7 +116,6 @@ def _standardizeDict(acqDict):
         'PhasePlateUsed': 'false',
         'MTF': 'None',
         'Voltage': 300,
-        'Cs': SCOPE_DICT[acqDict['MicroscopeID']][1]
     }
 
     sr = 1.0
@@ -125,6 +124,7 @@ def _standardizeDict(acqDict):
         stdDict["Mode"] = 'Super-resolution'
 
     stdDict['PixelSpacing'] = float(acqDict['XResolution']) / 2.54e+8 / sr
+    stdDict['Cs'] = SCOPE_DICT[stdDict['MicroscopeID']][1]
 
     # convert all to str
     for key in stdDict:
