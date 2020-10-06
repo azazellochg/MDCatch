@@ -6,7 +6,6 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
-import shutil
 import time
 from glob import glob
 import subprocess

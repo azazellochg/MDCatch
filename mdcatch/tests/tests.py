@@ -80,7 +80,7 @@ class TestParser(unittest.TestCase):
         if model.getSoftware() == 'EPU':
             model.parseImgEpu(mdFn)
         else:  # SerialEM
-            model.parseImgMdoc(mdFn)
+            model.parseImgSem(mdFn)
 
         model.calcDose()
         model.guessDataDir(testmode=True)

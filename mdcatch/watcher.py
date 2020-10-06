@@ -93,7 +93,7 @@ def start_app(mdFn):
     if DEF_SOFTWARE == 'EPU':
         model.parseImgEpu(mdFn)
     else:  # SerialEM
-        model.parseImgMdoc(mdFn)
+        model.parseImgSem(mdFn)
 
     model.calcDose()
     model.guessDataDir(wait=True)

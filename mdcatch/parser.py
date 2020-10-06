@@ -24,14 +24,13 @@
 # *
 # **************************************************************************
 
-import re
 import os
 import math
 import time
 from glob import iglob
 
 from .config import *
-from .utils import parseXml, parseMrc
+from .utils import parseXml, parseMrc, parseTif, parseMdoc
 
 
 class Parser:
@@ -121,42 +120,9 @@ class Parser:
         acqDict = parseXml(fn) if fn.endswith("xml") else parseMrc(fn)
         self.acqDict.update(acqDict)
 
-    def parseImgMdoc(self, fn):
-        """ SerialEM is used only for K2/K3 cameras. """
-        self.acqDict['Detector'] = 'EF-CCD'
-
-        with open(fn, 'r') as fname:
-            regex = re.compile(REGEX_MDOC_VAR)
-
-            for line in fname:
-                match = regex.match(line)
-                if match and match.groupdict()['var'] in SERIALEM_PARAMS:
-                    key = match.groupdict()['var']
-                    self.acqDict[key] = match.groupdict()['value'].strip()
-
-        try:
-            # rename a few keys to match EPU
-            # T = SerialEM: Acquired on Titan Krios D3593
-            match = re.search("D[0-9]{3,4}", self.acqDict['T'])
-            if match:
-                value = match.group().replace('D', '')
-                self.acqDict['MicroscopeID'] = value
-                self.acqDict.pop('T')
-                if value in SCOPE_DICT:
-                    self.acqDict['Cs'] = str(SCOPE_DICT[value][1])
-
-            self.acqDict['Dose'] = self.acqDict.pop('ExposureDose')
-            self.acqDict['AppliedDefocus'] = self.acqDict.pop('TargetDefocus')
-            self.acqDict['Mode'] = 'Super-resolution' if self.acqDict['Binning'] == '0.5' else 'Counting'
-            if 'PhasePlateInserted' in self.acqDict:
-                self.acqDict['PhasePlateUsed'] = self.acqDict.pop('PhasePlateInserted')
-            self.acqDict.pop('Binning')
-        except KeyError:
-            pass
-
-        if DEBUG:
-            for k, v in sorted(self.acqDict.items()):
-                print("%s = %s" % (k, v))
+    def parseImgSem(self, fn):
+        acqDict = parseMdoc(fn) if fn.endswith("mdoc") else parseTif(fn)
+        self.acqDict.update(acqDict)
 
     def calcDose(self):
         """ Calculate dose rate per unbinned px. """

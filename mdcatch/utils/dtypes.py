@@ -39,7 +39,7 @@ bigtiff_tags = {
     256: ("ImageWidth", 3),  # nx
     257: ("ImageLength", 3),  # ny
     258: ("BitsPerSample", 3),  # data type
-    259: ("Compression", 3),
+    259: ("Compression", 3),  # 5=LZW
     262: ("PhotometricInterpretation", 3),  # The color space of the image data.
     270: ("ImageDescription", 2),
     273: ("StripOffsets", 16),
@@ -49,11 +49,11 @@ bigtiff_tags = {
     282: ("XResolution", 5),  # The number of pixels per ResolutionUnit in the ImageWidth direction.
     283: ("YResolution", 5),  # The number of pixels per ResolutionUnit in the ImageLength direction.
     284: ("PlanarConfiguration", 3),
-    296: ("ResolutionUnit", 3),  # The unit of measurement for XResolution and YResolution.
+    296: ("ResolutionUnit", 3),  # The unit of measurement for XResolution and YResolution. 2=inch, 3=cm.
     306: ("DateTime", 2),  # YYYY:MM:DD HH:MM:SS
     339: ("SampleFormat", 3),
-    340: ("SMinSampleValue", 1),  # min
-    341: ("SMaxSampleValue", 1),  # max
+    340: ("MinSampleValue", 1),  # min
+    341: ("MaxSampleValue", 1),  # max
 }
 
 # See https://www.ccpem.ac.uk/mrc_format/mrc2014.php
