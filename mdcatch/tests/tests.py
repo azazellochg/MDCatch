@@ -39,8 +39,8 @@ class TestParser(unittest.TestCase):
         cls.epuDir = os.path.join(os.path.dirname(__file__), "../Metadata-examples/EPU")
         cls.semDir = os.path.join(os.path.dirname(__file__), "../Metadata-examples/SerialEM/")
 
-    def test_xml(self):
-        print("=" * 80, "\nTesting xml parser...")
+    def test_epu(self):
+        print("=" * 80, "\nTesting xml or mrc parser...")
         xmlFns = glob(os.path.join(self.epuDir, "*/%s" % PATTERN_EPU), recursive=True)
         xmlFns = [os.path.abspath(x) for x in xmlFns]
 
@@ -50,8 +50,8 @@ class TestParser(unittest.TestCase):
             model.setSoftware("EPU")
             self._runParser(model, mdPath, mdFn)
 
-    def test_mdoc(self):
-        print("=" * 80, "\nTesting mdoc parser...")
+    def test_sem(self):
+        print("=" * 80, "\nTesting mdoc or tif parser...")
         mdocFns = glob(os.path.join(self.semDir, PATTERN_SEM))
         mdocFns = [os.path.abspath(x) for x in mdocFns]
 
@@ -62,6 +62,7 @@ class TestParser(unittest.TestCase):
             self._runParser(model, mdPath, mdFn)
 
     def _runParser(self, model, mdPath, mdFn):
+        """ Run the parser and return model acqDict. """
         model.setPipeline(DEF_PIPELINE)
         model.setMdPath(mdPath)
         model.setFn(mdFn)

@@ -106,6 +106,7 @@ class Parser:
         return self.fn
 
     def guessFn(self, prog="EPU"):
+        """ Return the first matching filename. """
         regex = PATTERN_EPU if prog == "EPU" else PATTERN_SEM
 
         if DEBUG:
@@ -117,10 +118,12 @@ class Parser:
         return img
 
     def parseImgEpu(self, fn):
+        """ Parse xml or mrc and return updated acqDict. """
         acqDict = parseXml(fn) if fn.endswith("xml") else parseMrc(fn)
         self.acqDict.update(acqDict)
 
     def parseImgSem(self, fn):
+        """ Parse mdoc or tif and return updated acqDict. """
         acqDict = parseMdoc(fn) if fn.endswith("mdoc") else parseTif(fn)
         self.acqDict.update(acqDict)
 

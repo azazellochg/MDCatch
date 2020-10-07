@@ -54,6 +54,7 @@ class App(QWizard):
         self.initUI()
 
     def initUI(self):
+        """ Initialize QWizard with two pages. """
         self.page1 = Page1()
         self.addPage(self.page1)
         self.page2 = Page2()
@@ -410,6 +411,7 @@ class Page2(QWizardPage):
         return groupBox
 
     def group3(self):
+        """ Widgets at row 1, col 0. """
         groupBox = QGroupBox("Recommended options")
 
         box = QLabel("Box size (px)")
@@ -433,6 +435,7 @@ class Page2(QWizardPage):
         return groupBox
 
     def addPtclSizeWidgets(self, acqDict):
+        """ Add particle size widgets depending on the input params. """
         picker = App.model.getPicker()
         sizes = App.model.getSize()
         acqDict['PtclSizes'] = sizes
@@ -481,6 +484,7 @@ class Page2(QWizardPage):
 
 
 def main():
+    """ Create GUI app or start watchdog. """
     args = sys.argv
     help = "Usage: mdcatch [--watch]\nBy default starts a GUI, "\
            "use '--watch' for daemon mode. It will watch METADATA_PATH folder."
