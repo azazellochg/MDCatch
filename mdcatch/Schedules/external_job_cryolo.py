@@ -121,7 +121,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " --input %s" % i
+        cmd += " --input %s/" % i
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
