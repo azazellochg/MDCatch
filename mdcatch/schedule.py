@@ -87,6 +87,10 @@ def setupRelion(paramDict):
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
+    # Create .gui_projectdir file, so that other users can open GUI
+    with open('.gui_projectdir', 'w'):
+        pass
+
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
