@@ -185,7 +185,7 @@ fei_tags = [
 
 fei1_tags = np.dtype(fei_tags)
 
-fei_tags.append(
+fei_tags.extend([
     ('Scan rotation', 'f8'),  # rad.
     ('Diffraction pattern rotation', 'f8'),  # rad.
     ('Image rotation', 'f8'),  # rad.
@@ -201,6 +201,6 @@ fei_tags.append(
     ('CFEG flash timestamp', 'i8'),  # us since 01/01/1970
     ('Phase plate position index', 'i4'),
     ('Objective aperture name', 'S16')
-)
+])
 
 fei2_tags = np.dtype(fei_tags)
