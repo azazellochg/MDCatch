@@ -78,10 +78,10 @@ mrc_tags = np.dtype([
     ])
 ])
 
-# See EPU user manual for FEI1 MRC header details
+# See EPU user manual for FEI1/FEI2 MRC header details
 # For Timestamp definition see:
 # https://docs.microsoft.com/en-us/cpp/atl-mfc-shared/reference/coledatetime-class?redirectedfrom=MSDN&view=vs-2019
-fei_tags = np.dtype([
+fei_tags = [
     ('Metadata size', 'i4'),  # bytes
     ('Metadata version', 'i4'),
     ('Bitmask 1', 'u4'),
@@ -181,4 +181,26 @@ fei_tags = np.dtype([
     ('Bitmask 4', 'u4'),
     ('Alpha tilt min', 'f8'),  # deg.
     ('Alpha tilt max', 'f8')  # deg.
-])
+]
+
+fei1_tags = np.dtype(fei_tags)
+
+fei_tags.append(
+    ('Scan rotation', 'f8'),  # rad.
+    ('Diffraction pattern rotation', 'f8'),  # rad.
+    ('Image rotation', 'f8'),  # rad.
+    ('Scan mode enumeration', 'i4'),  # 0 - other, 1 - raster, 2 - serpentine raster
+    ('Acquisition time stamp', 'i8'),  # us since 01/01/1970
+    ('Detector commercial name', 'S16'),
+    ('Start tilt angle', 'f8'),  # deg.
+    ('End tilt angle', 'f8'),  # deg.
+    ('Tilt per image', 'f8'),  # deg.
+    ('Tilt speed', 'f8'),  # deg./s
+    ('Beam center X pixel', 'i4'),  # px
+    ('Beam center Y pixel', 'i4'),  # px
+    ('CFEG flash timestamp', 'i8'),  # us since 01/01/1970
+    ('Phase plate position index', 'i4'),
+    ('Objective aperture name', 'S16')
+)
+
+fei2_tags = np.dtype(fei_tags)

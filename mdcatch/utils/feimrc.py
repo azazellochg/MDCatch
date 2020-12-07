@@ -24,13 +24,13 @@
 # *
 # **************************************************************************
 
-""" This script parses MRC 2014 FEI1 file header. """
+""" This script parses MRC 2014 FEI1/FEI2 file header. """
 
 import numpy as np
 import math
 from struct import unpack
 
-from .dtypes import mrc_tags, fei_tags
+from .dtypes import mrc_tags, fei1_tags, fei2_tags
 from ..config import DEBUG, SCOPE_DICT
 
 
@@ -45,8 +45,8 @@ def parseMrc(fn):
         if map != b'MAP ' or machst != b'DD':  # 0x44 0x44 is little endian
             print("Not a MRC file or not little endian byte order!")
             return None
-        if exttyp != b'FEI1':
-            print("No FEI1 extended header found!")
+        if exttyp not in [b'FEI1', b'FEI2']:
+            print("No FEI1 or FEI2 extended header found!")
             return None
 
         fin.seek(1024)
@@ -63,6 +63,7 @@ def parseMrc(fn):
     header_dict["apix_y"] = header_dict["CELLA"]["Y"] / header_dict["NY"]
 
     # parse extended header
+    fei_tags = fei1_tags if exttyp == b'FEI1' else fei2_tags
     ext_header_arr = np.frombuffer(ext_header, dtype=fei_tags)
     keys = ext_header_arr.dtype.names
     ext_header_dict = [dict(zip(keys, value)) for value in ext_header_arr][0]
@@ -106,6 +107,9 @@ def _standardizeDict(acqDict):
 
     if stdDict['MicroscopeID'] in SCOPE_DICT:
         stdDict['Cs'] = SCOPE_DICT[stdDict['MicroscopeID']][1]
+
+    if 'Phase plate position index' in acqDict:
+        stdDict['PhasePlatePosition'] = acqDict['Phase plate position index']
 
     # convert all to str
     for key in stdDict:
