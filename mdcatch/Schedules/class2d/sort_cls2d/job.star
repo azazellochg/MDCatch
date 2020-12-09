@@ -27,8 +27,8 @@ nr_threads          1
 other_args         ""
 param10_label         ""
 param10_value         ""
-param1_label         ""
-param1_value         ""
+param1_label         gpu
+param1_value         1
 param2_label         ""
 param2_value         ""
 param3_label         ""

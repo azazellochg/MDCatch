@@ -25,6 +25,7 @@ def run_job(project_dir, args):
     in_parts = args.in_parts
     job_dir = args.out_dir
     batch = args.batch_size
+    gpu = args.gpu
 
     getPath = lambda *arglist: os.path.join(project_dir, *arglist)
 
@@ -43,7 +44,7 @@ def run_job(project_dir, args):
         '-b': batch,
         '-m': CRYOASSESS_2D_MODEL,
     }
-    cmd = "%s && %s " % (CONDA_ENV, CRYOASSESS_2D)
+    cmd = "%s && CUDA_VISIBLE_DEVICES=%d %s " % (CONDA_ENV, gpu, CRYOASSESS_2D)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
 
     print("Running command:\n{}".format(cmd))
@@ -110,6 +111,7 @@ External job for calling cryoassess within Relion 3.1.0. Run it in the main Reli
     parser.add_argument("--batch_size", help="Batch size used in prediction. Default is 32. If "
                         "memory error/warning appears, try lower this number to "
                         "16, 8, or even lower", default=32)
+    parser.add_argument("--gpu", help='GPU to use', default=0)
     parser.add_argument("--pipeline_control", help="Not used here. Required by relion")
     parser.add_argument("--j", dest="threads", help="Not used here. Required by relion")
 
