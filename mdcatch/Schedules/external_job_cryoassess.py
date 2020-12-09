@@ -55,9 +55,9 @@ def run_job(project_dir, args):
 
     # Parse output to get good classes IDs
     goodTemplate = getPath(job_dir, "output/Good/particle_*.jpg")
-    regex = re.compile('particle_(\d)\.jpg')
+    regex = re.compile('particle_(\d*)\.jpg')
     goodcls = []
-    files = sorted(glob(goodTemplate))
+    files = glob(goodTemplate)
     if files:
         for i in files:
             s = regex.search(i)

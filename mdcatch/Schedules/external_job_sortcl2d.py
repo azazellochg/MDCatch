@@ -25,10 +25,12 @@ def run_job(project_dir, args):
     model = in_parts.replace("_data.star", "_model.star")
     clstable = Table(fileName=getPath(model), tableName='model_classes')
 
-    # Find classes with >= 5% particles
+    # Find classes with >= 5% particles, accuracy < 10deg, < 10A
     good_cls = []
     for row in clstable:
-        if row.rlnClassDistribution >= 0.05:
+        if (row.rlnClassDistribution >= 0.05 and
+                row.rlnAccuracyRotations < 10 and
+                row.rlnAccuracyTranslationsAngst < 10):
             good_cls.append(int(row.rlnReferenceImage.split("@")[0]))
     if DEBUG:
         print("Classes selected: ", good_cls)
