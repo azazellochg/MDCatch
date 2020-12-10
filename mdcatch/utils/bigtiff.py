@@ -109,14 +109,18 @@ def _standardizeDict(acqDict):
         'Mode': 'Counting',
         'NumSubFrames': acqDict['nimg'],
         'ExposureTime': 1,
-        'GainReference': acqDict['ImageDescription'].split("\n")[1].strip(),
-        'DefectFile': acqDict['ImageDescription'].split("\n")[2].strip(),
         'Dose': '0',
         'OpticalGroup': 'opticsGroup1',
         'PhasePlateUsed': 'false',
         'MTF': 'None',
         'Voltage': 300,
     }
+
+    desc = acqDict['ImageDescription'].split("\n")
+    stdDict['GainReference'] = desc[1].strip()
+
+    if len(desc) == 3:
+        stdDict['DefectFile'] = desc[2].strip()
 
     sr = 1.0
     if acqDict['ImageLength'] in ['7676', '11520']:
