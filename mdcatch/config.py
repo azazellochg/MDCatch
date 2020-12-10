@@ -25,7 +25,7 @@
 # **************************************************************************
 
 # Config variables
-DEBUG = 1
+DEBUG = 0
 
 # daemon mode vars
 DEF_USER = ("emuser", 11048)  # default name: (username, uid)

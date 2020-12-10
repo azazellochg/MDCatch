@@ -229,6 +229,49 @@ def run_job(project_dir, args):
         with open(outputFn, "w") as f:
             tableTopaz.writeStar(f, tableName='picker')
 
+        # create .gui_manualpickjob.star for easy display
+        starString = """
+# version 30001
+
+data_job
+
+_rlnJobType                             3
+_rlnJobIsContinue                       0
+
+
+# version 30001
+
+data_joboptions_values
+
+loop_
+_rlnJobOptionVariable #1
+_rlnJobOptionValue #2
+    angpix         -1
+ black_val          0
+blue_value          0
+color_label rlnParticleSelectZScore
+  ctfscale          1
+  diameter         %d
+  do_color         No
+  do_queue         No
+do_startend        No
+  fn_color         ""
+     fn_in         ""
+  highpass         -1
+   lowpass         20
+  micscale        0.2
+min_dedicated       1
+other_args         ""
+      qsub       qsub
+qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
+ queuename    openmpi
+ red_value          2
+sigma_contrast      3
+ white_val          0
+"""
+        with open(getPath(".gui_manualpickjob.star"), "w") as f:
+            f.write(starString % diam)
+
     end = time.time()
     diff = end - start
     print("Job duration = %dh %dmin %dsec \n" % (diff//3600, diff//60 % 60, diff % 60))

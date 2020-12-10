@@ -37,6 +37,7 @@ def run_job(project_dir, args):
     modelstar = in_parts.replace("_data.star", "_model.star")
     refstable = Table(fileName=getPath(modelstar), tableName='model_classes')
     refstack = refstable[0].rlnReferenceImage.split("@")[-1]
+    nrCls = int(refstable[-1].rlnReferenceImage.split("@")[0])
 
     if DEBUG:
         print("Found input class averages stack: %s" % refstack)
@@ -99,6 +100,13 @@ def run_job(project_dir, args):
     with open(out_star, "w") as f:
         optics.writeStar(f, tableName="optics")
         out_ptcls.writeStar(f, tableName="particles")
+
+    # Create backup_selection.star for results visualization
+    sel = Table(columns=['rlnSelected'])
+    for i in range(1, nrCls + 1):
+        sel.addRow(1 if i in goodcls else 0)
+    with open(getPath("backup_selection.star"), "w") as f:
+        sel.writeStar(f, tableName="")
 
     end = time.time()
     diff = end - start
