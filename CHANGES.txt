@@ -1,6 +1,12 @@
 1.0:
     - separate mdoc parser, enable bigtiff header parser
-    - create doc website
+    - add Cryoassess for 2D cls sorting, use it by default
+    - create backup_selection.star so that user can see selected 2D classes
+    - create .gui_projectdir to automatically "start" a new project
+    - create .gui_manualpickjob.star so that user can visualize picking
+    - sortcl2d job check for accuracy
+    - add FEI MRC2 extended header support
+    - create documentation
 0.9.10:
     - cleanup filtered mics for topaz and cryolo
     - add distance arg = half box size (when provided) to cryolo job
