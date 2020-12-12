@@ -45,25 +45,28 @@ def parseMdoc(fn):
                 key = match.groupdict()['var']
                 acqDict[key] = match.groupdict()['value'].strip()
 
-    try:
-        # rename a few keys to match EPU
-        # T = SerialEM: Acquired on Titan Krios D3593
-        match = re.search("D[0-9]{3,4}", acqDict['T'])
-        if match:
-            value = match.group().replace('D', '')
-            acqDict['MicroscopeID'] = value
-            acqDict.pop('T')
-            if value in SCOPE_DICT:
-                acqDict['Cs'] = str(SCOPE_DICT[value][1])
+    # rename a few keys to match EPU
+    # T = SerialEM: Acquired on Titan Krios D3593
+    match = re.search("D[0-9]{3,4}", acqDict['T'])
+    if match:
+        value = match.group().replace('D', '')
+        acqDict['MicroscopeID'] = value
+        acqDict.pop('T')
+        if value in SCOPE_DICT:
+            acqDict['Cs'] = str(SCOPE_DICT[value][1])
+    else:
+        print("ERROR: Could not detect MicroscopeID from mdoc! Exiting.")
+        exit(1)
 
+    if 'ExposureDose' in acqDict:
         acqDict['Dose'] = acqDict.pop('ExposureDose')
+    if 'TargetDefocus' in acqDict:
         acqDict['AppliedDefocus'] = acqDict.pop('TargetDefocus')
+    if 'Binning' in acqDict:
         acqDict['Mode'] = 'Super-resolution' if acqDict['Binning'] == '0.5' else 'Counting'
-        if 'PhasePlateInserted' in acqDict:
-            acqDict['PhasePlateUsed'] = acqDict.pop('PhasePlateInserted')
         acqDict.pop('Binning')
-    except KeyError:
-        pass
+    if 'PhasePlateInserted' in acqDict:
+        acqDict['PhasePlateUsed'] = acqDict.pop('PhasePlateInserted')
 
     if DEBUG:
         for k, v in sorted(acqDict.items()):

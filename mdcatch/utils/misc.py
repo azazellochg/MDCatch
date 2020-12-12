@@ -44,10 +44,10 @@ def getUsername(mdPath):
     try:
         res = subprocess.check_output(cmd.split())
     except subprocess.CalledProcessError:
-        print("ERROR: username %s not found! Using defaults: " % username, DEF_USER)
+        print("Warning: username %s not found! Using defaults: " % username, DEF_USER)
         return DEF_USER
     except FileNotFoundError:
-        print("ERROR: command %s failed! Using defaults: " % cmd, DEF_USER)
+        print("Warning: command %s failed! Using defaults: " % cmd, DEF_USER)
         return DEF_USER
     else:
         uid = str(res).split(":")[2]
