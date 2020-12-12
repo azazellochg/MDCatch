@@ -104,7 +104,7 @@ def parseTif(fn):
 def _standardizeDict(acqDict):
     """Convert values to expected format. """
     stdDict = {
-        'MicroscopeID': "unknown",
+        'MicroscopeID': "3593",
         'Detector': "EF-CCD",
         'Mode': 'Counting',
         'NumSubFrames': acqDict['nimg'],

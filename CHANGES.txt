@@ -6,7 +6,7 @@
     - create .gui_manualpickjob.star so that user can visualize picking
     - sortcl2d job check for accuracy
     - add FEI MRC2 extended header support
-    - create documentation
+    - update documentation
 0.9.10:
     - cleanup filtered mics for topaz and cryolo
     - add distance arg = half box size (when provided) to cryolo job

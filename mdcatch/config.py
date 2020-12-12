@@ -33,9 +33,8 @@ DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_PICKER = "crYOLO"  # default particle picker: crYOLO or Topaz or LogPicker
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
-
-LOGPICKER_SIZES = (150, 180)  # min/max size in A for Relion LogPicker
-TOPAZ_SIZE = 150  # diameter in A for Topaz
+LOGPICKER_SIZES = (150, 180)  # default min/max size in A for Relion LogPicker
+TOPAZ_SIZE = 150  # default diameter in A for Topaz
 
 # path to EPU session or folder with SerialEM mdoc files
 METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
@@ -56,8 +55,7 @@ JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
               '3413': ['Krios2', 2.7, 'Falcon', 'K2'],
               '3593': ['Krios3', 2.7, 'Falcon', 'K3'],
-              '9952833': ['Glacios', 2.7, 'Falcon', None],
-              'unknown': ['unknown', 2.7, 'Falcon', 'K2']
+              '9952833': ['Glacios', 2.7, 'Falcon', None]
               }
 
 ###############################################################################
