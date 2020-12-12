@@ -30,7 +30,7 @@ import subprocess
 import json
 
 from .utils.misc import precalculateVars, getPrjName
-from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH
+from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 
 def setupRelion(paramDict):
@@ -79,8 +79,8 @@ def setupRelion(paramDict):
         mapDict['movies_wildcard'] = 'Movies/Images-Disc%s' % origPath2
     else:
         # SerialEM: Movies -> Raw path folder
-        origPath1 = paramDict['MoviePath'].split('*.tif')[0]
-        mapDict['movies_wildcard'] = 'Movies/*.tif'
+        origPath1 = paramDict['MoviePath'].split(PATTERN_SEM_MOVIES)[0]
+        mapDict['movies_wildcard'] = 'Movies/%s' % PATTERN_SEM_MOVIES
 
     if DEBUG:
         print("Params passed to Relion: ", mapDict)

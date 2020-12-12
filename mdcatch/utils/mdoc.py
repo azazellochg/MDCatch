@@ -34,6 +34,7 @@ from ..config import DEBUG, REGEX_MDOC_VAR, SERIALEM_PARAMS, SCOPE_DICT
 
 def parseMdoc(fn):
     acqDict = dict()
+    # we assume SerialEM is only used for Gatan detectors
     acqDict['Detector'] = 'EF-CCD'
 
     with open(fn, 'r') as fname:
@@ -47,7 +48,7 @@ def parseMdoc(fn):
 
     # rename a few keys to match EPU
     # T = SerialEM: Acquired on Titan Krios D3593
-    match = re.search("D[0-9]{3,4}", acqDict['T'])
+    match = re.search("D[0-9]{3,10}", acqDict['T'])
     if match:
         value = match.group().replace('D', '')
         acqDict['MicroscopeID'] = value
@@ -55,7 +56,9 @@ def parseMdoc(fn):
         if value in SCOPE_DICT:
             acqDict['Cs'] = str(SCOPE_DICT[value][1])
     else:
-        print("ERROR: Could not detect MicroscopeID from mdoc! Exiting.")
+        print("ERROR: Could not detect MicroscopeID (D####) from mdoc!\n"
+              "Make sure you have e.g. the following line in the mdoc:\n"
+              "T = SerialEM: Acquired on Titan Krios D3593")
         exit(1)
 
     if 'ExposureDose' in acqDict:

@@ -100,7 +100,7 @@ The server requires the following software installed:
     - `2dassess <https://github.com/cianfrocco-lab/Automatic-cryoEM-preprocessing>`_ or/and `Cinderella <https://sphire.mpg.de/wiki/doku.php?id=auto_2d_class_selection>`_ (installed in a conda environment)
     - ypmatch (part of NIS client, only used to match a folder name with username from a NIS database)
 
-Relion, Scipion and Ctffind should be available from your shell PATH.
+Relion and Scipion should be available from your shell PATH. For Ctffind make sure you have RELION_CTFFIND_EXECUTABLE variable defined.
 Also, this server needs access to both EPU session folder (with metadata files) and
 raw movies folder. In our case both storage systems are mounted via NFSv4.
 

@@ -117,7 +117,7 @@ def _standardizeDict(acqDict):
     }
 
     print("Warning: tif headers do not contain enough metadata, "
-          "so some default values were used.")
+          "so some default values were used.\n")
 
     desc = acqDict['ImageDescription'].split("\n")
     stdDict['GainReference'] = desc[1].strip()
