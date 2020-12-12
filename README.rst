@@ -100,7 +100,7 @@ The server requires the following software installed:
     - `2dassess <https://github.com/cianfrocco-lab/Automatic-cryoEM-preprocessing>`_ or/and `Cinderella <https://sphire.mpg.de/wiki/doku.php?id=auto_2d_class_selection>`_ (installed in a conda environment)
     - ypmatch (part of NIS client, only used to match a folder name with username from a NIS database)
 
-Relion and Scipion should be available from your shell PATH. For Ctffind make sure you have RELION_CTFFIND_EXECUTABLE variable defined.
+Relion and Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
 Also, this server needs access to both EPU session folder (with metadata files) and
 raw movies folder. In our case both storage systems are mounted via NFSv4.
 
@@ -111,13 +111,13 @@ raw movies folder. In our case both storage systems are mounted via NFSv4.
    <summary><a>Configuration</a></summary>
 
 Most of configuration is done in **config.py**. As explained in the next section, the app can run in either interactive (GUI) or daemon mode.
-For the very first run it is useful to set DEBUG=1 to see additional output and make sure it all works as expected.
+For the very first run it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
 
 Important points to mention:
 
-    * camera names in SCOPE_DICT must match names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
-    * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed
-    * you will also need to modify **Schedules/external_job_....py**, updating the path to conda environments and training models.
+    * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
+    * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
+    * you will also need to modify **Schedules/external_job_....py**, updating the path to conda environments and training models
     * Relion schedules use **/work** as the scratch (SSD) folder, you might want to change this
     * Relion schedules also use two GPUs: 0 and 1
 
@@ -164,11 +164,11 @@ Daemon mode
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode (except uid which is obtained from username).
 
-Make sure you have set in *config.py*: DEF_USER, DEF_PICKER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
+Make sure you have set in **config.py**: DEF_USER, DEF_PICKER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
 Though all three pickers can be run fully automatically, Topaz and LogPicker will most likely require particle size / threshold adjustment, so crYOLO is preferred over other pickers.
 
-We usually setup a daily cron job for `mdcatch --watch`, that starts only if mdcatch and Relion/Scipion are not already running.
+We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
 
 EPU vs SerialEM
@@ -187,7 +187,7 @@ So far RELION cases are more tested than Scipion. With the app we only provide a
 so irrespective of particle picker choice crYOLO will always be used. Particle size is also ignored.
 Have a look into the json file to see what pipeline will be launched.
 
-Scipion project will be created in the default Scipion folder, defined by SCIPION_USER_DATA in **scipion.conf**.
+Scipion project will be created in the default Scipion projects folder.
 
 .. raw:: html
 
@@ -197,13 +197,16 @@ Scipion project will be created in the default Scipion folder, defined by SCIPIO
 
 There are two schedules: *preprocess-xxx* (where xxx is cryolo, topaz or logpicker) and *class2d*. Both are launched at the same time.
 
-1. Preprocess includes 5 jobs that run in an endless loop, processing batches of 5 movies:
+1. Preprocess includes 5 jobs that run in a loop, processing batches of 5 movies:
 
  * import movies
  * motion correction (relion motioncor)
  * ctffind4-4.1.14
  * picking (crYOLO, Topaz or Relion LogPicker)
  * extraction
+
+The schedule will terminate if no new movies were imported for 240 consecutive (!) loops (~ 4h in our case).
+This helps in case a user pauses EPU session for some reason and then continues.
 
 2. Class2D includes 2 jobs:
 
