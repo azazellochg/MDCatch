@@ -20,7 +20,7 @@ TOPAZ_PREPROCESS = "topaz preprocess"
 TOPAZ_EXTRACT = "topaz extract"
 TOPAZ_CONVERT = "topaz convert"
 TOPAZ_SPLIT = "topaz split"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):

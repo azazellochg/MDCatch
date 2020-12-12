@@ -11,7 +11,7 @@ from emtable import Table  # requires pip install emtable
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):

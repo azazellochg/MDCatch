@@ -20,7 +20,7 @@ CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):

@@ -17,7 +17,7 @@ RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryoassess-0.1.0"
 CRYOASSESS_2D = "2dassess"
 CRYOASSESS_2D_MODEL = "/home/gsharov/soft/cryoassess-models/2dassess_062119.h5"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):

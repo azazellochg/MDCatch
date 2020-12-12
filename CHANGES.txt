@@ -6,6 +6,9 @@
     - create .gui_manualpickjob.star so that user can visualize picking
     - sortcl2d job check for accuracy
     - add FEI MRC2 extended header support
+    - replace Ctffind & Gctf paths by shell vars
+    - switch off debug for release
+    - update Scipion template
     - update documentation
 0.9.10:
     - cleanup filtered mics for topaz and cryolo
