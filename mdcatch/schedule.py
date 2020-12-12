@@ -151,8 +151,8 @@ def setupRelion(paramDict):
 
 def setupScipion(paramDict):
     """ Prepare and schedule Scipion 3 workflow.
-    The default template will run import movies, motioncor2,
-    gctf, cryolo picking, extraction and summary monitor protocols.
+    The default template will run import movies, relion motioncor,
+    ctffind4, cryolo picking, extraction and summary monitor protocols.
     """
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
@@ -191,14 +191,14 @@ def setupScipion(paramDict):
     importProt["gainFile"] = os.path.join(os.getcwd(), os.path.basename(gain)) if gain else ""
 
     # motioncorr
-    movieProt = protocolsList[protNames["ProtMotionCorr"]]
+    movieProt = protocolsList[protNames["ProtRelionMotioncor"]]
     movieProt["binFactor"] = bin
-    movieProt["group"] = group_frames
+    movieProt["groupFrames"] = group_frames
     movieProt["defectFile"] = os.path.join(os.getcwd(), os.path.basename(defect)) if defect else ""
 
-    # gctf
-    ctfProt = protocolsList[protNames["ProtGctf"]]
-    ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
+    # ctffind
+    ctfProt = protocolsList[protNames["CistemProtCTFFind"]]
+    ctfProt["findPhaseShift"] = paramDict['PhasePlateUsed']
 
     jsonFn = "%s.json" % prjName
     with open(jsonFn, "w") as f:
