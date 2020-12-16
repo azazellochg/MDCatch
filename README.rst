@@ -215,6 +215,8 @@ This helps in case a user pauses EPU session for some reason and then continues.
 
 Classification starts (with 20 classes) once 5000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
 
+.. important:: Both schedules produce output log files: *schedules_preprocess.log* and *schedules_class2d.log*
+
 .. raw:: html
 
    </details>
