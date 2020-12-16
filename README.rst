@@ -205,7 +205,7 @@ There are two schedules: *preprocess-xxx* (where xxx is cryolo, topaz or logpick
  * picking (crYOLO, Topaz or Relion LogPicker)
  * extraction
 
-The schedule will terminate if no new movies were imported for 240 consecutive (!) loops (~ 4h in our case).
+The schedule will terminate if no new mics were processed by Ctffind for 240 consecutive (!) loops (~ 4h in our case).
 This helps in case a user pauses EPU session for some reason and then continues.
 
 2. Class2D includes 2 jobs:
