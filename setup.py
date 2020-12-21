@@ -32,23 +32,17 @@ https://github.com/pypa/sampleproject
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-# To use a consistent encoding
-from codecs import open
 from os import path
 
 from mdcatch import __version__
 
 here = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
-
 setup(
     name='MDCatch',
     version=__version__,
     description='Fetch metadata from EPU / SerialEM and launch on-the-fly pre-processing',
-    long_description=long_description,
+    long_description='See https://github.com/azazellochg/MDCatch for more details',
     url='https://github.com/azazellochg/MDCatch',
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
