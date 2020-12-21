@@ -278,7 +278,7 @@ class Page1(QWizardPage):
             App.showDialog("ERROR", "No matching files found!\n\n" + help_message)
             return False
         else:
-            print("\nFiles found: %s\n" % fnList) if DEBUG else ""
+            print("\nFiles found: %s\n" % fnList)
             App.model.setFn(fnList)
             return True
 

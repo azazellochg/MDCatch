@@ -208,12 +208,16 @@ There are two schedules: *preprocess-xxx* (where xxx is cryolo, topaz or logpick
 The schedule will terminate if no new mics were processed by Ctffind for 240 consecutive (!) loops (~ 4h in our case).
 This helps in case a user pauses EPU session for some reason and then continues.
 
+.. tip:: Picking results from crYOLO or Topaz can be visualized immediately (without saving settings for Manual picking job).
+
 2. Class2D includes 2 jobs:
 
  * 2D classification
  * sorting 2D class averages (cryoassess)
 
 Classification starts (with 20 classes) once 5000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
+
+.. tip:: You can display the selected classes by opening the last iteration's results of the Class2D/job007 (with 20000 particles).
 
 .. important:: Both schedules produce output log files: *schedules_preprocess.log* and *schedules_class2d.log*
 

@@ -109,8 +109,7 @@ class Parser:
         """ Return the first matching filename. """
         regex = PATTERN_EPU if prog == "EPU" else PATTERN_SEM
 
-        if DEBUG:
-            print("\nUsing regex: ", regex)
+        print("\nUsing regex: ", regex)
 
         files = iglob(os.path.join(self.getMdPath(), regex))
         img = next(files, None)
