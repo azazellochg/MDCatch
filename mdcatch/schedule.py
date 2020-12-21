@@ -30,7 +30,7 @@ import subprocess
 import json
 
 from .utils.misc import precalculateVars, getPrjName
-from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH
+from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 
 def setupRelion(paramDict):
@@ -79,14 +79,18 @@ def setupRelion(paramDict):
         mapDict['movies_wildcard'] = 'Movies/Images-Disc%s' % origPath2
     else:
         # SerialEM: Movies -> Raw path folder
-        origPath1 = paramDict['MoviePath'].split('*.tif')[0]
-        mapDict['movies_wildcard'] = 'Movies/*.tif'
+        origPath1 = paramDict['MoviePath'].split(PATTERN_SEM_MOVIES)[0]
+        mapDict['movies_wildcard'] = 'Movies/%s' % PATTERN_SEM_MOVIES
 
     if DEBUG:
         print("Params passed to Relion: ", mapDict)
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
+    # Create .gui_projectdir file, so that other users can open GUI
+    with open('.gui_projectdir', 'w'):
+        pass
+
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
@@ -147,8 +151,8 @@ def setupRelion(paramDict):
 
 def setupScipion(paramDict):
     """ Prepare and schedule Scipion 3 workflow.
-    The default template will run import movies, motioncor2,
-    gctf, cryolo picking, extraction and summary monitor protocols.
+    The default template will run import movies, relion motioncor,
+    ctffind4, cryolo picking, extraction and summary monitor protocols.
     """
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
@@ -187,14 +191,14 @@ def setupScipion(paramDict):
     importProt["gainFile"] = os.path.join(os.getcwd(), os.path.basename(gain)) if gain else ""
 
     # motioncorr
-    movieProt = protocolsList[protNames["ProtMotionCorr"]]
+    movieProt = protocolsList[protNames["ProtRelionMotioncor"]]
     movieProt["binFactor"] = bin
-    movieProt["group"] = group_frames
+    movieProt["groupFrames"] = group_frames
     movieProt["defectFile"] = os.path.join(os.getcwd(), os.path.basename(defect)) if defect else ""
 
-    # gctf
-    ctfProt = protocolsList[protNames["ProtGctf"]]
-    ctfProt["doPhShEst"] = paramDict['PhasePlateUsed']
+    # ctffind
+    ctfProt = protocolsList[protNames["CistemProtCTFFind"]]
+    ctfProt["findPhaseShift"] = paramDict['PhasePlateUsed']
 
     jsonFn = "%s.json" % prjName
     with open(jsonFn, "w") as f:

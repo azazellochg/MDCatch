@@ -1,3 +1,15 @@
+1.0:
+    - separate mdoc parser, enable bigtiff header parser
+    - add Cryoassess for 2D cls sorting, use it by default
+    - create backup_selection.star so that user can see selected 2D classes
+    - create .gui_projectdir to automatically "start" a new project
+    - create .gui_manualpickjob.star so that user can visualize picking
+    - sortcl2d job check for accuracy
+    - add FEI MRC2 extended header support
+    - replace Ctffind & Gctf paths by shell vars
+    - switch off debug for release
+    - update Scipion template
+    - update documentation
 0.9.10:
     - cleanup filtered mics for topaz and cryolo
     - add distance arg = half box size (when provided) to cryolo job
@@ -52,3 +64,29 @@
     - remove shell=True to increase security
     - initial preparation for scipion 3 workflow
     - created SCOPE_DICT, now parser is not LMB-specific
+0.9:
+    - config reorganized
+    - add user id check
+    - create Relion project dir username_scope_date_time
+    - add class2d schedule
+0.8:
+    - fix EPU xml pattern
+    - add particle size for LogPicker
+    - calculate box size params based on particle size
+    - create project path with links to movies
+0.7:
+    - add extra mdoc params
+    - check if Images-DicsX exists in the path
+    - remove Help button from GUI window
+    - add scipion pipeline
+    - separate schedule setup fro mthe parser
+0.6:
+    - add MTF dict
+    - add Relion Schedules
+0.5:
+    - separate parser code from GUI
+    - switch to QWizard
+0.4:
+    - add BigTiff parser
+    - add gain ref and counting mode detection
+    - guess folder name with movies

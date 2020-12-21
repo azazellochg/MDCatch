@@ -35,6 +35,7 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QButtonGroup, QSpinBox)
 from PyQt5.QtCore import Qt
 
+from . import __version__
 from .config import *
 from .utils.misc import getUsername
 from .parser import Parser
@@ -47,12 +48,13 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent, flags=Qt.WindowFlags())
-        self.title = 'MDCatch v%s - metadata parser' % VERSION
+        self.title = 'MDCatch v%s - metadata parser' % __version__
         self.width = 640
         self.height = 320
         self.initUI()
 
     def initUI(self):
+        """ Initialize QWizard with two pages. """
         self.page1 = Page1()
         self.addPage(self.page1)
         self.page2 = Page2()
@@ -276,7 +278,7 @@ class Page1(QWizardPage):
             App.showDialog("ERROR", "No matching files found!\n\n" + help_message)
             return False
         else:
-            print("\nFiles found: %s\n" % fnList) if DEBUG else ""
+            print("\nFiles found: %s\n" % fnList)
             App.model.setFn(fnList)
             return True
 
@@ -317,7 +319,7 @@ class Page2(QWizardPage):
         if prog == 'EPU':
             App.model.parseImgEpu(fnList)
         else:  # SerialEM
-            App.model.parseImgMdoc(fnList)
+            App.model.parseImgSem(fnList)
 
         self.addPtclSizeWidgets(acqDict)
         App.model.calcDose()
@@ -409,6 +411,7 @@ class Page2(QWizardPage):
         return groupBox
 
     def group3(self):
+        """ Widgets at row 1, col 0. """
         groupBox = QGroupBox("Recommended options")
 
         box = QLabel("Box size (px)")
@@ -432,6 +435,7 @@ class Page2(QWizardPage):
         return groupBox
 
     def addPtclSizeWidgets(self, acqDict):
+        """ Add particle size widgets depending on the input params. """
         picker = App.model.getPicker()
         sizes = App.model.getSize()
         acqDict['PtclSizes'] = sizes
@@ -480,6 +484,7 @@ class Page2(QWizardPage):
 
 
 def main():
+    """ Create GUI app or start watchdog. """
     args = sys.argv
     help = "Usage: mdcatch [--watch]\nBy default starts a GUI, "\
            "use '--watch' for daemon mode. It will watch METADATA_PATH folder."

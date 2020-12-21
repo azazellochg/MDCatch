@@ -15,7 +15,7 @@ loop_
 _rlnJobOptionVariable #1
 _rlnJobOptionValue #2
   do_queue         No
-    fn_exe         Schedules/external_job_cinderella.py
+    fn_exe         Schedules/external_job_cryoassess.py
   in_3dref         ""
  in_coords         ""
    in_mask         ""
@@ -28,7 +28,7 @@ other_args         ""
 param10_label         ""
 param10_value         ""
 param1_label         gpu
-param1_value         0
+param1_value         1
 param2_label         ""
 param2_value         ""
 param3_label         ""

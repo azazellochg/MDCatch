@@ -11,7 +11,7 @@ from emtable import Table  # requires pip install emtable
 
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):
@@ -24,11 +24,14 @@ def run_job(project_dir, args):
     # Reading the model star file from relion
     model = in_parts.replace("_data.star", "_model.star")
     clstable = Table(fileName=getPath(model), tableName='model_classes')
+    nrCls = int(clstable[-1].rlnReferenceImage.split("@")[0])
 
-    # Find classes with >= 5% particles
+    # Find classes with >= 5% particles, accuracy < 10deg, < 10A
     good_cls = []
     for row in clstable:
-        if row.rlnClassDistribution >= 0.05:
+        if (row.rlnClassDistribution >= 0.05 and
+                row.rlnAccuracyRotations < 10 and
+                row.rlnAccuracyTranslationsAngst < 10):
             good_cls.append(int(row.rlnReferenceImage.split("@")[0]))
     if DEBUG:
         print("Classes selected: ", good_cls)
@@ -54,6 +57,13 @@ def run_job(project_dir, args):
     with open(out_star, "w") as f:
         optics.writeStar(f, tableName="optics")
         out_ptcls.writeStar(f, tableName="particles")
+
+    # Create backup_selection.star for results visualization
+    sel = Table(columns=['rlnSelected'])
+    for i in range(1, nrCls + 1):
+        sel.addRow(1 if i in good_cls else 0)
+    with open(getPath("backup_selection.star"), "w") as f:
+        sel.writeStar(f, tableName="")
 
     end = time.time()
     diff = end - start

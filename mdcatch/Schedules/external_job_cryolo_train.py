@@ -20,7 +20,7 @@ CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
 TUNE_MODEL = "fine_tuned_model.h5"
 IMG_FOLDER = "train_image"
 ANNOT_FOLDER = "train_annot"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):

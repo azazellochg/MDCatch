@@ -25,8 +25,7 @@
 # **************************************************************************
 
 # Config variables
-VERSION = "0.9.10"
-DEBUG = 1
+DEBUG = 0
 
 # daemon mode vars
 DEF_USER = ("emuser", 11048)  # default name: (username, uid)
@@ -34,9 +33,8 @@ DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_PICKER = "crYOLO"  # default particle picker: crYOLO or Topaz or LogPicker
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
-
-LOGPICKER_SIZES = (150, 180)  # min/max size in A for Relion LogPicker
-TOPAZ_SIZE = 150  # diameter in A for Topaz
+LOGPICKER_SIZES = (150, 180)  # default min/max size in A for Relion LogPicker
+TOPAZ_SIZE = 150  # default diameter in A for Topaz
 
 # path to EPU session or folder with SerialEM mdoc files
 METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
@@ -93,8 +91,10 @@ MOVIE_PATH_DICT = {
 
 ###############################################################################
 # SerialEM params
-PATTERN_SEM_MOVIES = "*.tif"  # movie pattern for Gatan K2/K3 cameras
-PATTERN_MDOC = "*.tif.mdoc"
+
+PATTERN_SEM_MOVIES = "*.tif"
+# change the pattern below if you want to parse movie tif instead
+PATTERN_SEM = "*.tif.mdoc"
 REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # SerialEM mdoc vars to parse

@@ -39,7 +39,7 @@ bigtiff_tags = {
     256: ("ImageWidth", 3),  # nx
     257: ("ImageLength", 3),  # ny
     258: ("BitsPerSample", 3),  # data type
-    259: ("Compression", 3),
+    259: ("Compression", 3),  # 5=LZW
     262: ("PhotometricInterpretation", 3),  # The color space of the image data.
     270: ("ImageDescription", 2),
     273: ("StripOffsets", 16),
@@ -49,11 +49,11 @@ bigtiff_tags = {
     282: ("XResolution", 5),  # The number of pixels per ResolutionUnit in the ImageWidth direction.
     283: ("YResolution", 5),  # The number of pixels per ResolutionUnit in the ImageLength direction.
     284: ("PlanarConfiguration", 3),
-    296: ("ResolutionUnit", 3),  # The unit of measurement for XResolution and YResolution.
+    296: ("ResolutionUnit", 3),  # The unit of measurement for XResolution and YResolution. 2=inch, 3=cm.
     306: ("DateTime", 2),  # YYYY:MM:DD HH:MM:SS
     339: ("SampleFormat", 3),
-    340: ("SMinSampleValue", 1),  # min
-    341: ("SMaxSampleValue", 1),  # max
+    340: ("MinSampleValue", 1),  # min
+    341: ("MaxSampleValue", 1),  # max
 }
 
 # See https://www.ccpem.ac.uk/mrc_format/mrc2014.php
@@ -78,10 +78,10 @@ mrc_tags = np.dtype([
     ])
 ])
 
-# See EPU user manual for FEI1 MRC header details
+# See EPU user manual for FEI1/FEI2 MRC header details
 # For Timestamp definition see:
 # https://docs.microsoft.com/en-us/cpp/atl-mfc-shared/reference/coledatetime-class?redirectedfrom=MSDN&view=vs-2019
-fei_tags = np.dtype([
+fei_tags = [
     ('Metadata size', 'i4'),  # bytes
     ('Metadata version', 'i4'),
     ('Bitmask 1', 'u4'),
@@ -181,4 +181,26 @@ fei_tags = np.dtype([
     ('Bitmask 4', 'u4'),
     ('Alpha tilt min', 'f8'),  # deg.
     ('Alpha tilt max', 'f8')  # deg.
+]
+
+fei1_tags = np.dtype(fei_tags)
+
+fei_tags.extend([
+    ('Scan rotation', 'f8'),  # rad.
+    ('Diffraction pattern rotation', 'f8'),  # rad.
+    ('Image rotation', 'f8'),  # rad.
+    ('Scan mode enumeration', 'i4'),  # 0 - other, 1 - raster, 2 - serpentine raster
+    ('Acquisition time stamp', 'i8'),  # us since 01/01/1970
+    ('Detector commercial name', 'S16'),
+    ('Start tilt angle', 'f8'),  # deg.
+    ('End tilt angle', 'f8'),  # deg.
+    ('Tilt per image', 'f8'),  # deg.
+    ('Tilt speed', 'f8'),  # deg./s
+    ('Beam center X pixel', 'i4'),  # px
+    ('Beam center Y pixel', 'i4'),  # px
+    ('CFEG flash timestamp', 'i8'),  # us since 01/01/1970
+    ('Phase plate position index', 'i4'),
+    ('Objective aperture name', 'S16')
 ])
+
+fei2_tags = np.dtype(fei_tags)

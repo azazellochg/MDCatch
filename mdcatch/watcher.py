@@ -50,9 +50,8 @@ class WatchDog:
                                                   case_sensitive=True)
         event_handler.on_created = self.on_created
 
-        if DEBUG:
-            print("Watchdog started for: %s\n\tregex: %s" %
-                  (path, regex))
+        print("Watchdog started for: %s\n\tregex: %s" %
+              (path, regex))
 
         self.observer.schedule(event_handler, path, recursive=True)
         self.observer.start()
@@ -60,8 +59,7 @@ class WatchDog:
 
     def on_created(self, event):
         mdFn = event.src_path
-        if DEBUG:
-            print("File creation detected: %s" % mdFn)
+        print("File creation detected: %s" % mdFn)
         self.observer.stop()
         start_app(mdFn)
 
@@ -88,23 +86,23 @@ def start_app(mdFn):
               model.getMdPath(),
               model.getUser(),
               model.getPipeline())
-        print("\nFiles found: %s\n" % mdFn) if DEBUG else ""
+
+    print("\nFiles found: %s\n" % mdFn)
 
     if DEF_SOFTWARE == 'EPU':
         model.parseImgEpu(mdFn)
     else:  # SerialEM
-        model.parseImgMdoc(mdFn)
+        model.parseImgSem(mdFn)
 
     model.calcDose()
     model.guessDataDir(wait=True)
     model.acqDict['Picker'] = DEF_PICKER
     setParticleSizes(model)
 
-    if DEBUG:
-        print("\nFinal parameters:\n")
-        for k, v in sorted(model.acqDict.items()):
-            print(k, v)
-        print('\n')
+    print("\nFinal parameters:\n")
+    for k, v in sorted(model.acqDict.items()):
+        print(k, v)
+    print('\n')
 
     if DEF_PIPELINE == 'Relion':
         setupRelion(model.acqDict)

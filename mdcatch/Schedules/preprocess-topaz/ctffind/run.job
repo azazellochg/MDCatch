@@ -10,8 +10,8 @@ Perform equi-phase averaging? == No
 Ignore 'Searches' parameters? == Yes
 Estimate phase shifts? == $$is_VPP
 Submit to queue? == No
-CTFFIND-4.1 executable: == /usr/local/bin/ctffind
-Gctf executable: == /public/EM/Gctf/bin/Gctf
+CTFFIND-4.1 executable: == $RELION_CTFFIND_EXECUTABLE
+Gctf executable: == $RELION_GCTF_EXECUTABLE
 Which GPUs to use: == 
 Input micrographs STAR file: == Schedules/preprocess-topaz/motioncorr/corrected_micrographs.star
 Minimum dedicated cores per node: == 24

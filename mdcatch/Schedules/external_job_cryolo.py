@@ -6,7 +6,6 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
-import shutil
 import time
 from glob import glob
 import subprocess
@@ -21,7 +20,7 @@ CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.7.5"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
-DEBUG = 1
+DEBUG = 0
 
 
 def run_job(project_dir, args):
@@ -122,7 +121,7 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " --input %s" % i
+        cmd += " --input %s/" % i
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -203,6 +202,49 @@ def run_job(project_dir, args):
         tableCryolo.addRow(diam, boxSize, boxSizeSmall)
         with open(outputFn, "w") as f:
             tableCryolo.writeStar(f, tableName='picker')
+
+        # create .gui_manualpickjob.star for easy display
+        starString = """
+# version 30001
+
+data_job
+
+_rlnJobType                             3
+_rlnJobIsContinue                       0
+
+
+# version 30001
+
+data_joboptions_values
+
+loop_
+_rlnJobOptionVariable #1
+_rlnJobOptionValue #2
+    angpix         -1
+ black_val          0
+blue_value          0
+color_label rlnParticleSelectZScore
+  ctfscale          1
+  diameter         %d
+  do_color         No
+  do_queue         No
+do_startend        No
+  fn_color         ""
+     fn_in         ""
+  highpass         -1
+   lowpass         20
+  micscale        0.2
+min_dedicated       1
+other_args         ""
+      qsub       qsub
+qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
+ queuename    openmpi
+ red_value          2
+sigma_contrast      3
+ white_val          0
+"""
+        with open(getPath(".gui_manualpickjob.star"), "w") as f:
+            f.write(starString % diam)
 
     end = time.time()
     diff = end - start
