@@ -41,25 +41,25 @@ Dependencies are installed by pip automatically:
 
 You have two options:
 
-a) create python virtualenv:
+    a) create python virtualenv:
 
-.. code-block:: python
+        .. code-block:: python
 
-    python3 -m venv mdcatch
-    source mdcatch/bin/activate
-    git clone https://github.com/azazellochg/MDCatch.git
-    cd MDCatch
-    pip install -e .
+            python3 -m venv mdcatch
+            source mdcatch/bin/activate
+            git clone https://github.com/azazellochg/MDCatch.git
+            cd MDCatch
+            pip install -e .
 
-b) create conda virtualenv (requires miniconda3 installed):
+    b) create conda virtualenv (requires miniconda3 installed):
 
-.. code-block:: python
+        .. code-block:: python
 
-    conda create -n mdcatch python=3.8
-    conda activate mdcatch
-    git clone https://github.com/azazellochg/MDCatch.git
-    cd MDCatch
-    pip install -e .
+            conda create -n mdcatch python=3.8
+            conda activate mdcatch
+            git clone https://github.com/azazellochg/MDCatch.git
+            cd MDCatch
+            pip install -e .
 
 .. raw:: html
 
@@ -197,29 +197,29 @@ Scipion project will be created in the default Scipion projects folder.
 
 There are two schedules: *preprocess-xxx* (where xxx is cryolo, topaz or logpicker) and *class2d*. Both are launched at the same time.
 
-1. Preprocess includes 5 jobs that run in a loop, processing batches of 5 movies:
+    1. Preprocess includes 5 jobs that run in a loop, processing batches of 5 movies:
 
- * import movies
- * motion correction (relion motioncor)
- * ctffind4-4.1.14
- * picking (crYOLO, Topaz or Relion LogPicker)
- * extraction
+        * import movies
+        * motion correction (relion motioncor)
+        * ctffind4-4.1.14
+        * picking (crYOLO, Topaz or Relion LogPicker)
+        * extraction
 
-The schedule will terminate if no new mics were processed by Ctffind for 240 consecutive (!) loops (~ 4h in our case).
-This helps in case a user pauses EPU session for some reason and then continues.
+        The schedule will terminate if no new mics were processed by Ctffind for 240 consecutive (!) loops (~ 4h in our case).
+        This helps in case a user pauses EPU session for some reason and then continues.
 
-.. tip:: Picking results from crYOLO or Topaz can be visualized immediately (without saving settings for Manual picking job).
+        .. tip:: Picking results from crYOLO or Topaz can be visualized immediately (without saving settings for Manual picking job).
 
-2. Class2D includes 2 jobs:
+    2. Class2D includes 2 jobs:
 
- * 2D classification
- * sorting 2D class averages (cryoassess)
+        * 2D classification
+        * sorting 2D class averages (cryoassess)
 
-Classification starts (with 20 classes) once 5000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
+        Classification starts (with 20 classes) once 5000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
 
-.. tip:: You can display the selected classes by opening the last iteration's results of the Class2D/job007 (with 20000 particles).
+        .. tip:: You can display the selected classes by opening the last iteration's results of the Class2D/job007 (with 20000 particles).
 
-.. important:: Both schedules produce output log files: *schedules_preprocess.log* and *schedules_class2d.log*
+        .. important:: Both schedules produce output log files: *schedules_preprocess.log* and *schedules_class2d.log*
 
 .. raw:: html
 
