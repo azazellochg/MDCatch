@@ -7,6 +7,7 @@ import argparse
 import os
 import shutil
 import time
+from glob import glob
 import subprocess
 import math
 from emtable import Table  # requires pip install emtable
@@ -69,31 +70,26 @@ def run_job(project_dir, args):
     input_job = "/".join(mic_fns[0].split("/")[:2])
     keys = ["/".join(i.split("/")[2:]) for i in mic_fns]  # remove JobType/jobXXX
     values = [os.path.splitext(i)[0] + "_topaz.star" for i in keys]  # _topaz.star
-    mic_dict = {k: v for k, v in zip(keys, values)}
+    mic_dict = {k: v for k, v in zip(keys, values) if k not in done_mics}
 
     for mic in mic_dict:
         if DEBUG:
             print("Processing mic: ", mic)
         mic_dir = os.path.dirname(mic)
+        # create folder for micrograph links for topaz job
         if not os.path.isdir(mic_dir):
             os.makedirs(mic_dir)
         if mic_dir not in mic_dirs:
             mic_dirs.append(mic_dir)
-            print("Added folder %s to the mic_dirs" % mic_dir)
-        if mic not in done_mics:
-            inputfn = getPath(input_job, mic)
-            outfn = getPath(job_dir, mic)
+            if DEBUG:
+                print("Added folder %s to the mic_dirs" % mic_dir)
+        inputfn = getPath(input_job, mic)
+        outfn = getPath(job_dir, mic)
+        os.symlink(inputfn, outfn)
+        if DEBUG:
+            print("Link %s --> %s" % (inputfn, outfn))
 
-            # if mic had no coords picked, symlink still exists
-            if os.path.exists(outfn):
-                os.remove(outfn)
-                continue
-            else:
-                os.symlink(inputfn, outfn)
-                if DEBUG:
-                    print("Link %s --> %s" % (inputfn, outfn))
-
-    if len(mic_dict.keys()) == len(done_mics):
+    if len(mic_dict.keys()) == 0:
         print("All mics picked! Nothing to do.")
         open(RELION_JOB_SUCCESS_FILENAME, "w").close()
         exit(0)
@@ -108,7 +104,8 @@ def run_job(project_dir, args):
     cmd = "%s && %s " % (CONDA_ENV, TOPAZ_PREPROCESS)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
-        cmd += " %s/*%s" % (i, mic_ext)
+        if len(glob("%s/*%s" % (i, mic_ext))):  # skip folders with no mics
+            cmd += " %s/*%s" % (i, mic_ext)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -169,14 +166,13 @@ def run_job(project_dir, args):
     # Move output star files for Relion to use
     with open(DONE_MICS, "a+") as f:
         for mic in mic_dict:
+            f.write("%s\n" % mic)
             mic_base = os.path.basename(mic)
+            os.remove(mic)  # clean up
             coord_topaz = "output/" + os.path.splitext(mic_base)[0] + ".star"
             coord_relion = mic_dict[mic]
-            # To ensure that topaz doesn't pick from already done mics
             if os.path.exists(coord_topaz):
-                f.write("%s\n" % mic)
                 os.rename(coord_topaz, getPath(job_dir, coord_relion))
-                os.remove(mic)  # clean up
                 if DEBUG:
                     print("Moved %s to %s" % (coord_topaz, getPath(job_dir, coord_relion)))
 
