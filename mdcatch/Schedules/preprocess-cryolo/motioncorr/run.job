@@ -19,7 +19,7 @@ Input movies STAR file: == Schedules/preprocess-cryolo/importmovies/movies.star
 Last frame for corrected sum: == -1
 Minimum dedicated cores per node: == 24
 Number of MPI procs: == 5
-Number of threads: == 12
+Number of threads: == 10
 Additional arguments: == --do_at_most $$do_at_most
 Other MOTIONCOR2 arguments == 
 Number of patches X: == 5
