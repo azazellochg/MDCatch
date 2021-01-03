@@ -119,7 +119,7 @@ def run_job(project_dir, args):
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
     for i in mic_dirs:
         if len(glob("%s/*%s" % (i, mic_ext))):  # skip folders with no mics
-            cmd += " %s/*%s" % (i, mic_ext)
+            cmd += " --input %s/*%s" % (i, mic_ext)
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
