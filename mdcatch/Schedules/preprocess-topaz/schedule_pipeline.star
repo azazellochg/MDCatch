@@ -18,7 +18,7 @@ _rlnPipeLineProcessStatus #4
 Schedules/preprocess-topaz/importmovies/       None            0            1
 Schedules/preprocess-topaz/motioncorr/       None            1            1
 Schedules/preprocess-topaz/ctffind/       None            2            1
-Schedules/preprocess-topaz/topazpicker/       None           99            1
+Schedules/preprocess-topaz/topazpicker/       Schedules/preprocess-topaz/Autopick_topaz           99            1
 Schedules/preprocess-topaz/extract/       None            5            1
  
 
