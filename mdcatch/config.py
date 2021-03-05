@@ -42,10 +42,10 @@ METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
 PROJECT_PATH = "/cephfs"
 
 # Folder with Relion 4.0 schedules
-SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schedules"
+SCHEDULE_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schedules"
 
 # Scipion pre-processing template
-JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
+JSON_TEMPLATE = "/home/gsharov/soft/MDCatch-dev/mdcatch/template.json"
 
 # main dictionary
 # instrumentID: [name, Cs, TFS camera, Gatan camera]
