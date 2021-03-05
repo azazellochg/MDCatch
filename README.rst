@@ -21,7 +21,6 @@ Dependencies are installed by pip automatically:
  * pyqt5 (GUI)
  * mrcfile (to parse MRC header)
  * tifffile (to parse TIF header)
- * emtable (for Relion schedules scripts)
  * watchdog (watch a folder when running in daemon mode)
 
 .. raw:: html
@@ -97,11 +96,17 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://www3.mrc-lmb.cam.ac.uk/relion//index.php/Main_Page>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `crYOLO <https://cryolo.readthedocs.io/>`_ or/and `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
-    - `2dassess <https://github.com/cianfrocco-lab/Automatic-cryoEM-preprocessing>`_ or/and `Cinderella <https://sphire.mpg.de/wiki/doku.php?id=auto_2d_class_selection>`_ (installed in a conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
     - ypmatch (part of NIS client, only used to match a folder name with username from a NIS database)
 
 Relion and Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
+For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where topaz is a bash script like this:
+
+.. code-block:: bash
+    #!/bin/bash
+    source /home/gsharov/soft/miniconda3/bin/activate topaz-0.2.4
+    topaz $@
+
 Also, this server needs access to both EPU session folder (with metadata files) and
 raw movies folder. In our case both storage systems are mounted via NFSv4.
 
@@ -118,7 +123,6 @@ Important points to mention:
 
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
-    * you will also need to modify **Schedules/external_job_....py**, updating the path to conda environments and training models
     * Relion schedules use **/work** as the scratch (SSD) folder, you might want to change this
     * Relion schedules also use two GPUs: 0 and 1
 
@@ -129,13 +133,13 @@ Below is an example of folders setup on our server. Data points to movies storag
     /mnt
     ├── Data
     │   ├── Krios1
-    │   │   ├── Falcon
+    │   │   ├── Falcon3
     │   │   └── K2
     │   ├── Krios2
-    │   │   ├── Falcon
+    │   │   ├── Falcon4
     │   │   └── K2
     │   └── Krios3
-    │       ├── Falcon
+    │       ├── Falcon3
     │       └── K3
     └── MetaData
         ├── Krios1
@@ -165,9 +169,7 @@ Daemon mode
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode (except uid which is obtained from username).
 
-Make sure you have set in **config.py**: DEF_USER, DEF_PICKER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
-
-Though all three pickers can be run fully automatically, Topaz and LogPicker will most likely require particle size / threshold adjustment, so crYOLO is preferred over other pickers.
+Make sure you have set in **config.py**: DEF_USER, DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
 We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
@@ -196,31 +198,27 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schedules description</a></summary>
 
-There are two schedules: *preprocess-xxx* (where xxx is cryolo, topaz or logpicker) and *class2d*. Both are launched at the same time.
+There are two schedules: *prep* and *proc*. Both are launched at the same time.
 
-    1. Preprocess includes 5 jobs that run in a loop, processing batches of 5 movies:
+    1. Prep includes 3 jobs that run in a loop, processing batches of 5 movies:
 
         * import movies
         * motion correction (relion motioncor)
         * ctffind4-4.1.14
-        * picking (crYOLO, Topaz or Relion LogPicker)
-        * extraction
 
-        The schedule will terminate if no new mics were processed by Ctffind for 240 consecutive (!) loops (~ 4h in our case).
+        The schedule will terminate if no new mics were imported for ~ 4h.
         This helps in case a user pauses EPU session for some reason and then continues.
 
-        .. tip:: Picking results from crYOLO or Topaz can be visualized immediately (without saving settings for Manual picking job).
+    2. Proc includes multiple jobs:
 
-    2. Class2D includes 2 jobs:
-
+        * micrograph selection (CTF res < 6A)
+        * particle picking (Topaz and LogPicker)
+        * particle extration
         * 2D classification
-        * sorting 2D class averages (cryoassess)
+        * subset selections for particles/classes, auto-selection of good 2D classes
+        * 3D initial model and refinement
 
-        Classification starts (with 20 classes) once 5000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
-
-        .. tip:: You can display the selected classes by opening the last iteration's results of the Class2D/job007 (with 20000 particles).
-
-        .. important:: Both schedules produce output log files: *schedules_preprocess.log* and *schedules_class2d.log*
+        Classification starts (with 50 classes) once 10000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
 
 .. raw:: html
 

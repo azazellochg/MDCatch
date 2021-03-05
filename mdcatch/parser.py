@@ -44,7 +44,7 @@ class Parser:
         self.fn = None
         self.pipeline = DEF_PIPELINE
         self.symmetry = "C1"
-        self.size = (0, 0)
+        self.size = DEF_PARTICLE_SIZES
 
         self.acqDict = {
             'Mode': 'Linear',
