@@ -38,6 +38,7 @@ def setupRelion(paramDict):
     bin, gain, defect, group_frames = precalculateVars(paramDict)
     mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
+        'prep__do_at_most': 5,  # for testing
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
@@ -100,9 +101,6 @@ def setupRelion(paramDict):
         'prep__motioncorr__fn_defect': os.path.basename(defect) or '""'
     })
 
-    if DEBUG:
-        print("Params passed to Relion: ", mapDict)
-
     try:
         subprocess.check_output(["which", "relion_scheduler"],
                                 stderr=subprocess.DEVNULL)
@@ -131,10 +129,10 @@ def setupRelion(paramDict):
         opts = key.split("__")
         if key.count("__") == 2:  # job option
             jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
-            cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue %s' % (
+            cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue "%s"' % (
                 jobstar, opts[2], mapDict[key])
         else:  # schedule option
-            cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
+            cmd = 'relion_scheduler --schedule %s --set_var %s --value "%s" --original_value "%s"' % (
                 opts[0], opts[1], mapDict[key], mapDict[key])
 
         cmdList.append(cmd)
