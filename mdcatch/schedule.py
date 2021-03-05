@@ -30,7 +30,7 @@ import subprocess
 import json
 
 from .utils.misc import precalculateVars, getPrjName
-from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
+from .config import JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 
 def setupRelion(paramDict):
@@ -96,9 +96,9 @@ def setupRelion(paramDict):
             shutil.copyfile(i, os.path.basename(i))
 
     mapDict.update({
-        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '""',
+        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '',
         'prep__importmovies__fn_mtf': os.path.basename(paramDict['MTF']),
-        'prep__motioncorr__fn_defect': os.path.basename(defect) or '""'
+        'prep__motioncorr__fn_defect': os.path.basename(defect) or ''
     })
 
     try:
