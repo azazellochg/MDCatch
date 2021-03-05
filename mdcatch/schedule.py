@@ -132,7 +132,8 @@ def setupRelion(paramDict):
             cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue "%s"' % (
                 jobstar, opts[2], mapDict[key])
         else:  # schedule option
-            cmd = 'relion_scheduler --schedule %s --set_var %s --value "%s" --original_value "%s"' % (
+            # FIXME: set var depending on its type (str, float)
+            cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
                 opts[0], opts[1], mapDict[key], mapDict[key])
 
         cmdList.append(cmd)
