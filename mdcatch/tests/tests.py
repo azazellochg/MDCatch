@@ -29,7 +29,7 @@ from glob import glob
 import unittest
 
 from ..config import *
-from ..utils.misc import getUsername, setParticleSizes
+from ..utils.misc import getUsername
 from ..parser import Parser
 
 
@@ -85,8 +85,8 @@ class TestParser(unittest.TestCase):
 
         model.calcDose()
         model.guessDataDir(testmode=True)
-        model.acqDict['Picker'] = DEF_PICKER
-        setParticleSizes(model)
+        model.acqDict['PtclSizes'] = DEF_PARTICLE_SIZES
+        model.calcBox()
 
         print("\nFinal parameters:\n")
         for k, v in sorted(model.acqDict.items()):

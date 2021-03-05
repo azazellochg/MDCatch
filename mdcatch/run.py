@@ -98,14 +98,13 @@ class Page1(QWizardPage):
         label_soft = QLabel('Software')
         label_path = QLabel('Path')
         label_pipeline = QLabel('Run pipeline in')
-        label_picker = QLabel('Particle picker')
-        label_diam = QLabel('Particle diameter (A)')
-        label_diam.setToolTip(help_picker)
+        label_sym = QLabel('Symmetry')
+        label_diam = QLabel('Particle size (A)')
 
         vbox.addWidget(label_soft, alignment=Qt.Alignment())
         vbox.addWidget(label_path, alignment=Qt.Alignment())
         vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
-        vbox.addWidget(label_picker, alignment=Qt.Alignment())
+        vbox.addWidget(label_sym, alignment=Qt.Alignment())
         vbox.addWidget(label_diam, alignment=Qt.Alignment())
 
         return vbox
@@ -160,47 +159,33 @@ class Page1(QWizardPage):
         hbox_pipeline.addWidget(button_scipion, alignment=Qt.Alignment())
         grid.addLayout(hbox_pipeline)
 
-        # particle picker
-        hbox_picker = QHBoxLayout()
-        hbox_picker.setAlignment(Qt.AlignLeft)
-        btgroup_picker = QButtonGroup()
+        # symmetry box
+        hbox_sym = QHBoxLayout()
+        self.symm = QLineEdit()
+        self.symm.setMinimumWidth(60)
+        self.symm.setMaximumWidth(60)
+        self.symm.setText("C1")
 
-        self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "crYOLO")
-        self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
-        self.button_logpick = self.addRadioButton("LogPicker", default=DEF_PICKER == "LogPicker")
-
-        btgroup_picker.addButton(self.button_cryolo)
-        btgroup_picker.addButton(self.button_topaz)
-        btgroup_picker.addButton(self.button_logpick)
-        btgroup_picker.buttonClicked.connect(lambda: self.updPicker(btgroup_picker))
-        hbox_picker.addWidget(self.button_cryolo, alignment=Qt.Alignment())
-        hbox_picker.addWidget(self.button_topaz, alignment=Qt.Alignment())
-        hbox_picker.addWidget(self.button_logpick, alignment=Qt.Alignment())
-        grid.addLayout(hbox_picker)
+        hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
+        grid.addLayout(hbox_sym)
 
         # size box
         hbox_diam = QHBoxLayout()
-        self.label_diamMin = QLabel('')
-        self.label_diamMin.setToolTip(help_picker)
+        self.label_diamMin = QLabel('min')
         hbox_diam.addWidget(self.label_diamMin)
 
         self.spbox_diamMin = QSpinBox()
-        self.spbox_diamMin.setToolTip(help_picker)
         self.spbox_diamMin.setRange(0, 9999)
-        self.spbox_diamMin.setValue(LOGPICKER_SIZES[0] if DEF_PICKER != "crYOLO" else 0)
+        self.spbox_diamMin.setValue(DEF_PARTICLE_SIZES[0])
         self.spbox_diamMin.setFixedSize(60, 25)
         hbox_diam.addWidget(self.spbox_diamMin)
 
         self.label_diamMax = QLabel('max')
-        self.label_diamMax.setToolTip(help_picker)
-        self.label_diamMax.setVisible(self.button_logpick.isChecked())
         hbox_diam.addWidget(self.label_diamMax)
 
         self.spbox_diamMax = QSpinBox()
-        self.spbox_diamMax.setToolTip(help_picker)
-        self.spbox_diamMax.setVisible(self.button_logpick.isChecked())
         self.spbox_diamMax.setRange(10, 9999)
-        self.spbox_diamMax.setValue(LOGPICKER_SIZES[1])
+        self.spbox_diamMax.setValue(DEF_PARTICLE_SIZES[1])
         self.spbox_diamMax.setFixedSize(60, 25)
         hbox_diam.addWidget(self.spbox_diamMax)
         hbox_diam.setAlignment(Qt.AlignLeft)
@@ -215,27 +200,6 @@ class Page1(QWizardPage):
     def updPipeline(self, btgroup):
         bt = btgroup.checkedButton()
         App.model.setPipeline(bt.text())
-
-    def updPicker(self, btgroup):
-        bt = btgroup.checkedButton()
-        if self.button_cryolo.isChecked():  # crYOLO
-            self.label_diamMin.setText("")
-            self.spbox_diamMin.setValue(0)
-            self.label_diamMax.setVisible(False)
-            self.spbox_diamMax.setVisible(False)
-        elif self.button_topaz.isChecked():  # Topaz
-            self.label_diamMin.setText("")
-            self.spbox_diamMin.setValue(LOGPICKER_SIZES[0])
-            self.label_diamMax.setVisible(False)
-            self.spbox_diamMax.setVisible(False)
-        elif self.button_logpick.isChecked():  # LogPicker
-            self.label_diamMin.setText("min")
-            self.spbox_diamMin.setValue(LOGPICKER_SIZES[0])
-            self.label_diamMax.setVisible(True)
-            self.spbox_diamMax.setVisible(True)
-
-        App.model.setPicker(bt.text())
-        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
 
     def browseSlot(self, var):
         """ Called when "Browse" is pressed. """
@@ -254,6 +218,7 @@ class Page1(QWizardPage):
     def validatePage(self):
         """ Executed when Next is pressed.
         Returns True or False. """
+        App.model.setSymmetry(self.symm.text())
         App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
 
         if App.model.getMdPath() is None:
@@ -268,7 +233,7 @@ class Page1(QWizardPage):
                    App.model.getMdPath(),
                    App.model.getUser(),
                    App.model.getPipeline(),
-                   App.model.getPicker(),
+                   App.model.getSymmetry(),
                    App.model.getSize()])
 
         prog = App.model.getSoftware()
@@ -307,7 +272,6 @@ class Page2(QWizardPage):
         self.mainLayout = QGridLayout()
         self.mainLayout.addWidget(self.group1(), 0, 0)
         self.mainLayout.addWidget(self.group2(), 0, 1)
-        self.doCalcBox = False
         self.setLayout(self.mainLayout)
 
     def initializePage(self):
@@ -384,7 +348,7 @@ class Page2(QWizardPage):
         mode = QLabel("Mode")
         time = QLabel("Exposure time (s)")
         frames = QLabel("Frames")
-        dosepf = QLabel("Dose per frame (e/A²)")
+        dosepf = QLabel("Fluence per frame (e/A²)")
         gain = QLabel("Gain reference")
         defects = QLabel("Defects file")
 
@@ -435,21 +399,14 @@ class Page2(QWizardPage):
         return groupBox
 
     def addPtclSizeWidgets(self, acqDict):
-        """ Add particle size widgets depending on the input params. """
-        picker = App.model.getPicker()
+        """ Add particle size widgets. """
         sizes = App.model.getSize()
         acqDict['PtclSizes'] = sizes
-        acqDict['Picker'] = picker
-
-        if picker == 'crYOLO' and sizes[0] == 0:
-            pass  # automated estimation, no params needed
-        else:
-            self.doCalcBox = True
-            App.model.calcBox(picker)
-            self.mainLayout.addWidget(self.group3(), 1, 0)
-            self.box.setText(acqDict['BoxSize'])
-            self.mask.setText(acqDict['MaskSize'])
-            self.box_bin.setText(acqDict['BoxSizeSmall'])
+        App.model.calcBox()
+        self.mainLayout.addWidget(self.group3(), 1, 0)
+        self.box.setText(acqDict['BoxSize'])
+        self.mask.setText(acqDict['MaskSize'])
+        self.box_bin.setText(acqDict['BoxSizeSmall'])
 
     def onFinish(self):
         """ Finish is pressed, we need to update all editable vars. """
@@ -457,11 +414,10 @@ class Page2(QWizardPage):
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
-
-        if self.doCalcBox:
-            App.model.acqDict['BoxSize'] = self.box.text()
-            App.model.acqDict['MaskSize'] = self.mask.text()
-            App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
+        App.model.acqDict['BoxSize'] = self.box.text()
+        App.model.acqDict['MaskSize'] = self.mask.text()
+        App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
+        App.model.acqDict['Symmetry'] = App.model.getSymmetry()
 
         print("\nFinal parameters:\n")
         for k, v in sorted(App.model.acqDict.items()):

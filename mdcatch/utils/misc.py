@@ -28,8 +28,7 @@ import os
 import subprocess
 from datetime import datetime
 
-from ..config import (DEF_USER, SCOPE_DICT, DEF_PICKER,
-                      TOPAZ_SIZE, LOGPICKER_SIZES)
+from ..config import DEF_USER, SCOPE_DICT
 
 
 def getUsername(mdPath):
@@ -73,7 +72,7 @@ def precalculateVars(paramDict):
     bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
     gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-    # group frames if dose rate < 0.8 e/A^2/frame
+    # group frames if fluence < 0.8 e/A^2/frame
     group_frames = 1
     dpf = float(paramDict['DosePerFrame'])
     if dpf < 0.8:
@@ -82,15 +81,3 @@ def precalculateVars(paramDict):
             group_frames += 1
 
     return bin, gain, defect, group_frames
-
-
-def setParticleSizes(model):
-    """ Setup particle sizes when running in non-GUI mode. """
-    if DEF_PICKER == 'Topaz':
-        model.acqDict['PtclSizes'] = TOPAZ_SIZE, LOGPICKER_SIZES[1]
-        model.calcBox(DEF_PICKER)
-    elif DEF_PICKER == 'LogPicker':
-        model.acqDict['PtclSizes'] = LOGPICKER_SIZES
-        model.calcBox(DEF_PICKER)
-    else:
-        model.acqDict['PtclSizes'] = 0, LOGPICKER_SIZES[1]

@@ -2,7 +2,7 @@ MDCatch
 =======
 
 A simple app to fetch acquisition metadata from a running EPU session or SerialEM.
-It parses the first found xml/mrc (EPU) or mdoc/tif file (SerialEM) associated with a
+It parses the first found xml/mdoc/mrc/tif/eer (from EPU/SerialEM) associated with a
 data collection session and launches Relion or Scipion pipeline.
 
 Installation
@@ -19,7 +19,8 @@ Dependencies are installed by pip automatically:
 
  * python3
  * pyqt5 (GUI)
- * numpy (to parse MRC header)
+ * mrcfile (to parse MRC header)
+ * tifffile (to parse TIF header)
  * emtable (for Relion schedules scripts)
  * watchdog (watch a folder when running in daemon mode)
 
@@ -94,7 +95,7 @@ Here you can find information about how the app works and how to configure it fo
 The app is installed on a pre-processing server with GPU(s).
 The server requires the following software installed:
 
-    - `RELION 3.1 <https://www3.mrc-lmb.cam.ac.uk/relion//index.php/Main_Page>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
+    - `RELION 4.0 <https://www3.mrc-lmb.cam.ac.uk/relion//index.php/Main_Page>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
     - `crYOLO <https://cryolo.readthedocs.io/>`_ or/and `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
     - `2dassess <https://github.com/cianfrocco-lab/Automatic-cryoEM-preprocessing>`_ or/and `Cinderella <https://sphire.mpg.de/wiki/doku.php?id=auto_2d_class_selection>`_ (installed in a conda environment)

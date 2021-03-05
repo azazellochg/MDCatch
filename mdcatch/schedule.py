@@ -34,32 +34,35 @@ from .config import DEBUG, JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 
 def setupRelion(paramDict):
-    """ Prepare and launch Relion 3.1 schedules. """
+    """ Prepare and launch Relion 4.0 schedules. """
     bin, gain, defect, group_frames = precalculateVars(paramDict)
-    mapDict = {'Cs': paramDict['Cs'],
-               'dose_rate': paramDict['DosePerFrame'],
-               'angpix': paramDict['PixelSpacing'],
-               'voltage': paramDict['Voltage'],
-               'motioncorr_bin': bin,
-               'group_frames': group_frames,
-               'is_VPP': paramDict['PhasePlateUsed'],
-               'optics_group': paramDict['OpticalGroup'],
-               'size_min': paramDict['PtclSizes'][0],
-               'size_max': paramDict['PtclSizes'][1],
-               }
-
-    pickerSchedule = {'crYOLO': 'preprocess-cryolo',
-                      'Topaz': 'preprocess-topaz',
-                      'LogPicker': 'preprocess-logpicker'}
-    preprocess_schd = pickerSchedule[paramDict['Picker']]
-
-    if paramDict['PtclSizes'][0] != 0:
-        mapDict.update({
-            'box_size': paramDict['BoxSize'],
-            'mask_diam_px': paramDict['MaskSize'],
-            'mask_diam': int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing']),
-            'box_size_bin': paramDict['BoxSizeSmall'],
-        })
+    mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
+    mapDict = {
+        'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
+        'prep__importmovies__Cs': paramDict['Cs'],
+        'prep__importmovies__angpix': paramDict['PixelSpacing'],
+        'prep__importmovies__kV': paramDict['Voltage'],
+        'prep__importmovies__optics_group_name': paramDict['OpticalGroup'],
+        'prep__motioncorr__bin_factor': bin,
+        'prep__motioncorr__dose_per_frame': paramDict['DosePerFrame'],
+        'prep__motioncorr__group_frames': group_frames,
+        'proc__class2d_ini__particle_diameter': mask_diam,
+        'proc__class2d_rest__particle_diameter': mask_diam,
+        'proc__extract_ini__bg_diameter': paramDict['MaskSize'],
+        'proc__extract_ini__extract_size': paramDict['BoxSize'],
+        'proc__extract_ini__rescale': paramDict['BoxSizeSmall'],
+        'proc__extract_rest__bg_diameter': paramDict['MaskSize'],
+        'proc__extract_rest__extract_size': paramDict['BoxSize'],
+        'proc__extract_rest__rescale': paramDict['BoxSizeSmall'],
+        'proc__inimodel3d__particle_diameter': mask_diam,
+        'proc__inimodel3d__sym_name': paramDict['Symmetry'],
+        'proc__inipicker__log_diam_max': paramDict['PtclSizes'][1],
+        'proc__inipicker__log_diam_min': paramDict['PtclSizes'][0],
+        'proc__refine3d__particle_diameter': mask_diam,
+        'proc__refine3d__sym_name': paramDict['Symmetry'],
+        'proc__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
+        'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+    }
 
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
@@ -76,28 +79,29 @@ def setupRelion(paramDict):
     if paramDict['Software'] == 'EPU':
         # EPU: Movies -> EPU session folder
         origPath1, origPath2 = paramDict['MoviePath'].split('/Images-Disc')
-        mapDict['movies_wildcard'] = 'Movies/Images-Disc%s' % origPath2
+        mapDict['prep__importmovies__fn_in_raw'] = 'Movies/Images-Disc%s' % origPath2
     else:
         # SerialEM: Movies -> Raw path folder
         origPath1 = paramDict['MoviePath'].split(PATTERN_SEM_MOVIES)[0]
-        mapDict['movies_wildcard'] = 'Movies/%s' % PATTERN_SEM_MOVIES
-
-    if DEBUG:
-        print("Params passed to Relion: ", mapDict)
+        mapDict['prep__importmovies__fn_in_raw'] = 'Movies/%s' % PATTERN_SEM_MOVIES
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
-    # Create .gui_projectdir file, so that other users can open GUI
-    with open('.gui_projectdir', 'w'):
-        pass
+    # Create .gui_projectdir file, so that users can open GUI
+    open('.gui_projectdir', 'w').close()
 
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
 
-    mapDict['gainref'] = os.path.basename(gain) or '""'
-    mapDict['mtf_file'] = os.path.basename(paramDict['MTF'])
-    mapDict['defect_file'] = os.path.basename(defect) or '""'
+    mapDict.update({
+        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '""',
+        'prep__importmovies__fn_mtf': os.path.basename(paramDict['MTF']),
+        'prep__motioncorr__fn_defect': os.path.basename(defect) or '""'
+    })
+
+    if DEBUG:
+        print("Params passed to Relion: ", mapDict)
 
     try:
         subprocess.check_output(["which", "relion_scheduler"],
@@ -105,16 +109,16 @@ def setupRelion(paramDict):
         if not os.path.exists('Schedules'):
             shutil.copytree(SCHEDULE_PATH, os.getcwd() + '/Schedules')
     except subprocess.CalledProcessError:
-        print("ERROR: relion command not found in PATH or Schedules not found!")
+        print("ERROR: Relion not found in PATH or Schedules not found!")
         exit(1)
 
     # setup ACL for uid
     uid = paramDict['User'][1]
     if uid:  # not zero
-        cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath)]
-        cmdList.append("setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath))
-        cmdList.append("setfacl -R -m m::rwx %s" % prjPath)
-        cmdList.append("setfacl -R -d -m m::rwx %s" % prjPath)
+        cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath),
+                   "setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath),
+                   "setfacl -R -m m::rwx %s" % prjPath,
+                   "setfacl -R -d -m m::rwx %s" % prjPath]
         try:
             for cmd in cmdList:
                 subprocess.check_output(cmd.split())
@@ -124,29 +128,29 @@ def setupRelion(paramDict):
     # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
-        cmd = 'relion_scheduler --schedule %s --set_var %s --value %s' % (
-            preprocess_schd, key, str(mapDict[key]))
+        opts = key.split("__")
+        if key.count("__") == 2:  # job option
+            jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
+            cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue %s' % (
+                jobstar, opts[2], mapDict[key])
+        else:  # schedule option
+            cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
+                opts[0], opts[1], mapDict[key], mapDict[key])
+
         cmdList.append(cmd)
 
-    cmdList.append('relion_scheduler --schedule class2d --set_var mask_diam --value %s' % mapDict.get('mask_diam', 0))
-
-    for cmd in cmdList:
+    for cmd in sorted(cmdList):
         print(cmd)
         proc = subprocess.check_output(cmd.split())
 
     # Run scheduler with Popen - without waiting for return
-    cmd1 = 'relion_scheduler --schedule %s --run --pipeline_control Schedules/%s/ &' % (
-        preprocess_schd, preprocess_schd)
-    cmd2 = 'relion_scheduler --schedule class2d --run --pipeline_control Schedules/class2d/ &'
+    cmd = ['relion_scheduler --schedule prep --reset &',
+           'relion_scheduler --schedule prep --run --pipeline_control Schedules/prep/ >> Schedules/prep/run.out 2>> Schedules/prep/run.err &',
+           'relion_scheduler --schedule proc --reset &',
+           'relion_scheduler --schedule proc --run --pipeline_control Schedules/proc/ >> Schedules/proc/run.out 2>> Schedules/proc/run.err &']
 
-    with open("schedules_preprocess.log", "w") as fnLog1:
-        print(cmd1)
-        proc = subprocess.Popen(cmd1.split(), universal_newlines=True,
-                                stdout=fnLog1, stderr=subprocess.STDOUT)
-    with open("schedules_class2d.log", "w") as fnLog2:
-        print(cmd2)
-        proc = subprocess.Popen(cmd2.split(), universal_newlines=True,
-                                stdout=fnLog2, stderr=subprocess.STDOUT)
+    print(cmd)
+    proc = subprocess.Popen(cmd, universal_newlines=True)
 
 
 def setupScipion(paramDict):

@@ -47,18 +47,14 @@ setup(
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3'
     ],
     keywords='cryo-em python qt5 epu serialem',
     packages=find_packages(),
-    install_requires=['pyqt5', 'numpy', 'emtable', 'watchdog'],
-    entry_points={
-        'console_scripts': [
-            'mdcatch=mdcatch.run:main'
-        ],
-    },
+    install_requires=['pyqt5', 'numpy', 'emtable', 'watchdog', 'mrcfile', 'tifffile'],
+    entry_points={'console_scripts': ['mdcatch=mdcatch.run:main']},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/MDCatch/issues',
         'Source': 'https://github.com/azazellochg/MDCatch',

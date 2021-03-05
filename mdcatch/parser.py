@@ -43,7 +43,7 @@ class Parser:
         self.user = DEF_USER
         self.fn = None
         self.pipeline = DEF_PIPELINE
-        self.picker = DEF_PICKER
+        self.symmetry = "C1"
         self.size = (0, 0)
 
         self.acqDict = {
@@ -69,11 +69,11 @@ class Parser:
     def getPipeline(self):
         return self.pipeline
 
-    def setPicker(self, choice):
-        self.picker = choice
+    def setSymmetry(self, choice):
+        self.symmetry = choice
 
-    def getPicker(self):
-        return self.picker
+    def getSymmetry(self):
+        return self.symmetry
 
     def getSize(self):
         return self.size
@@ -146,17 +146,16 @@ class Parser:
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
-    def calcBox(self, picker):
+    def calcBox(self):
         """ Calculate box, mask, downsample. """
         minSize, maxSize = self.acqDict['PtclSizes']
-        ptclSizeAng = max(minSize, maxSize) if picker == 'LogPicker' else minSize
         angpix = float(self.acqDict['PixelSpacing'])
 
         if self.acqDict['Mode'] == 'Super-resolution':
             # since we always bin by 2 in mc if using super-res
             angpix *= 2
 
-        ptclSizePx = float(ptclSizeAng) / angpix
+        ptclSizePx = float(maxSize) / angpix
         # use +20% for mask size
         self.acqDict['MaskSize'] = str(math.ceil(1.2 * ptclSizePx))
         # use +30% for box size, make it even
@@ -165,7 +164,7 @@ class Parser:
 
         # from relion_it.py script
         # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
-        for box in (32, 48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
                     360, 384, 400, 420, 450, 480, 512, 640, 768,
                     896, 1024):
             # Don't go larger than the original box
@@ -184,18 +183,19 @@ class Parser:
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
         scopeID = self.acqDict['MicroscopeID']
+        voltage = self.acqDict['Voltage']
 
         # get MTF file
         if camera == 'EF-CCD':
             model = SCOPE_DICT[scopeID][3]
             if model is not None:
-                self.acqDict['MTF'] = MTF_DICT[model]
+                self.acqDict['MTF'] = MTF_DICT[model] % voltage
         else:
             model = SCOPE_DICT[scopeID][2]
             if self.acqDict['Mode'] == 'Linear':
-                self.acqDict['MTF'] = MTF_DICT['%s-linear' % model]
+                self.acqDict['MTF'] = MTF_DICT['%s-linear' % model] % voltage
             else:
-                self.acqDict['MTF'] = MTF_DICT['%s-count' % model]
+                self.acqDict['MTF'] = MTF_DICT['%s-count' % model] % voltage
 
         # update with real camera name
         self.acqDict['Detector'] = model
@@ -216,7 +216,7 @@ class Parser:
             if wait:  # in daemon mode wait for movie folder to appear
                 while True:
                     if not os.path.exists(movieBaseDir):
-                        print("Movie folder %s not found, waiting for 1 min.." % movieBaseDir)
+                        print("Movie folder %s not found, waiting for 60 s.." % movieBaseDir)
                         time.sleep(60)
                     else:
                         print("Movie folder found! Continuing..")
