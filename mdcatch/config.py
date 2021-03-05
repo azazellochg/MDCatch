@@ -66,7 +66,7 @@ EPU_MOVIES_DICT = {
 }
 GAIN_DICT = {
     'K2': "FoilHole_*_Data_*-gain-ref.MRC",
-    'K3': "FoilHole_*_Data_*_gain.tiff",
+    'K3': "FoilHole_*_Data_*_gainX.tiff",
     'Falcon4': "*_EER_GainReference.gain"
 }
 

@@ -143,13 +143,14 @@ def setupRelion(paramDict):
         proc = subprocess.check_output(cmd.split())
 
     # Run scheduler with Popen - without waiting for return
-    cmd = ['relion_scheduler --schedule prep --reset &',
-           'relion_scheduler --schedule prep --run --pipeline_control Schedules/prep/ >> Schedules/prep/run.out 2>> Schedules/prep/run.err &',
-           'relion_scheduler --schedule proc --reset &',
-           'relion_scheduler --schedule proc --run --pipeline_control Schedules/proc/ >> Schedules/proc/run.out 2>> Schedules/proc/run.err &']
+    cmdList = ['relion_scheduler --schedule prep --reset &',
+               'relion_scheduler --schedule prep --run --pipeline_control Schedules/prep/ >> Schedules/prep/run.out 2>> Schedules/prep/run.err &',
+               'relion_scheduler --schedule proc --reset &',
+               'relion_scheduler --schedule proc --run --pipeline_control Schedules/proc/ >> Schedules/proc/run.out 2>> Schedules/proc/run.err &']
 
-    print(cmd)
-    proc = subprocess.Popen(cmd, universal_newlines=True)
+    for cmd in cmdList:
+        print(cmd)
+        proc = subprocess.Popen(cmd.split(), universal_newlines=True)
 
 
 def setupScipion(paramDict):
