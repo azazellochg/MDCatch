@@ -43,7 +43,7 @@ def setupRelion(paramDict):
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
         'prep__importmovies__kV': paramDict['Voltage'],
-        'prep__importmovies__optics_group_name': paramDict['OpticalGroup'],
+        'prep__importmovies__optics_group_name': '"%s"' % paramDict['OpticalGroup'],
         'prep__motioncorr__bin_factor': bin,
         'prep__motioncorr__dose_per_frame': paramDict['DosePerFrame'],
         'prep__motioncorr__group_frames': group_frames,
@@ -56,11 +56,11 @@ def setupRelion(paramDict):
         'proc__extract_rest__extract_size': paramDict['BoxSize'],
         'proc__extract_rest__rescale': paramDict['BoxSizeSmall'],
         'proc__inimodel3d__particle_diameter': mask_diam,
-        'proc__inimodel3d__sym_name': paramDict['Symmetry'],
+        'proc__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
         'proc__inipicker__log_diam_max': paramDict['PtclSizes'][1],
         'proc__inipicker__log_diam_min': paramDict['PtclSizes'][0],
         'proc__refine3d__particle_diameter': mask_diam,
-        'proc__refine3d__sym_name': paramDict['Symmetry'],
+        'proc__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
         'proc__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
         'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
     }
@@ -80,11 +80,11 @@ def setupRelion(paramDict):
     if paramDict['Software'] == 'EPU':
         # EPU: Movies -> EPU session folder
         origPath1, origPath2 = paramDict['MoviePath'].split('/Images-Disc')
-        mapDict['prep__importmovies__fn_in_raw'] = 'Movies/Images-Disc%s' % origPath2
+        mapDict['prep__importmovies__fn_in_raw'] = '"Movies/Images-Disc%s"' % origPath2
     else:
         # SerialEM: Movies -> Raw path folder
         origPath1 = paramDict['MoviePath'].split(PATTERN_SEM_MOVIES)[0]
-        mapDict['prep__importmovies__fn_in_raw'] = 'Movies/%s' % PATTERN_SEM_MOVIES
+        mapDict['prep__importmovies__fn_in_raw'] = '"Movies/%s"' % PATTERN_SEM_MOVIES
 
     os.symlink(origPath1, movieDir)
     os.chdir(prjPath)
@@ -96,9 +96,9 @@ def setupRelion(paramDict):
             shutil.copyfile(i, os.path.basename(i))
 
     mapDict.update({
-        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '',
-        'prep__importmovies__fn_mtf': os.path.basename(paramDict['MTF']),
-        'prep__motioncorr__fn_defect': os.path.basename(defect) or ''
+        'prep__motioncorr__fn_gain_ref': '"%s"' % os.path.basename(gain) or '',
+        'prep__importmovies__fn_mtf': '"%s"' % os.path.basename(paramDict['MTF']),
+        'prep__motioncorr__fn_defect': '"%s"' % os.path.basename(defect) or ''
     })
 
     try:
@@ -142,7 +142,7 @@ def setupRelion(paramDict):
         print(cmd)
         os.system(cmd)
 
-    # Run scheduler with Popen - without waiting for return
+    # Run scheduler
     cmdList = ['relion_scheduler --schedule prep --reset &',
                'relion_scheduler --schedule prep --run --pipeline_control Schedules/prep/ >> Schedules/prep/run.out 2>> Schedules/prep/run.err &',
                'relion_scheduler --schedule proc --reset &',
