@@ -135,7 +135,7 @@ def setupRelion(paramDict):
     # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
-        if len(mapDict[key]):
+        if mapDict[key] != '':
             opts = key.split("__")
             if key.count("__") == 2:  # job option
                 jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
