@@ -25,7 +25,7 @@ dose_per_frame       1.277
 eer_grouping         20 
 first_frame_sum          1 
  fn_defect         "" 
-fn_gain_ref "Movies/gain.mrc" 
+fn_gain_ref ""
 fn_motioncor2_exe /public/EM/MOTIONCOR2/MotionCor2 
  gain_flip "No flipping (0)" 
   gain_rot "No rotation (0)" 

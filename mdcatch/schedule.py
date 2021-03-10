@@ -96,9 +96,9 @@ def setupRelion(paramDict):
             shutil.copyfile(i, os.path.basename(i))
 
     mapDict.update({
-        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '""',
+        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '',
         'prep__importmovies__fn_mtf': os.path.basename(paramDict['MTF']),
-        'prep__motioncorr__fn_defect': os.path.basename(defect) or '""'
+        'prep__motioncorr__fn_defect': os.path.basename(defect) or ''
     })
 
     try:
@@ -126,16 +126,17 @@ def setupRelion(paramDict):
     # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
-        opts = key.split("__")
-        if key.count("__") == 2:  # job option
-            jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
-            cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue %s' % (
-                jobstar, opts[2], mapDict[key])
-        else:  # schedule option
-            cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
-                opts[0], opts[1], mapDict[key], mapDict[key])
+        if mapDict[key] != "":
+            opts = key.split("__")
+            if key.count("__") == 2:  # job option
+                jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
+                cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue %s' % (
+                    jobstar, opts[2], mapDict[key])
+            else:  # schedule option
+                cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
+                    opts[0], opts[1], mapDict[key], mapDict[key])
 
-        cmdList.append(cmd)
+            cmdList.append(cmd)
 
     for cmd in sorted(cmdList):
         print(cmd)
