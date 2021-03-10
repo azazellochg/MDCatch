@@ -38,7 +38,7 @@ def setupRelion(paramDict):
     bin, gain, defect, group_frames = precalculateVars(paramDict)
     mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
-        'prep__do_at_most': 5,  # for testing
+        'prep__do_at_most': 5,
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
@@ -95,11 +95,20 @@ def setupRelion(paramDict):
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
 
-    mapDict.update({
-        'prep__motioncorr__fn_gain_ref': '"%s"' % os.path.basename(gain) or '',
-        'prep__importmovies__fn_mtf': '"%s"' % os.path.basename(paramDict['MTF']),
-        'prep__motioncorr__fn_defect': '"%s"' % os.path.basename(defect) or ''
-    })
+    if os.path.exists(gain):
+        mapDict['prep__motioncorr__fn_gain_ref'] = '"%s"' % os.path.basename(gain)
+    else:
+        mapDict['prep__motioncorr__fn_gain_ref'] = ''
+
+    if os.path.exists(paramDict['MTF']):
+        mapDict['prep__importmovies__fn_mtf'] = '"%s"' % os.path.basename(paramDict['MTF'])
+    else:
+        mapDict['prep__importmovies__fn_mtf'] = ''
+
+    if os.path.exists(defect):
+        mapDict['prep__motioncorr__fn_defect'] = '"%s"' % os.path.basename(defect)
+    else:
+        mapDict['prep__motioncorr__fn_defect'] = ''
 
     try:
         subprocess.check_output(["which", "relion_scheduler"],
@@ -126,7 +135,7 @@ def setupRelion(paramDict):
     # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
-        if mapDict[key] != "":
+        if len(mapDict[key]):
             opts = key.split("__")
             if key.count("__") == 2:  # job option
                 jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
