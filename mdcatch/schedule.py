@@ -96,9 +96,9 @@ def setupRelion(paramDict):
             shutil.copyfile(i, os.path.basename(i))
 
     mapDict.update({
-        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '',
+        'prep__motioncorr__fn_gain_ref': os.path.basename(gain) or '""',
         'prep__importmovies__fn_mtf': os.path.basename(paramDict['MTF']),
-        'prep__motioncorr__fn_defect': os.path.basename(defect) or ''
+        'prep__motioncorr__fn_defect': os.path.basename(defect) or '""'
     })
 
     try:
@@ -129,10 +129,9 @@ def setupRelion(paramDict):
         opts = key.split("__")
         if key.count("__") == 2:  # job option
             jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
-            cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue "%s"' % (
+            cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue %s' % (
                 jobstar, opts[2], mapDict[key])
         else:  # schedule option
-            # FIXME: set var depending on its type (str, float)
             cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
                 opts[0], opts[1], mapDict[key], mapDict[key])
 
@@ -140,7 +139,7 @@ def setupRelion(paramDict):
 
     for cmd in sorted(cmdList):
         print(cmd)
-        proc = subprocess.check_output(cmd.split())
+        os.system(cmd)
 
     # Run scheduler with Popen - without waiting for return
     cmdList = ['relion_scheduler --schedule prep --reset &',
@@ -150,7 +149,7 @@ def setupRelion(paramDict):
 
     for cmd in cmdList:
         print(cmd)
-        proc = subprocess.Popen(cmd.split(), universal_newlines=True)
+        os.system(cmd)
 
 
 def setupScipion(paramDict):
