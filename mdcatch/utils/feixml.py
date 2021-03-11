@@ -39,7 +39,8 @@ def parseXml(fn):
     nspace = {'so': '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}',
               'ar': '{http://schemas.microsoft.com/2003/10/Serialization/Arrays}',
               'fr': '{http://schemas.datacontract.org/2004/07/Fei.Applications.Common.Omp.Interface}',
-              'tp': '{http://schemas.datacontract.org/2004/07/Fei.Types}'}
+              'tp': '{http://schemas.datacontract.org/2004/07/Fei.Types}',
+              'dr': '{http://schemas.datacontract.org/2004/07/System.Drawing}'}
 
     items = {'ExposureTime': "./{so}microscopeData/{so}acquisition/{so}camera/{so}ExposureTime",
              'Detector': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name",
@@ -52,8 +53,8 @@ def parseXml(fn):
              'ExtractorVoltage': "./{so}microscopeData/{so}gun/{so}ExtractorVoltage",
              'MicroscopeID': "./{so}microscopeData/{so}instrument/{so}InstrumentID",
              'PixelSpacing': "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue",
-             #'EnergySelectionSlitWidth': "./{so}microscopeData/{so}optics/{so}EnergyFilter/{so}EnergySelectionSlitWidth",
-             'Binning': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Binning/{tp}_x",
+             'EnergySelectionSlitWidth': "./{so}microscopeData/{so}optics/{so}EnergyFilter/{so}EnergySelectionSlitWidth",
+             'Binning': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Binning/{dr}x",
              'EPUversion': "./{so}microscopeData/{so}core/{so}ApplicationSoftwareVersion",
              'BeamTiltX': "./{so}microscopeData/{so}optics/{so}BeamTilt/{tp}_x",
              'BeamTiltY': "./{so}microscopeData/{so}optics/{so}BeamTilt/{tp}_y",
@@ -64,7 +65,10 @@ def parseXml(fn):
              }
 
     for key in items:
-        acqDict[key] = root.find(items[key].format(**nspace)).text
+        try:
+            acqDict[key] = root.find(items[key].format(**nspace)).text
+        except:
+            pass
 
     if acqDict['MicroscopeID'] in SCOPE_DICT:
         acqDict['Cs'] = SCOPE_DICT[acqDict['MicroscopeID']][1]
