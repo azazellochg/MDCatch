@@ -14,9 +14,9 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-        Cs        1.4 
+        Cs        2.7
         Q0        0.1 
-    angpix      0.877 
+    angpix      1.0
 beamtilt_x          0 
 beamtilt_y          0 
   do_other         No 
@@ -26,7 +26,7 @@ fn_in_other    ref.mrc
  fn_in_raw Movies/*.tiff 
     fn_mtf         "" 
 is_multiframe        Yes 
-        kV      200.0 
+        kV      300.0
 min_dedicated         24 
  node_type "Particle coordinates (*.box, *_pick.star)" 
 optics_group_name opticsGroup1 

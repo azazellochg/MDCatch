@@ -63,7 +63,7 @@ ref3d_symmetry         ""
     shrink          0 
 threshold_autopick         "" 
 topaz_model $$topaz_model 
-topaz_nr_particles        900 
+topaz_nr_particles        300
 topaz_other_args         "" 
 topaz_particle_diameter      100.0 
 topaz_train_parts         "" 

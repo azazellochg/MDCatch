@@ -21,8 +21,8 @@ do_own_motioncor        Yes
   do_queue         No 
 do_save_noDW        No 
 do_save_ps        Yes 
-dose_per_frame       1.277 
-eer_grouping         20 
+dose_per_frame       1.0
+eer_grouping         32
 first_frame_sum          1 
  fn_defect         "" 
 fn_gain_ref ""
@@ -36,7 +36,7 @@ input_star_mics Schedules/prep/importmovies/movies.star
 last_frame_sum         -1 
 min_dedicated         24 
     nr_mpi          1 
-nr_threads         24 
+nr_threads          1
 other_args "--do_at_most $$do_at_most" 
 other_motioncor2_args         "" 
    patch_x          5 

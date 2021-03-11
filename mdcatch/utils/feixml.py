@@ -45,11 +45,15 @@ def parseXml(fn):
              'Detector': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name",
              'GunLens': "./{so}microscopeData/{so}gun/{so}GunLens",
              'SpotSize': "./{so}microscopeData/{so}optics/{so}SpotIndex",
+             'ProbeMode': "./{so}microscopeData/{so}optics/{so}ProbeMode",
              'Magnification': "./{so}microscopeData/{so}optics/{so}TemMagnification/{so}NominalMagnification",
              'BeamSize': "./{so}microscopeData/{so}optics/{so}BeamDiameter",
              'Voltage': "./{so}microscopeData/{so}gun/{so}AccelerationVoltage",
+             'ExtractorVoltage': "./{so}microscopeData/{so}gun/{so}ExtractorVoltage",
              'MicroscopeID': "./{so}microscopeData/{so}instrument/{so}InstrumentID",
              'PixelSpacing': "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue",
+             #'EnergySelectionSlitWidth': "./{so}microscopeData/{so}optics/{so}EnergyFilter/{so}EnergySelectionSlitWidth",
+             'Binning': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Binning/{tp}_x",
              'EPUversion': "./{so}microscopeData/{so}core/{so}ApplicationSoftwareVersion",
              'BeamTiltX': "./{so}microscopeData/{so}optics/{so}BeamTilt/{tp}_x",
              'BeamTiltY': "./{so}microscopeData/{so}optics/{so}BeamTilt/{tp}_y",
@@ -67,6 +71,7 @@ def parseXml(fn):
 
     acqDict['BeamSize'] = float(acqDict['BeamSize']) * math.pow(10, 6)
     acqDict['Voltage'] = int(acqDict['Voltage']) // 1000
+    acqDict['Binning'] = int(acqDict['Binning'])
 
     # get cameraSpecificInput: ElectronCountingEnabled, SuperResolutionFactor etc.
     customDict = dict()
@@ -104,6 +109,10 @@ def parseXml(fn):
         acqDict['Dose'] = float(customDict['Dose']) * math.pow(10, -20)
     if 'PhasePlateUsed' in customDict:
         acqDict['PhasePlateUsed'] = customDict['PhasePlateUsed']
+    if 'Aperture[C2].Name' in customDict:
+        acqDict['C2Aperture'] = customDict['Aperture[C2].Name']
+    if 'Aperture[OBJ].Name' in customDict:
+        acqDict['ObjAperture'] = customDict['Aperture[OBJ].Name']
 
         if customDict['PhasePlateUsed'] == 'true':
             acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName'].split(" ")[-1]

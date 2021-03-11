@@ -20,14 +20,14 @@ do_amyloid         No
 do_ctf_autopick        Yes 
 do_ignore_first_ctfpeak_autopick         No 
 do_invert_refs        Yes 
-    do_log        Yes 
+    do_log        No
 do_pick_helical_segments         No 
   do_queue         No 
 do_read_fom_maps         No 
   do_ref3d         No 
    do_refs         No 
-  do_topaz         No 
-do_topaz_pick         No 
+  do_topaz         Yes
+do_topaz_pick         Yes
 do_topaz_train         No 
 do_topaz_train_parts         No 
 do_write_fom_maps         No 
@@ -63,8 +63,8 @@ ref3d_symmetry         C1
     shrink          0 
 threshold_autopick       0.05 
 topaz_model         "" 
-topaz_nr_particles         -1 
-topaz_other_args         "" 
+topaz_nr_particles         300
+topaz_other_args         "--threshold 0"
 topaz_particle_diameter         -1 
 topaz_train_parts         "" 
 topaz_train_picks         "" 
