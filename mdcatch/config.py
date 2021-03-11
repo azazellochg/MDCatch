@@ -34,8 +34,7 @@ DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 DEF_PARTICLE_SIZES = (150, 180)  # default min/max size in Angstroms
 
 # path to EPU session or folder with SerialEM mdoc files
-#METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
-METADATA_PATH = "/mnt/MetaData/Krios1/EPU/Eva_Absmeier/EV45_B4_collect_K3_105kx_20210305"
+METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
 
 # path where Relion projects are created
 # for Scipion mtf, defects, gain and template files are copied here
