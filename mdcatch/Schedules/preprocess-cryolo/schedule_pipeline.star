@@ -18,7 +18,7 @@ _rlnPipeLineProcessStatus #4
 Schedules/preprocess-cryolo/importmovies/       None            0            1
 Schedules/preprocess-cryolo/motioncorr/       None            1            1
 Schedules/preprocess-cryolo/ctffind/       None            2            1
-Schedules/preprocess-cryolo/cryolopicker/       None           99            1
+Schedules/preprocess-cryolo/cryolopicker/       Schedules/preprocess-cryolo/Autopick_cryolo           99            1
 Schedules/preprocess-cryolo/extract/       None            5            1
  
 

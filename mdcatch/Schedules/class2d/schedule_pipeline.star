@@ -14,9 +14,9 @@ _rlnPipeLineProcessName #1
 _rlnPipeLineProcessAlias #2 
 _rlnPipeLineProcessType #3 
 _rlnPipeLineProcessStatus #4 
-Schedules/class2d/class2d_first/       None            8            1
-Schedules/class2d/class2d_last/       None            8            1
-Schedules/class2d/sort_cls2d/       None           99            1
+Schedules/class2d/class2d_first/       Schedules/class2d/Class2D_run1            8            1
+Schedules/class2d/class2d_last/       Schedules/class2d/Class2D_run2            8            1
+Schedules/class2d/sort_cls2d/       Schedules/class2d/2D_assess           99            1
 
 
 # version 30001

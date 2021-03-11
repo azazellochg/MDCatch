@@ -22,7 +22,7 @@ Number of unique asymmetrical units: == 1
 Helical rise (A): == 1
 Tube diameter (A):  == 200
 Minimum dedicated cores per node: == 24
-Number of MPI procs: == 1
+Number of MPI procs: == 5
 Additional arguments: == 
 Queue submit command: == qsub
 Standard submission script: == /public/EM/RELION/relion/bin/relion_qsub.csh

@@ -35,7 +35,7 @@ input_star_mics Schedules/preprocess-cryolo/importmovies/movies.star
 last_frame_sum         -1 
 min_dedicated         24 
     nr_mpi         5 
-nr_threads         12 
+nr_threads         10
 other_args "--do_at_most $$do_at_most" 
 other_motioncor2_args         "" 
    patch_x          5 
