@@ -127,21 +127,21 @@ class Parser:
         self.acqDict.update(acqDict)
 
     def calcDose(self):
-        """ Calculate dose rate per unbinned px. """
+        """ Calculate dose rate per unbinned px per s. """
         numFr = int(self.acqDict['NumSubFrames'])
         dose_total = float(self.acqDict['Dose'])  # e/A^2
         exp = float(self.acqDict['ExposureTime'])  # s
 
         if self.acqDict['Mode'] == 'Super-resolution':
-            pix = 2 * float(self.acqDict['PixelSpacing'])  # A
+            pix = 2 * float(self.acqDict['PixelSpacing']) / self.acqDict['Binning']  # A
         else:
-            pix = float(self.acqDict['PixelSpacing'])  # A
+            pix = float(self.acqDict['PixelSpacing']) / self.acqDict['Binning']  # A
 
         if numFr:  # not 0
             dose_per_frame = dose_total / numFr  # e/A^2/frame
         else:
             dose_per_frame = 0
-        dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
+        dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/unbinned_px/s
 
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)

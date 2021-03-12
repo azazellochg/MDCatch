@@ -90,6 +90,7 @@ def parseXml(fn):
         sr = float(customDict['SuperResolutionFactor'])  # 1 - counting, 2 - super-res
         acqDict['Mode'] = 'Counting' if sr == 1.0 else 'Super-resolution'
 
+    # EPU's pixel size refers to a physical pixel, which is already multiplied by Binning factor
     acqDict['PixelSpacing'] = float(acqDict['PixelSpacing']) * math.pow(10, 10) / sr
 
     if acqDict['Detector'] == 'EF-CCD':
