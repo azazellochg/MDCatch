@@ -20,7 +20,7 @@ coords_suffix Schedules/proc/restpicker/autopick.star
 do_cut_into_segments        Yes 
 do_extract_helical_tubes        Yes 
 do_extract_helix         No 
-do_fom_threshold        Yes 
+do_fom_threshold        No
  do_invert        Yes 
    do_norm        Yes 
   do_queue         No 

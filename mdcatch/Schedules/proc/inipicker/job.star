@@ -34,7 +34,7 @@ do_write_fom_maps         No
 fn_input_autopick Schedules/proc/select_mics/micrographs.star 
 fn_ref3d_autopick         "" 
 fn_refs_autopick         "" 
-   gpu_ids         "" 
+   gpu_ids         0
 helical_nr_asu          1 
 helical_rise         -1 
 helical_tube_kappa_max        0.1 
@@ -68,5 +68,5 @@ topaz_other_args         "--threshold 0"
 topaz_particle_diameter         -1 
 topaz_train_parts         "" 
 topaz_train_picks         "" 
-   use_gpu         No 
+   use_gpu         Yes
  
