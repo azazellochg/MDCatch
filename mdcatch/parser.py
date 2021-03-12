@@ -133,9 +133,9 @@ class Parser:
         exp = float(self.acqDict['ExposureTime'])  # s
 
         if self.acqDict['Mode'] == 'Super-resolution':
-            pix = 2 * float(self.acqDict['PixelSpacing']) / self.acqDict['Binning']  # A
+            pix = 2 * float(self.acqDict['PixelSpacing']) / int(self.acqDict['Binning'])  # A
         else:
-            pix = float(self.acqDict['PixelSpacing']) / self.acqDict['Binning']  # A
+            pix = float(self.acqDict['PixelSpacing']) / int(self.acqDict['Binning'])  # A
 
         if numFr:  # not 0
             dose_per_frame = dose_total / numFr  # e/A^2/frame
