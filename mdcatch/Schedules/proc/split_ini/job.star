@@ -26,7 +26,6 @@ do_remove_duplicates         No
 do_select_values         No 
   do_split        Yes 
 duplicate_threshold         30 
- fn_coords         "" 
    fn_data Schedules/proc/extract_ini/particles.star 
     fn_mic         "" 
   fn_model         "" 

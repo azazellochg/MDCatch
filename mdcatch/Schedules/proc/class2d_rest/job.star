@@ -29,7 +29,7 @@ do_zero_mask        Yes
 dont_skip_align        Yes 
    fn_cont         "" 
     fn_img Schedules/proc/extract_rest/particles.star 
-   gpu_ids        0,1 
+   gpu_ids        1 
 helical_rise       4.75 
 helical_tube_outer_diameter        200 
 highres_limit         -1 

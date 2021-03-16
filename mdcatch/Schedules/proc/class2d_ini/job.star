@@ -29,16 +29,16 @@ do_zero_mask        Yes
 dont_skip_align        Yes 
    fn_cont         "" 
     fn_img $$ini_batch 
-   gpu_ids        0,1 
+   gpu_ids        "0:1" 
 helical_rise       4.75 
 helical_tube_outer_diameter        200 
 highres_limit         -1 
 min_dedicated         24 
 nr_classes        50 
    nr_iter        20 
-    nr_mpi          1 
+    nr_mpi          3 
    nr_pool         30 
-nr_threads         12 
+nr_threads         4 
 offset_range          5 
 offset_step          1 
 other_args         "" 
