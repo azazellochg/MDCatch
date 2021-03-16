@@ -26,7 +26,6 @@ do_remove_duplicates         No
 do_select_values        Yes 
   do_split         No 
 duplicate_threshold         30 
- fn_coords         "" 
    fn_data         "" 
     fn_mic $$ctffind_mics
   fn_model         "" 

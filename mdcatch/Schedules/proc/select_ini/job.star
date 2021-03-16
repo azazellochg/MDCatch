@@ -26,7 +26,6 @@ do_remove_duplicates         No
 do_select_values         No 
   do_split         No 
 duplicate_threshold         30 
- fn_coords         "" 
    fn_data         "" 
     fn_mic         "" 
   fn_model Schedules/proc/class2d_ini/run_it020_optimiser.star 
