@@ -212,13 +212,13 @@ There are two schedules: *prep* and *proc*. Both are launched at the same time.
     2. Proc includes multiple jobs:
 
         * micrograph selection (CTF res < 6A)
-        * particle picking (Topaz and LogPicker)
+        * particle picking (Topaz)
         * particle extration
         * 2D classification
         * subset selections for particles/classes, auto-selection of good 2D classes
         * 3D initial model and refinement
 
-        Classification starts (with 50 classes) once 10000 particles have been extracted. This class2d job will be repeated continuously, overwriting the results each time until 20000 particles is reached. Once this threshold is reached, a separate class2d job is launched with 50 classes. Then cryoassess is launched. Once that job is finished, the schedule stops.
+        The proc schedule starts once ctffind results are available. The first 2D classification starts (with 50 classes) once 10000 particles have been extracted. After the classification, the best class averages are auto-selected and the corresponding particles are used for Topaz model training. Then all micrographs are picked again with the new model followed by extraction and another 2D classification (with 100 classes).
 
 .. raw:: html
 
