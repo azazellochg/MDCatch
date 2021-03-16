@@ -52,7 +52,7 @@ maxstddevnoise_autopick         ""
 min_dedicated         24 
 minavgnoise_autopick         "" 
 mindist_autopick         "" 
-    nr_mpi          2 
+    nr_mpi          1
 other_args         "" 
 psi_sampling_autopick          5 
       qsub       qsub 
