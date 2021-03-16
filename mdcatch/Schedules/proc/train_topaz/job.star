@@ -63,7 +63,7 @@ ref3d_symmetry         C1
     shrink          0 
 threshold_autopick       0.05 
 topaz_model         "" 
-topaz_nr_particles        900 
+topaz_nr_particles        300
 topaz_other_args         "" 
 topaz_particle_diameter      100.0 
 topaz_train_parts Schedules/proc/select_ini/particles.star 
