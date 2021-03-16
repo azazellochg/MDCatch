@@ -89,6 +89,51 @@ def setupRelion(paramDict):
     os.chdir(prjPath)
     # Create .gui_projectdir file, so that users can open GUI
     open('.gui_projectdir', 'w').close()
+    # Create .gui_manualpickjob.star for easy picking results display
+    starString = """
+
+# version 30001
+
+data_job
+
+_rlnJobTypeLabel             ManualPick
+_rlnJobIsContinue                       0
+ 
+
+# version 30001
+
+data_joboptions_values
+
+loop_ 
+_rlnJobOptionVariable #1 
+_rlnJobOptionValue #2 
+    angpix         %s 
+ black_val          0 
+blue_value          0 
+color_label rlnAutopickFigureOfMerit 
+  diameter        %s 
+  do_color         No 
+do_fom_threshold         No 
+  do_queue         No 
+do_startend         No 
+  fn_color         "" 
+     fn_in         "" 
+  highpass         -1 
+   lowpass         20 
+  micscale        0.2 
+min_dedicated         24 
+minimum_pick_fom          0 
+other_args         "" 
+      qsub       qsub 
+qsubscript /home/gsharov/rc/relion-slurm.sh 
+ queuename    openmpi 
+ red_value          2 
+sigma_contrast          3 
+ white_val          0     
+"""
+    with open(".gui_manualpickjob.star", "w") as f:
+        f.write(starString % (float(paramDict['PixelSpacing']) * bin,
+                              paramDict['PtclSizes'][1]))
 
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
