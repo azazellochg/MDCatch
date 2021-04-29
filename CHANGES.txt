@@ -1,3 +1,4 @@
+1.1: fix installer
 1.0:
     - separate mdoc parser, enable bigtiff header parser
     - add Cryoassess for 2D cls sorting, use it by default
