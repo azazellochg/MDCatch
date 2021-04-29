@@ -34,13 +34,11 @@ https://github.com/pypa/sampleproject
 from setuptools import setup, find_packages
 from os import path
 
-from mdcatch import __version__
-
 here = path.abspath(path.dirname(__file__))
 
 setup(
     name='MDCatch',
-    version=__version__,
+    version='1.0',
     description='Fetch metadata from EPU / SerialEM and launch on-the-fly pre-processing',
     long_description='See https://github.com/azazellochg/MDCatch for more details',
     url='https://github.com/azazellochg/MDCatch',
