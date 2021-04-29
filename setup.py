@@ -38,7 +38,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='MDCatch',
-    version='1.0',
+    version='1.1',
     description='Fetch metadata from EPU / SerialEM and launch on-the-fly pre-processing',
     long_description='See https://github.com/azazellochg/MDCatch for more details',
     url='https://github.com/azazellochg/MDCatch',
