@@ -16,7 +16,7 @@ _rlnScheduleFloatVariableName #1
 _rlnScheduleFloatVariableValue #2 
 _rlnScheduleFloatVariableResetValue #3 
 do_at_most    5.000000    5.000000 
-maxtime_hr    4.000000    4.000000 
+maxtime_hr    24.000000    24.000000
   wait_sec   0.000000   0.000000 
  
 

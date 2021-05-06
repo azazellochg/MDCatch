@@ -19,7 +19,7 @@ _rlnScheduleFloatVariableResetValue #3
 current_ini_size     0.000000     0.000000 
 current_rest_size     0.000000     0.000000 
 inibatch_size 10000.000000 10000.000000 
-maxtime_hr    4.000000    4.000000 
+maxtime_hr    24.000000    24.000000
 prev_rest_size     0.000000     0.000000 
 wait_sec   60.000000   60.000000 
  

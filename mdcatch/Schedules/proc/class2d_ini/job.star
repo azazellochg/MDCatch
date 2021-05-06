@@ -34,7 +34,7 @@ helical_rise       4.75
 helical_tube_outer_diameter        200 
 highres_limit         -1 
 min_dedicated         24 
-nr_classes        50 
+nr_classes        25
    nr_iter        20 
     nr_mpi          5
    nr_pool         30 
@@ -48,7 +48,7 @@ psi_sampling          6
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
  range_psi          6 
-scratch_dir         "" 
+scratch_dir         "/ssd"
  tau_fudge          2 
    use_gpu        Yes 
  
