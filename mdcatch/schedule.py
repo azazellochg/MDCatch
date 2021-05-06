@@ -64,6 +64,15 @@ def setupRelion(paramDict):
         'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
     }
 
+    if paramDict['Mode'] == "EER":
+        eer_group = 1 // paramDict['DosePerFrame']  # group to achieve 1 e/A^2/frame
+        mapDict.update({
+            'prep__motioncorr__bin_factor': 1,
+            'prep__motioncorr__group_frames': 1,
+            'prep__motioncorr__dose_per_frame': 1.0,
+            'prep__motioncorr__eer_grouping': eer_group
+        })
+
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
