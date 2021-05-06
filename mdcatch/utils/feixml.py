@@ -86,6 +86,7 @@ def parseXml(fn):
 
     # check if counting/super-res is enabled
     sr = 1.0
+    acqDict['Mode'] = 'Linear'
     if customDict['ElectronCountingEnabled'] == 'true':
         sr = float(customDict['SuperResolutionFactor'])  # 1 - counting, 2 - super-res
         acqDict['Mode'] = 'Counting' if sr == 1.0 else 'Super-resolution'
@@ -99,7 +100,10 @@ def parseXml(fn):
     else:
         # count number of DoseFractions for Falcon 3
         elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}DoseFractions"
-        acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
+        try:
+            acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
+        except:
+            pass
 
     # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus
     customDict = dict()
@@ -108,6 +112,9 @@ def parseXml(fn):
     for k, v in zip(root.findall(keys.format(**nspace)), root.findall(values.format(**nspace))):
         customDict[k.text] = v.text
 
+    if 'Detectors[BM-Falcon].EerGainReference' in customDict:
+        acqDict['NumSubFrames'] = int(float(acqDict['ExposureTime']) * 248)
+        acqDict['Mode'] = "EER"
     if 'AppliedDefocus' in customDict:
         acqDict['AppliedDefocus'] = float(customDict['AppliedDefocus']) * math.pow(10, 6)
     if 'Dose' in customDict:
