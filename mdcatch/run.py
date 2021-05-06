@@ -35,7 +35,6 @@ from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QButtonGroup, QSpinBox)
 from PyQt5.QtCore import Qt
 
-from . import __version__
 from .config import *
 from .utils.misc import getUsername
 from .parser import Parser
@@ -48,7 +47,7 @@ class App(QWizard):
 
     def __init__(self, parent=None):
         super(App, self).__init__(parent, flags=Qt.WindowFlags())
-        self.title = 'MDCatch v%s - metadata parser' % __version__
+        self.title = 'MDCatch v2.0a1-DEV - metadata parser'
         self.width = 640
         self.height = 320
         self.initUI()

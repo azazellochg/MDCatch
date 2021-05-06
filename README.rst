@@ -239,7 +239,7 @@ You need to define PATTERN_EPU and PATTERN_SEM in the **config.py** and then run
 How to cite
 -----------
 
-Please cite the code repository DOI: `10.5281/zenodo.4319193 <https://zenodo.org/record/4319193>`_
+Please cite the code repository DOI: `10.5281/zenodo.4383190 <http://doi.org/10.5281/zenodo.4383190>`_
 
 Feedback
 --------
