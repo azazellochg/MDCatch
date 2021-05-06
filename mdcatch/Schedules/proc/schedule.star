@@ -19,7 +19,7 @@ _rlnScheduleFloatVariableResetValue #3
 current_ini_size     0.000000     0.000000 
 current_rest_size     0.000000     0.000000 
 inibatch_size 10000.000000 10000.000000 
-maxtime_hr    24.000000    24.000000
+maxtime_hr    8.000000    8.000000
 prev_rest_size     0.000000     0.000000 
 wait_sec   60.000000   60.000000 
  
@@ -140,6 +140,6 @@ select_rest   SET_prev_rest_size         0  undefined  undefined
 SET_prev_rest_size  WAIT       1 CHECK_iniref  do_3d 
 CHECK_iniref inimodel3d 1 SET_myref_user has_iniref
 inimodel3d SET_myref_inimodel            0  undefined  undefined 
-SET_myref_inimodel   refine3d            0  undefined  undefined 
+SET_myref_inimodel   refine3d            0  undefined  undefined
 SET_myref_user refine3d            0  undefined  undefined 
 refine3d WAIT            0  undefined  undefined 
