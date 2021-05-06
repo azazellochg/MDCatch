@@ -24,7 +24,7 @@ _rlnJobOptionValue #2
 do_ignore_ctffind_params        Yes 
 do_phaseshift         No 
   do_queue         No 
-fn_ctffind_exe /usr/local/bin/ctffind
+fn_ctffind_exe $RELION_CTFFIND_EXECUTABLE
 fn_gctf_exe /public/EM/Gctf/bin/Gctf 
    gpu_ids         "" 
 input_star_mics Schedules/prep/motioncorr/corrected_micrographs.star 

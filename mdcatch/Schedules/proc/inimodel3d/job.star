@@ -38,7 +38,7 @@ particle_diameter        200
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
   sampling "15 degrees" 
-scratch_dir       "/work" 
+scratch_dir       "/ssd"
 skip_gridding        Yes 
   sym_name         C1
    use_gpu        Yes 

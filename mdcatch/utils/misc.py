@@ -25,32 +25,14 @@
 # **************************************************************************
 
 import os
-import subprocess
 from datetime import datetime
 
-from ..config import DEF_USER, SCOPE_DICT
+from ..config import SCOPE_DICT
 
 
 def getUsername(mdPath):
-    """ Return username and uid using NIS database. """
-    mdFolder = os.path.basename(mdPath)
-    try:
-        username = mdFolder.split("_")[1]
-    except IndexError:
-        return DEF_USER
-
-    cmd = "/usr/bin/ypmatch %s passwd" % username
-    try:
-        res = subprocess.check_output(cmd.split())
-    except subprocess.CalledProcessError:
-        print("Warning: username %s not found! Using defaults: " % username, DEF_USER)
-        return DEF_USER
-    except FileNotFoundError:
-        print("Warning: command %s failed! Using defaults: " % cmd, DEF_USER)
-        return DEF_USER
-    else:
-        uid = str(res).split(":")[2]
-        return username, uid
+    """ Return username and uid. """
+    return os.getlogin(), os.getuid()
 
 
 def getPrjName(paramDict):

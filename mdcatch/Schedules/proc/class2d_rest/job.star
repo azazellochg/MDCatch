@@ -48,7 +48,7 @@ psi_sampling          6
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
  range_psi          6 
-scratch_dir         "/work" 
+scratch_dir         "/ssd"
  tau_fudge          2 
    use_gpu        Yes 
  

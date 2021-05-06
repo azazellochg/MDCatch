@@ -65,7 +65,7 @@ range_tilt         15
 ref_correct_greyscale        Yes 
  relax_sym         "" 
   sampling "7.5 degrees" 
-scratch_dir       "/work" 
+scratch_dir       "/ssd"
 skip_gridding        Yes 
   sym_name         C1
    use_gpu        Yes 

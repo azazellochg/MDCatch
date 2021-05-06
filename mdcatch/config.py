@@ -27,7 +27,6 @@
 DEBUG = 1
 
 # daemon mode vars
-DEF_USER = ("emuser", 11048)  # default name: (username, uid)
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix

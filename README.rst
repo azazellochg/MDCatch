@@ -97,7 +97,6 @@ The server requires the following software installed:
     - `RELION 4.0 <https://www3.mrc-lmb.cam.ac.uk/relion//index.php/Main_Page>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
     - `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
-    - ypmatch (part of NIS client, only used to match a folder name with username from a NIS database)
 
 Relion and Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
 For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where topaz is a bash script like this:
@@ -123,7 +122,7 @@ Important points to mention:
 
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
-    * Relion schedules use **/work** as the scratch (SSD) folder, you might want to change this
+    * Relion schedules use **/ssd** as the scratch (SSD) folder, you might want to change this
     * Relion schedules also use two GPUs: 0 and 1
 
 Below is an example of folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.

@@ -40,7 +40,7 @@ class Parser:
         self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
         self.software = DEF_SOFTWARE
-        self.user = DEF_USER
+        self.user = None
         self.fn = None
         self.pipeline = DEF_PIPELINE
         self.symmetry = "C1"
@@ -151,8 +151,8 @@ class Parser:
         minSize, maxSize = self.acqDict['PtclSizes']
         angpix = float(self.acqDict['PixelSpacing'])
 
-        if self.acqDict['Mode'] == 'Super-resolution':
-            # since we always bin by 2 in mc if using super-res
+        if self.acqDict['Mode'] == 'Super-resolution' and self.acqDict['Binning'] == '1':
+            # since we always bin by 2 in mc if using super-res and bin 1
             angpix *= 2
 
         ptclSizePx = float(maxSize) / angpix
