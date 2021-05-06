@@ -183,6 +183,12 @@ sigma_contrast          3
             file.write("'%s' : %s, \n" % (k, v))
         file.write("}\n")
 
+    # Save acquisition params
+    with open("%s_session_params" % paramDict['Software'], "w") as fn:
+        fn.write("Movies dir: %s\n" % origPath1)
+        for k, v in sorted(paramDict.items()):
+            fn.write("%s = %s" % (k, v))
+
     # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
