@@ -185,9 +185,9 @@ sigma_contrast          3
 
     # Save acquisition params
     with open("%s_session_params" % paramDict['Software'], "w") as fn:
-        fn.write("Movies dir: %s\n" % origPath1)
+        fn.write("Movies dir: %s\n\n" % origPath1)
         for k, v in sorted(paramDict.items()):
-            fn.write("%s = %s" % (k, v))
+            fn.write("%s = %s\n" % (k, v))
 
     # Set up scheduler vars
     cmdList = list()
