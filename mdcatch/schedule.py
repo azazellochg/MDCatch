@@ -163,19 +163,6 @@ sigma_contrast          3
         print("ERROR: Relion not found in PATH or Schedules not found!")
         exit(1)
 
-    # setup ACL for uid
-    uid = paramDict['User'][1]
-    if uid:  # not zero
-        cmdList = ["setfacl -R -m u:%s:rwX %s" % (uid, prjPath),
-                   "setfacl -R -d -m u:%s:rwX %s" % (uid, prjPath),
-                   "setfacl -R -m m::rwx %s" % prjPath,
-                   "setfacl -R -d -m m::rwx %s" % prjPath]
-        try:
-            for cmd in cmdList:
-                subprocess.check_output(cmd.split())
-        except subprocess.CalledProcessError:
-            print("Warning: setfacl command failed, ignoring..")
-
     # Save relion params in .py file
     with open("relion_it_options.py", 'w') as file:
         file.write("{\n")

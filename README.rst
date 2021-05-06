@@ -160,7 +160,6 @@ GUI mode
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
   3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
   4. modify existing Relion Schedules/Scipion templates, copy them to the project folder then launch Relion/Scipion on-the-fly processing
-  5. ACL Linux commands (setfacl) are executed for the project folder (so that uid has *rwx* permissions), where uid is obtained from DEF_USER
 
 Daemon mode
 ###########
