@@ -176,6 +176,13 @@ sigma_contrast          3
         except subprocess.CalledProcessError:
             print("Warning: setfacl command failed, ignoring..")
 
+    # Save relion params in .py file
+    with open("relion_it_options.py'", 'w') as file:
+        file.write("{\n")
+        for k, v in mapDict.items():
+            file.write("'%s' : '%s', \n" % (k, v))
+        file.write("}\n")
+
     # Set up scheduler vars
     cmdList = list()
     for key in mapDict:
