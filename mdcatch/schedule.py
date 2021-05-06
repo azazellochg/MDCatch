@@ -167,7 +167,8 @@ sigma_contrast          3
     with open("relion_it_options.py", 'w') as file:
         file.write("{\n")
         for k, v in mapDict.items():
-            file.write("'%s' : %s, \n" % (k, v))
+            if v != '':
+                file.write("'%s' : %s, \n" % (k, v))
         file.write("}\n")
 
     # Save acquisition params
