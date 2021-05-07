@@ -65,7 +65,7 @@ def setupRelion(paramDict):
     }
 
     if paramDict['Mode'] == "EER":
-        eer_group = 1 // paramDict['DosePerFrame']  # group to achieve 1 e/A^2/frame
+        eer_group = 1 // float(paramDict['DosePerFrame'])  # group to achieve 1 e/A^2/frame
         mapDict.update({
             'prep__motioncorr__bin_factor': 1,
             'prep__motioncorr__group_frames': 1,
