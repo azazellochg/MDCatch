@@ -130,9 +130,6 @@ def parseXml(fn):
             acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName'].split(" ")[-1]
             acqDict['PhasePlatePosition'] = customDict['PhasePlatePosition']
 
-    #if 'DoseOnCamera' in customDict:
-    #    acqDict['DoseOnCamera'] = customDict['DoseOnCamera']
-
     if DEBUG:
         for k, v in sorted(acqDict.items()):
             print("%s = %s" % (k, v))

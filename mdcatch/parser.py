@@ -116,14 +116,18 @@ class Parser:
 
         return img
 
-    def parseImgEpu(self, fn):
-        """ Parse xml or mrc and return updated acqDict. """
-        acqDict = parseXml(fn) if fn.endswith("xml") else parseMrc(fn)
-        self.acqDict.update(acqDict)
-
-    def parseImgSem(self, fn):
-        """ Parse mdoc or tif and return updated acqDict. """
-        acqDict = parseMdoc(fn) if fn.endswith("mdoc") else parseTif(fn)
+    def parseMetadata(self, fn):
+        """ Parse metadata file and return updated acqDict. """
+        if fn.endswith("xml"):
+            acqDict = parseXml(fn)
+        elif fn.endswith("tif") or fn.endswith("tiff"):
+            acqDict = parseTif(fn)
+        elif fn.endswith("mdoc"):
+            acqDict = parseMdoc(fn)
+        elif fn.endswith("mrc") or fn.endswith("mrcs"):
+            acqDict = parseMrc(fn)
+        else:
+            raise Exception("Metadata format not recognized.")
         self.acqDict.update(acqDict)
 
     def calcDose(self):

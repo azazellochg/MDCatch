@@ -93,10 +93,7 @@ def start_app(mdFn):
 
     print("\nFiles found: %s\n" % mdFn)
 
-    if DEF_SOFTWARE == 'EPU':
-        model.parseImgEpu(mdFn)
-    else:  # SerialEM
-        model.parseImgSem(mdFn)
+    model.parseMetadata(mdFn)
 
     model.calcDose()
     model.guessDataDir(wait=True)

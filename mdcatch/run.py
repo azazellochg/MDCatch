@@ -280,10 +280,7 @@ class Page2(QWizardPage):
         prog = App.model.getSoftware()
         fnList = App.model.getFn()
 
-        if prog == 'EPU':
-            App.model.parseImgEpu(fnList)
-        else:  # SerialEM
-            App.model.parseImgSem(fnList)
+        App.model.parseMetadata(fnList)
 
         self.addPtclSizeWidgets(acqDict)
         App.model.calcDose()

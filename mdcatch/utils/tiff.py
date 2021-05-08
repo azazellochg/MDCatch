@@ -70,8 +70,7 @@ def parseTif(fn):
         for page in tif.pages:
             for tag in page.tags:
                 acqDict[tif_tags[tag.code]] = tag.value
-                if DEBUG:
-                    print(tag.code, tag.dtype)
+                # print(tag.code, tag.dtype)
             break
 
         acqDict["nimg"] = len(tif.pages)
@@ -90,7 +89,8 @@ def parseTif(fn):
 
     if DEBUG:
         for k, v in sorted(acqDict.items()):
-            print("%s = %s" % (k, v))
+            if k != "StripByteCounts" and k != "StripOffsets":
+                print("%s = %s" % (k, v))
         print(40 * "=")
         for k, v in sorted(newDict.items()):
             print("%s = %s" % (k, v))
@@ -114,7 +114,7 @@ def _standardizeDict(acqDict):
     }
 
     print("Warning: tif headers do not contain enough metadata, "
-          "so some default values were used.")
+          "so some default values were used.\n")
 
     desc = acqDict['ImageDescription'].split("\n")
     stdDict['GainReferenceTransform'] = desc[0].split("r/f")[-1]

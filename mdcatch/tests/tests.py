@@ -76,10 +76,7 @@ class TestParser(unittest.TestCase):
               model.getPipeline())
         print("\nFiles found: %s\n" % mdFn)
 
-        if model.getSoftware() == 'EPU':
-            model.parseImgEpu(mdFn)
-        else:  # SerialEM
-            model.parseImgSem(mdFn)
+        model.parseMetadata(mdFn)
 
         model.calcDose()
         model.guessDataDir(testmode=True)
