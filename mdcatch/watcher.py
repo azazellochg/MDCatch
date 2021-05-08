@@ -74,7 +74,7 @@ def start_app(mdFn):
     model.setSoftware(DEF_SOFTWARE)
     model.setPipeline(DEF_PIPELINE)
     model.setSize(DEF_PARTICLE_SIZES)
-    model.setSymmetry("C1")
+    model.setSymmetry(DEF_SYMMETRY)
     model.setMdPath(mdPath)
     model.setFn(mdFn)
 
@@ -87,14 +87,11 @@ def start_app(mdFn):
               model.getSoftware(),
               model.getMdPath(),
               model.getUser(),
-              model.getPipeline(),
-              model.getSymmetry(),
-              model.getSize())
+              model.getPipeline())
 
     print("\nFiles found: %s\n" % mdFn)
 
     model.parseMetadata(mdFn)
-
     model.calcDose()
     model.guessDataDir(wait=True)
     model.acqDict['PtclSizes'] = DEF_PARTICLE_SIZES

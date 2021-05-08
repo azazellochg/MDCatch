@@ -164,7 +164,7 @@ class Page1(QWizardPage):
         self.symm = QLineEdit()
         self.symm.setMinimumWidth(60)
         self.symm.setMaximumWidth(60)
-        self.symm.setText("C1")
+        self.symm.setText(DEF_SYMMETRY)
 
         hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
         grid.addLayout(hbox_sym)

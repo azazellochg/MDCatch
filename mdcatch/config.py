@@ -24,25 +24,28 @@
 # *
 # **************************************************************************
 
+# set to 1 for more diagnostic output
 DEBUG = 1
 
-# daemon mode vars
+# some default vars
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 DEF_PARTICLE_SIZES = (150, 180)  # default min/max size in Angstroms
+DEF_SYMMETRY = "C1"
 
-# path to EPU session or folder with SerialEM mdoc files
+# path to folder with EPU sessions or folder with SerialEM mdoc files
+# in SerialEM case movies and mdocs are expected in the same folder
 METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
 
 # path where Relion projects are created
-# for Scipion mtf, defects, gain and template files are copied here
+# in Scipion case MTF, defects, gain and template files are copied here
 PROJECT_PATH = "/cephfs"
 
-# Folder with Relion 4.0 schedules
+# Folder with Relion 4 template schedules
 SCHEDULE_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schedules"
 
-# Scipion pre-processing template
+# Scipion 3 pre-processing template
 JSON_TEMPLATE = "/home/gsharov/soft/MDCatch-dev/mdcatch/template.json"
 
 # main dictionary
@@ -56,12 +59,15 @@ SCOPE_DICT = {
 
 ###############################################################################
 # EPU params
+
+# EPU-produced movie file patterns per each camera
 EPU_MOVIES_DICT = {
     'Falcon3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
     'Falcon4': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_EER.eer",
     'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
     'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
 }
+# EPU-produced gain reference file patterns per each camera
 GAIN_DICT = {
     'K2': "FoilHole_*_Data_*-gain-ref.MRC",
     'K3': "FoilHole_*_Data_*_gain.tiff",
@@ -69,6 +75,7 @@ GAIN_DICT = {
     'Falcon4': "/path/to/.._EER_GainReference.gain"
 }
 
+# Which EPU session files to parse for metadata (default is xml)
 # change the pattern below if you want to parse movie sums mrc instead
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
 
@@ -94,12 +101,12 @@ MOVIE_PATH_DICT = {
 ###############################################################################
 # SerialEM params
 
+# SerialEM-produced movies pattern
 PATTERN_SEM_MOVIES = "*.tif"
 # change the pattern below if you want to parse movie tif instead
 PATTERN_SEM = "*.tif.mdoc"
-REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
-# SerialEM mdoc vars to parse
+# Which SerialEM mdoc variables to parse
 SERIALEM_PARAMS = [
     'T',  # Microscope ID
     'Voltage',
@@ -115,10 +122,13 @@ SERIALEM_PARAMS = [
     'GainReference'
 ]
 
+# do not change this
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
+
 # help message for path selection
 help_message = """Select the following folder:\n\n
    For EPU: the EPU session folder on /mnt/MetaData/
-   with Images-DiscX folder inside.\n
+   with Images-Disc folder inside.\n
    OR\n
    For SerialEM: the folder on /mnt/Data/ that
    contains tif movies and mdoc files.\n"""

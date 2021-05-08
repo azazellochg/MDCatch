@@ -3,12 +3,12 @@
 from mdcatch.schedule import setupRelion, setupScipion
 
 paramDict = {
-       "AppliedDefocus": -1.5,
-       "BeamShiftX": -0.11633544415235519,
-       "BeamShiftY": -0.019380046054720879,
+       #"AppliedDefocus": -1.5,
+       #"BeamShiftX": -0.11633544415235519,
+       #"BeamShiftY": -0.019380046054720879,
        "BeamSize": 1.0499999999999998,
-       "BeamTiltX": 0.00850762240588665,
-       "BeamTiltY": 0.0088164648041129112,
+       #"BeamTiltX": 0.00850762240588665,
+       #"BeamTiltY": 0.0088164648041129112,
        "Cs": 2.7,
        "DefectFile": "None",
        "Detector": "K2",
@@ -37,7 +37,7 @@ paramDict = {
        "MaskSize": 180,
        "Software": "EPU",
        "SpotSize": 10,
-       "User": ('emuser', 11048),
+       "User": ('gsharov', 26096),
        "Voltage": 200,
 }
 
