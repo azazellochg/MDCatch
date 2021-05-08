@@ -1,9 +1,9 @@
 MDCatch
 =======
 
-A simple app to fetch acquisition metadata from a running EPU session or SerialEM.
-It parses the first found xml/mdoc/mrc/tif/eer (from EPU/SerialEM) associated with a
-data collection session and launches Relion or Scipion pipeline.
+A simple app to fetch acquisition metadata from a EPU session or SerialEM.
+It parses the first found xml/mdoc/mrc/tif/eer file (from EPU/SerialEM) associated with a
+data collection session and launches Relion 4 or Scipion 3 pipeline.
 
 Installation
 ------------
@@ -99,9 +99,10 @@ The server requires the following software installed:
     - `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
 
 Relion and Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
-For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where topaz is a bash script like this:
+For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where *topaz* is a bash script like this:
 
 .. code-block:: bash
+
     #!/bin/bash
     source /home/gsharov/soft/miniconda3/bin/activate topaz-0.2.4
     topaz $@
@@ -159,7 +160,8 @@ GUI mode
   1. find and parse the first metadata file, getting all acquisition metadata
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
   3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
-  4. modify existing Relion Schedules/Scipion templates, copy them to the project folder then launch Relion/Scipion on-the-fly processing
+  4. save found acquisition params in a text file (e.g. ``EPU_session_params``), save Relion params in ``relion_it_options.py``
+  5. modify existing Relion Schedules/Scipion templates, copy them to the project folder then launch Relion/Scipion on-the-fly processing
 
 Daemon mode
 ###########
@@ -224,8 +226,7 @@ There are two schedules: *prep* and *proc*. Both are launched at the same time.
    <details>
    <summary><a>Testing installation</a></summary>
 
-The test only checks if the parsers are working correctly using files from *Metadata-examples* folder.
-You need to define PATTERN_EPU and PATTERN_SEM in the **config.py** and then run:
+The test only checks if the parsers are working correctly using files from *tests/testdata* folder.
 
 .. code-block:: python
 
