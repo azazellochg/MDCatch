@@ -30,7 +30,7 @@ from datetime import datetime
 from ..config import SCOPE_DICT
 
 
-def getUsername(mdPath):
+def getUsername():
     """ Return username and uid. """
     return os.getlogin(), os.getuid()
 

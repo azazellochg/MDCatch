@@ -36,30 +36,28 @@ from ..parser import Parser
 class TestParser(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.epuDir = os.path.join(os.path.dirname(__file__), "../Metadata-examples/EPU")
-        cls.semDir = os.path.join(os.path.dirname(__file__), "../Metadata-examples/SerialEM/")
+        cls.cwd = os.path.dirname(__file__) + "/testdata"
 
-    def test_epu(self):
-        print("=" * 80, "\nTesting xml or mrc parser...")
-        xmlFns = glob(os.path.join(self.epuDir, "*/%s" % PATTERN_EPU), recursive=True)
-        xmlFns = [os.path.abspath(x) for x in xmlFns]
+    def test_run(self):
+        fns = glob(os.path.join(self.cwd, "*"))
+        fns = [os.path.abspath(x) for x in fns]
 
-        for mdFn in xmlFns:
-            mdPath = "/".join(mdFn.split("/")[:-4])
-            model = Parser()
-            model.setSoftware("EPU")
-            self._runParser(model, mdPath, mdFn)
+        model = Parser()
+        # Test EPU cases
+        for fn in fns:
+            if fn.endswith("mdoc"):
+                continue
+            else:
+                model.setSoftware("EPU")
+            self._runParser(model, self.cwd, os.path.abspath(fn))
 
-    def test_sem(self):
-        print("=" * 80, "\nTesting mdoc or tif parser...")
-        mdocFns = glob(os.path.join(self.semDir, PATTERN_SEM))
-        mdocFns = [os.path.abspath(x) for x in mdocFns]
-
-        for mdFn in mdocFns:
-            mdPath = "/".join(mdFn.split("/")[:-1])
-            model = Parser()
-            model.setSoftware("SerialEM")
-            self._runParser(model, mdPath, mdFn)
+        # Test SerialEM cases
+        for fn in fns:
+            if fn.endswith("xml"):
+                continue
+            else:
+                model.setSoftware("SerialEM")
+            self._runParser(model, self.cwd, os.path.abspath(fn))
 
     def _runParser(self, model, mdPath, mdFn):
         """ Run the parser and return model acqDict. """
@@ -67,7 +65,7 @@ class TestParser(unittest.TestCase):
         model.setMdPath(mdPath)
         model.setFn(mdFn)
 
-        username, uid = getUsername(mdPath)
+        username, uid = getUsername()
         model.setUser(username, uid)
         model.acqDict['User'] = model.getUser()
 
@@ -91,4 +89,3 @@ class TestParser(unittest.TestCase):
         print("\nFinal parameters:\n")
         for k, v in sorted(model.acqDict.items()):
             print(k, v)
-        print('\n')

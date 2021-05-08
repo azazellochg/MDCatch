@@ -66,8 +66,11 @@ def parseMdoc(fn):
     if 'TargetDefocus' in acqDict:
         acqDict['AppliedDefocus'] = acqDict.pop('TargetDefocus')
     if 'Binning' in acqDict:
-        acqDict['Mode'] = 'Super-resolution' if acqDict['Binning'] == '0.5' else 'Counting'
-        acqDict.pop('Binning')
+        if acqDict['Binning'] == '0.5':
+            acqDict['Mode'] = 'Super-resolution'
+            acqDict['Binning'] = 1
+        else:
+            acqDict['Mode'] = 'Counting'
     if 'PhasePlateInserted' in acqDict:
         acqDict['PhasePlateUsed'] = acqDict.pop('PhasePlateInserted')
 

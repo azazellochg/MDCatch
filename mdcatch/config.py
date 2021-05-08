@@ -65,7 +65,8 @@ EPU_MOVIES_DICT = {
 GAIN_DICT = {
     'K2': "FoilHole_*_Data_*-gain-ref.MRC",
     'K3': "FoilHole_*_Data_*_gain.tiff",
-    'Falcon4': "*_EER_GainReference.gain"
+    # Falcon 4 EER gain is not copied by EPU, so we need to provide a full path
+    'Falcon4': "/path/to/.._EER_GainReference.gain"
 }
 
 # change the pattern below if you want to parse movie sums mrc instead
@@ -111,12 +112,7 @@ SERIALEM_PARAMS = [
     'NumSubFrames',
     # 'DateTime',
     'DefectFile',
-    'GainReference',
-    # optional vars below can be added to mdoc using "AddToNextFrameStackMdoc key value"
-    'OpticalGroup',
-    'PhasePlateInserted',
-    'BeamTiltCompensation',
-    'Beamtilt'
+    'GainReference'
 ]
 
 # help message for path selection

@@ -224,7 +224,7 @@ class Page1(QWizardPage):
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
 
-        username, uid = getUsername(App.model.getMdPath())
+        username, uid = getUsername()
         App.model.setUser(username, uid)
 
         if DEBUG:

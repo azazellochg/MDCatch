@@ -78,7 +78,7 @@ def start_app(mdFn):
     model.setMdPath(mdPath)
     model.setFn(mdFn)
 
-    username, uid = getUsername(mdPath)
+    username, uid = getUsername()
     model.setUser(username, uid)
     model.acqDict['User'] = username
 
