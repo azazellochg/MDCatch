@@ -39,7 +39,6 @@ DEF_SYMMETRY = "C1"
 METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
 
 # path where Relion projects are created
-# in Scipion case MTF, defects, gain and template files are copied here
 PROJECT_PATH = "/cephfs"
 
 # Folder with Relion 4 template schedules

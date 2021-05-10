@@ -35,6 +35,13 @@ from .config import JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 def setupRelion(paramDict):
     """ Prepare and launch Relion 4.0 schedules. """
+    try:
+        subprocess.check_output(["which", "relion_scheduler"],
+                                stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print("ERROR: Relion not found in PATH!")
+        exit(1)
+
     bin, gain, defect, group_frames = precalculateVars(paramDict)
     mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
@@ -163,14 +170,8 @@ sigma_contrast          3
     else:
         mapDict['prep__motioncorr__fn_defect'] = ''
 
-    try:
-        subprocess.check_output(["which", "relion_scheduler"],
-                                stderr=subprocess.DEVNULL)
-        if not os.path.exists('Schedules'):
-            shutil.copytree(SCHEDULE_PATH, os.getcwd() + '/Schedules')
-    except subprocess.CalledProcessError:
-        print("ERROR: Relion not found in PATH or Schedules not found!")
-        exit(1)
+    if not os.path.exists('Schedules'):
+        shutil.copytree(SCHEDULE_PATH, os.getcwd() + '/Schedules')
 
     # Save relion params in .py file
     with open("relion_it_options.py", 'w') as file:
@@ -221,10 +222,19 @@ def setupScipion(paramDict):
     The default template will run import movies, relion motioncor,
     ctffind4, cryolo picking, extraction and summary monitor protocols.
     """
+    try:
+        subprocess.check_output(["which", "scipion3"], stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print("ERROR: scipion3 command not found in PATH!")
+        exit(1)
+
     prjName = getPrjName(paramDict)
-    prjPath = os.path.join(paramDict['PrjPath'], prjName)
-    os.mkdir(prjPath)
+    cmd = "scipion3 printenv | grep SCIPION_USER_DATA | cut -d'=' -f2"
+    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    prjPath = os.path.join(out.decode(), "projects", prjName)
     os.chdir(prjPath)
+
     with open(JSON_TEMPLATE, 'r') as f:
         protocolsList = json.load(f)
     protNames = dict()
