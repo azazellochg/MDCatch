@@ -72,7 +72,7 @@ GAIN_DICT = {
     'K2': "FoilHole_*_Data_*-gain-ref.MRC",
     'K3': "FoilHole_*_Data_*_gain.tiff",
     # Falcon 4 EER gain is not copied by EPU, so we need to provide a full path
-    'Falcon4': "/path/to/.._EER_GainReference.gain"
+    'Falcon4': "/home/gsharov/20210128_135200_EER_GainReference.gain"
 }
 
 # Which EPU session files to parse for metadata (default is xml)
