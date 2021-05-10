@@ -98,7 +98,7 @@ The server requires the following software installed:
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
     - `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
 
-Relion and Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
+Relion and/or Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
 For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where *topaz* is a bash script like this:
 
 .. code-block:: bash
@@ -116,7 +116,7 @@ raw movies folder. In our case both storage systems are mounted via NFSv4.
    <details>
    <summary><a>Configuration</a></summary>
 
-Most of configuration is done in **config.py**. As explained in the next section, the app can run in either interactive (GUI) or daemon mode.
+Most of the configuration is done in **config.py**. As explained in the next section, the app can run in either interactive (GUI) or daemon mode.
 For the very first run it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
 
 Important points to mention:
@@ -126,7 +126,7 @@ Important points to mention:
     * Relion schedules use **/ssd** as the scratch (SSD) folder, you might want to change this
     * Relion schedules also use two GPUs: 0 and 1
 
-Below is an example of folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
+Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
 
 .. code-block:: bash
 
@@ -167,7 +167,7 @@ Daemon mode
 ###########
 
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
-Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode (except uid which is obtained from username).
+Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
 Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
@@ -186,7 +186,7 @@ In case of SerialEM, the movies and metadata (mdoc file) are expected to be in t
 RELION vs Scipion
 #################
 
-So far RELION cases are more tested than Scipion. With the app we only provide a single **template.json**,
+So far RELION cases are more tested than Scipion. In the latter case, the app provides a single **template.json**,
 so irrespective of particle picker choice crYOLO will always be used. Particle size is also ignored.
 Have a look into the json file to see what pipeline will be launched.
 
