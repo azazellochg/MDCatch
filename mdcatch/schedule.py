@@ -283,8 +283,8 @@ def setupScipion(paramDict):
         prjName, os.path.abspath(jsonFn))
     proc = subprocess.run(cmd.split(), check=True)
 
+    os.rename(jsonFn, os.path.join(prjPath, jsonFn))
     os.chdir(prjPath)
-    os.rename(os.path.abspath(jsonFn), jsonFn)
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
