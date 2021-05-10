@@ -79,6 +79,7 @@ def _standardizeDict(acqDict):
         'SpotSize': acqDict['Spot index'],
         'Voltage': float(acqDict['HT']) // 1000,
         'PhasePlateUsed': bool(acqDict['Phase Plate']),
+        'Warning': 'MRC header does not contain frame number, please check the fluence!'
     }
 
     sr = 1

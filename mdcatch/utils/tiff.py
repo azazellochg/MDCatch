@@ -111,14 +111,13 @@ def _standardizeDict(acqDict):
         'PhasePlateUsed': 'false',
         'MTF': 'None',
         'Voltage': 300,
+        'Binning': 1,
+        'Warning': 'TIF header does not contain enough metadata, please check these values!'
     }
-
-    print("Warning: tif headers do not contain enough metadata, "
-          "so some default values were used.\n")
 
     desc = acqDict['ImageDescription'].split("\n")
     stdDict['GainReferenceTransform'] = desc[0].split("r/f")[-1]
-    stdDict['GainReference'] = desc[1].strip()
+    stdDict['GainReference'] = desc[1].strip() or None
 
     if len(desc) == 3:
         stdDict['DefectFile'] = desc[2].strip()

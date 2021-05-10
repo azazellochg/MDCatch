@@ -286,7 +286,10 @@ class Page2(QWizardPage):
         App.model.calcDose()
         App.model.guessDataDir()
 
-        self.setSubTitle("Found the following metadata from %s session:" % prog)
+        msg = "Found the following metadata from %s session:" % prog
+        if 'Warning' in acqDict:
+            msg += "\n%s" % acqDict['Warning']
+        self.setSubTitle(msg)
 
         scopeID = acqDict['MicroscopeID']
         time = round(float(acqDict['ExposureTime']), 3)
