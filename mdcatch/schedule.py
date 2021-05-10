@@ -289,5 +289,11 @@ def setupScipion(paramDict):
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
 
+    # Save acquisition params
+    with open("%s_session_params" % paramDict['Software'], "w") as fn:
+        fn.write("Movies dir: %s\n\n" % importProt["filesPath"])
+        for k, v in sorted(paramDict.items()):
+            fn.write("%s = %s\n" % (k, v))
+
     cmd2 = 'scipion3 python -m pyworkflow.project.scripts.schedule %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
