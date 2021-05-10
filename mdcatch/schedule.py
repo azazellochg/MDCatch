@@ -229,12 +229,6 @@ def setupScipion(paramDict):
         exit(1)
 
     prjName = getPrjName(paramDict)
-    cmd = "scipion3 printenv | grep SCIPION_USER_DATA | cut -d'=' -f2"
-    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = proc.communicate()
-    prjPath = os.path.join(out.decode().replace('"', '').replace('\n', ''), "projects", prjName)
-    os.chdir(prjPath)
-
     with open(JSON_TEMPLATE, 'r') as f:
         protocolsList = json.load(f)
     protNames = dict()
@@ -244,9 +238,6 @@ def setupScipion(paramDict):
         protNames[protClassName] = i
 
     bin, gain, defect, group_frames = precalculateVars(paramDict)
-    for i in [gain, defect, paramDict['MTF']]:
-        if os.path.exists(i):
-            shutil.copyfile(i, os.path.basename(i))
 
     # import movies
     importProt = protocolsList[protNames["ProtImportMovies"]]
@@ -282,15 +273,19 @@ def setupScipion(paramDict):
         jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
         f.write(jsonStr)
 
-    try:
-        subprocess.check_output(["which", "scipion3"], stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError:
-        print("ERROR: scipion3 command not found in PATH!")
-        exit(1)
-
     cmd = 'scipion3 python -m pyworkflow.project.scripts.create %s %s' % (
         prjName, os.path.abspath(jsonFn))
     proc = subprocess.run(cmd.split(), check=True)
+
+    cmd = "scipion3 printenv | grep SCIPION_USER_DATA | cut -d'=' -f2"
+    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    prjPath = "/".join([out.decode().replace('"', '').replace('\n', ''), "projects", prjName])
+    os.chdir(prjPath)
+
+    for i in [gain, defect, paramDict['MTF']]:
+        if os.path.exists(i):
+            shutil.copyfile(i, os.path.basename(i))
 
     cmd2 = 'scipion3 python -m pyworkflow.project.scripts.schedule %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)
