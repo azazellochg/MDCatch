@@ -232,7 +232,7 @@ def setupScipion(paramDict):
     cmd = "scipion3 printenv | grep SCIPION_USER_DATA | cut -d'=' -f2"
     proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = proc.communicate()
-    prjPath = os.path.join(out.decode(), "projects", prjName)
+    prjPath = os.path.join(out.decode().replace('"', '').replace('\n', ''), "projects", prjName)
     os.chdir(prjPath)
 
     with open(JSON_TEMPLATE, 'r') as f:
