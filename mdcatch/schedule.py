@@ -229,6 +229,12 @@ def setupScipion(paramDict):
         exit(1)
 
     prjName = getPrjName(paramDict)
+    cmd = "scipion3 printenv | grep SCIPION_USER_DATA | cut -d'=' -f2"
+    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    scipionDir = os.path.abspath(out.decode().replace('"', '').replace('\n', ''))
+    prjPath = scipionDir + "/projects/" + prjName
+
     with open(JSON_TEMPLATE, 'r') as f:
         protocolsList = json.load(f)
     protNames = dict()
@@ -256,13 +262,13 @@ def setupScipion(paramDict):
     importProt["sphericalAberration"] = float(paramDict['Cs'])
     importProt["samplingRate"] = float(paramDict['PixelSpacing'])
     importProt["dosePerFrame"] = float(paramDict['DosePerFrame'])
-    importProt["gainFile"] = os.path.join(os.getcwd(), os.path.basename(gain)) if gain else ""
+    importProt["gainFile"] = (prjPath + "/" + os.path.basename(gain)) if gain else ""
 
     # motioncorr
     movieProt = protocolsList[protNames["ProtRelionMotioncor"]]
     movieProt["binFactor"] = bin
     movieProt["groupFrames"] = group_frames
-    movieProt["defectFile"] = os.path.join(os.getcwd(), os.path.basename(defect)) if defect else ""
+    movieProt["defectFile"] = (prjPath + "/" + os.path.basename(defect)) if defect else ""
 
     # ctffind
     ctfProt = protocolsList[protNames["CistemProtCTFFind"]]
@@ -277,12 +283,8 @@ def setupScipion(paramDict):
         prjName, os.path.abspath(jsonFn))
     proc = subprocess.run(cmd.split(), check=True)
 
-    cmd = "scipion3 printenv | grep SCIPION_USER_DATA | cut -d'=' -f2"
-    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = proc.communicate()
-    prjPath = "/".join([out.decode().replace('"', '').replace('\n', ''), "projects", prjName])
     os.chdir(prjPath)
-
+    os.rename(os.path.abspath(jsonFn), jsonFn)
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
             shutil.copyfile(i, os.path.basename(i))
