@@ -36,9 +36,9 @@ highres_limit         -1
 min_dedicated         24 
 nr_classes        25
    nr_iter        20 
-    nr_mpi          5
+    nr_mpi          3
    nr_pool         30 
-nr_threads         1
+nr_threads         6
 offset_range          5 
 offset_step          1 
 other_args         "" 

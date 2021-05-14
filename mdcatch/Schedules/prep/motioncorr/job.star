@@ -36,8 +36,8 @@ group_frames          1
 input_star_mics Schedules/prep/importmovies/movies.star 
 last_frame_sum         -1 
 min_dedicated         24 
-    nr_mpi          1 
-nr_threads          24
+    nr_mpi          5
+nr_threads          8
 other_args "--do_at_most $$do_at_most" 
 other_motioncor2_args         "" 
    patch_x          5 
