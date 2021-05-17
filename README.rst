@@ -99,6 +99,7 @@ The server requires the following software installed:
     - `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
 
 Relion and/or Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
+For Relion class ranker provide a path to Python with Torch using **RELION_PYTHON** (e.g. Python from Topaz env).
 For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where *topaz* is a bash script like this:
 
 .. code-block:: bash
