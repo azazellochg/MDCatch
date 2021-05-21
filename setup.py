@@ -51,7 +51,7 @@ setup(
     ],
     keywords='cryo-em python qt5 epu serialem',
     packages=find_packages(),
-    install_requires=['pyqt5', 'watchdog', 'mrcfile', 'tifffile'],
+    install_requires=['pyqt5', 'watchdog', 'mrcfile', 'tifffile', 'emtable'],
     entry_points={'console_scripts': ['mdcatch=mdcatch.run:main']},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/MDCatch/issues',
