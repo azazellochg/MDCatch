@@ -16,13 +16,13 @@ loop_
 _rlnJobOptionVariable #1
 _rlnJobOptionValue #2
 do_queue         No
-fn_exe Schedules/external_job_cryolo.py
+fn_exe Schedules/external_job_cryolo_train.py
 in_3dref             ""
 in_coords            ""
 in_mask              ""
-in_mic Schedules/proc2/select_mics/micrographs.star
+in_mic               ""
 in_mov               ""
-in_part              ""
+in_part Schedules/proc2/select_ini/particles.star
 min_dedicated        24
 nr_threads            1
 other_args           ""
@@ -30,7 +30,7 @@ param10_label        ""
 param10_value        ""
 param1_label        gpu
 param1_value          0
-param2_label   box_size
+param2_label    boxsize
 param2_value          0
 param3_label         ""
 param3_value         ""
@@ -49,3 +49,5 @@ param9_value         ""
 qsub       qsub
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
 queuename    openmpi
+
+

@@ -421,6 +421,7 @@ class Page2(QWizardPage):
 
     def addPtclSizeWidgets(self, acqDict):
         """ Add particle size widgets. """
+        acqDict['Picker'] = App.model.getPicker()
         acqDict['PtclSize'] = App.model.getSize()
         if acqDict['PtclSize'] != 0:
             App.model.calcBox()
