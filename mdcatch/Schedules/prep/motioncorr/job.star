@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             MotionCorr
+_rlnJobTypeLabel             relion.motioncorr.own
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

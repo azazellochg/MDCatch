@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             AutoPick
+_rlnJobTypeLabel             relion.autopick.topaz.train
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

@@ -4,7 +4,9 @@
 data_job
 
 _rlnJobTypeLabel             Extract
+_rlnJobTypeLabel             relion.extract
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

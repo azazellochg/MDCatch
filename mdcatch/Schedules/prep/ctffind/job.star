@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             CtfFind
+_rlnJobTypeLabel             relion.ctffind.ctffind4
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

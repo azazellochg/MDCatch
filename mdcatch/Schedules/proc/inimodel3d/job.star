@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             InitialModel
+_rlnJobTypeLabel             relion.initialmodel
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             Select
+_rlnJobTypeLabel             relion.select.split
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

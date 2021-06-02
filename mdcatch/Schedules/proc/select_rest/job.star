@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             Select
+_rlnJobTypeLabel             relion.select.class2dauto
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

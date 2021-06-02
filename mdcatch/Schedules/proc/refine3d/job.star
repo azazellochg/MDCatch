@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             Refine3D
+_rlnJobTypeLabel             relion.refine3d
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001

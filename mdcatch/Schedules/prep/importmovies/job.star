@@ -3,8 +3,9 @@
 
 data_job
 
-_rlnJobTypeLabel             Import
+_rlnJobTypeLabel             relion.import.movies
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
  
 
 # version 30001
