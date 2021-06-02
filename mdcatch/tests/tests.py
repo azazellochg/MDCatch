@@ -73,15 +73,14 @@ class TestParser(unittest.TestCase):
               model.getSoftware(),
               model.getMdPath(),
               model.getUser(),
-              model.getPipeline(),
-              model.getPicker())
+              model.getPipeline())
         print("\nFiles found: %s\n" % mdFn)
 
         model.parseMetadata(mdFn)
 
         model.calcDose()
         model.guessDataDir(testmode=True)
-        model.acqDict['PtclSize'] = DEF_PARTICLE_SIZE
+        model.acqDict['PtclSizes'] = DEF_PARTICLE_SIZES
         model.calcBox()
 
         print("\nFinal parameters:\n")

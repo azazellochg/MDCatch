@@ -31,7 +31,7 @@ paramDict = {
        "PhasePlateUsed": False,
        "PixelSpacing": 0.885,
        "PrjPath": "/cephfs",
-       "PtclSize": 180,
+       "PtclSizes": (150, 180),
        "BoxSize": 200,
        "BoxSizeSmall": 64,
        "MaskSize": 180,

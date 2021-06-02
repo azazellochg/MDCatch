@@ -73,7 +73,7 @@ def start_app(mdFn):
     model = Parser()
     model.setSoftware(DEF_SOFTWARE)
     model.setPipeline(DEF_PIPELINE)
-    model.setSize(DEF_PARTICLE_SIZE)
+    model.setSize(DEF_PARTICLE_SIZES)
     model.setSymmetry(DEF_SYMMETRY)
     model.setMdPath(mdPath)
     model.setFn(mdFn)
@@ -94,7 +94,7 @@ def start_app(mdFn):
     model.parseMetadata(mdFn)
     model.calcDose()
     model.guessDataDir(wait=True)
-    model.acqDict['PtclSize'] = DEF_PARTICLE_SIZE
+    model.acqDict['PtclSizes'] = DEF_PARTICLE_SIZES
     model.calcBox()
 
     print("\nFinal parameters:\n")

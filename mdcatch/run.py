@@ -41,11 +41,6 @@ from .utils.misc import getUsername
 from .parser import Parser
 from .schedule import setupRelion, setupScipion
 
-# help message for particle size
-help_picker = """Provide particle size in Angstroms.\n
-   - crYOLO can estimate it automatically (set this to 0)\n
-   - Topaz requires this parameter to remove neighboring picks"""
-
 
 class App(QWizard):
     """ Main class that runs the GUI. """
@@ -103,15 +98,12 @@ class Page1(QWizardPage):
         label_soft = QLabel('Software')
         label_path = QLabel('Path')
         label_pipeline = QLabel('Run pipeline in')
-        label_picker = QLabel('Particle picker')
         label_sym = QLabel('Symmetry')
         label_diam = QLabel('Particle size (A)')
-        label_diam.setToolTip(help_picker)
 
         vbox.addWidget(label_soft, alignment=Qt.Alignment())
         vbox.addWidget(label_path, alignment=Qt.Alignment())
         vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
-        vbox.addWidget(label_picker, alignment=Qt.Alignment())
         vbox.addWidget(label_sym, alignment=Qt.Alignment())
         vbox.addWidget(label_diam, alignment=Qt.Alignment())
 
@@ -167,20 +159,6 @@ class Page1(QWizardPage):
         hbox_pipeline.addWidget(button_scipion, alignment=Qt.Alignment())
         grid.addLayout(hbox_pipeline)
 
-        # particle picker
-        hbox_picker = QHBoxLayout()
-        hbox_picker.setAlignment(Qt.AlignLeft)
-        btgroup_picker = QButtonGroup()
-
-        self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "Cryolo")
-        self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
-        btgroup_picker.addButton(self.button_cryolo)
-        btgroup_picker.addButton(self.button_topaz)
-        btgroup_picker.buttonClicked.connect(lambda: self.updPicker(btgroup_picker))
-        hbox_picker.addWidget(self.button_cryolo, alignment=Qt.Alignment())
-        hbox_picker.addWidget(self.button_topaz, alignment=Qt.Alignment())
-        grid.addLayout(hbox_picker)
-
         # symmetry box
         hbox_sym = QHBoxLayout()
         self.symm = QLineEdit()
@@ -193,12 +171,23 @@ class Page1(QWizardPage):
 
         # size box
         hbox_diam = QHBoxLayout()
-        self.spbox_diam = QSpinBox()
-        self.spbox_diam.setRange(0, 9999)
-        self.spbox_diam.setValue(DEF_PARTICLE_SIZE)
-        self.spbox_diam.setFixedSize(60, 25)
-        self.spbox_diam.setToolTip(help_picker)
-        hbox_diam.addWidget(self.spbox_diam)
+        self.label_diamMin = QLabel('min')
+        hbox_diam.addWidget(self.label_diamMin)
+
+        self.spbox_diamMin = QSpinBox()
+        self.spbox_diamMin.setRange(0, 9999)
+        self.spbox_diamMin.setValue(DEF_PARTICLE_SIZES[0])
+        self.spbox_diamMin.setFixedSize(60, 25)
+        hbox_diam.addWidget(self.spbox_diamMin)
+
+        self.label_diamMax = QLabel('max')
+        hbox_diam.addWidget(self.label_diamMax)
+
+        self.spbox_diamMax = QSpinBox()
+        self.spbox_diamMax.setRange(10, 9999)
+        self.spbox_diamMax.setValue(DEF_PARTICLE_SIZES[1])
+        self.spbox_diamMax.setFixedSize(60, 25)
+        hbox_diam.addWidget(self.spbox_diamMax)
         hbox_diam.setAlignment(Qt.AlignLeft)
         grid.addLayout(hbox_diam)
 
@@ -211,11 +200,6 @@ class Page1(QWizardPage):
     def updPipeline(self, btgroup):
         bt = btgroup.checkedButton()
         App.model.setPipeline(bt.text())
-
-    def updPicker(self, btgroup):
-        bt = btgroup.checkedButton()
-        App.model.setPicker(bt.text())
-        App.model.setSize(self.spbox_diam.value())
 
     def browseSlot(self, var):
         """ Called when "Browse" is pressed. """
@@ -234,12 +218,8 @@ class Page1(QWizardPage):
     def validatePage(self):
         """ Executed when Next is pressed.
         Returns True or False. """
-        if App.model.getPicker() == "Topaz" and self.spbox_diam.value() == 0:
-            App.showDialog("ERROR", "You cannot set zero size for Topaz picker!")
-            return False
-
         App.model.setSymmetry(self.symm.text())
-        App.model.setSize(self.spbox_diam.value())
+        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
 
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
@@ -253,7 +233,6 @@ class Page1(QWizardPage):
                    App.model.getMdPath(),
                    App.model.getUser(),
                    App.model.getPipeline(),
-                   App.model.getPicker(),
                    App.model.getSymmetry(),
                    App.model.getSize()])
 
@@ -421,13 +400,13 @@ class Page2(QWizardPage):
 
     def addPtclSizeWidgets(self, acqDict):
         """ Add particle size widgets. """
-        acqDict['PtclSize'] = App.model.getSize()
-        if acqDict['PtclSize'] != 0:
-            App.model.calcBox()
-            self.mainLayout.addWidget(self.group3(), 1, 0)
-            self.box.setText(acqDict['BoxSize'])
-            self.mask.setText(acqDict['MaskSize'])
-            self.box_bin.setText(acqDict['BoxSizeSmall'])
+        sizes = App.model.getSize()
+        acqDict['PtclSizes'] = sizes
+        App.model.calcBox()
+        self.mainLayout.addWidget(self.group3(), 1, 0)
+        self.box.setText(acqDict['BoxSize'])
+        self.mask.setText(acqDict['MaskSize'])
+        self.box_bin.setText(acqDict['BoxSizeSmall'])
 
     def onFinish(self):
         """ Finish is pressed, we need to update all editable vars. """
@@ -435,12 +414,10 @@ class Page2(QWizardPage):
         App.model.acqDict['DosePerFrame'] = self.dosepf.text()
         App.model.acqDict['PixelSpacing'] = self.px.text()
         App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
+        App.model.acqDict['BoxSize'] = self.box.text()
+        App.model.acqDict['MaskSize'] = self.mask.text()
+        App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
         App.model.acqDict['Symmetry'] = App.model.getSymmetry()
-
-        if App.model.acqDict['PtclSize'] != 0:
-            App.model.acqDict['BoxSize'] = self.box.text()
-            App.model.acqDict['MaskSize'] = self.mask.text()
-            App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
 
         print("\nFinal parameters:\n")
         for k, v in sorted(App.model.acqDict.items()):

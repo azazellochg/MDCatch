@@ -21,7 +21,6 @@ Dependencies are installed by pip automatically:
  * pyqt5 (GUI)
  * mrcfile (to parse MRC header)
  * tifffile (to parse TIF header)
- * emtable (STAR file parser)
  * watchdog (watch a folder when running in daemon mode)
 
 .. raw:: html
@@ -97,7 +96,7 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://www3.mrc-lmb.cam.ac.uk/relion//index.php/Main_Page>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO <https://cryolo.readthedocs.io/>`_ (installed in a separate conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ (installed in a conda environment)
 
 Relion and/or Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
 For Relion class ranker provide a path to Python with Torch using **RELION_PYTHON** (e.g. Python from Topaz env).
@@ -171,7 +170,7 @@ Daemon mode
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
-Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PREFIX, METATADA_PATH. Topaz was not designed for automation (it requires particle size), so you have to use crYOLO picker.
+Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PREFIX, METATADA_PATH.
 
 We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
@@ -221,7 +220,6 @@ There are two schedules: *prep* and *proc*. Both are launched at the same time.
         * 3D initial model and refinement
 
         The proc schedule starts once ctffind results are available. The first 2D classification starts (with 25 classes) once 10000 particles have been extracted. After the classification, the best class averages are auto-selected and the corresponding particles are used for Topaz model training. Then all micrographs are picked again with the new model followed by extraction and another 2D classification (with 50 classes).
-        After that 2D classification and class selection will be repeated as new jobs with more and more particles as they are getting extracted.
 
 .. raw:: html
 

@@ -35,8 +35,6 @@ from .config import JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 def setupRelion(paramDict):
     """ Prepare and launch Relion 4.0 schedules. """
-    print(paramDict)
-    exit(1)
     try:
         subprocess.check_output(["which", "relion_scheduler"],
                                 stderr=subprocess.DEVNULL)
@@ -45,8 +43,6 @@ def setupRelion(paramDict):
         exit(1)
 
     bin, gain, defect, group_frames = precalculateVars(paramDict)
-
-    #if paramDict['PtclSize'] != 0:
     mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
         'prep__do_at_most': 5,
@@ -68,11 +64,11 @@ def setupRelion(paramDict):
         'proc__extract_rest__rescale': paramDict['BoxSizeSmall'],
         'proc__inimodel3d__particle_diameter': mask_diam,
         'proc__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-        'proc__inipicker__topaz_particle_diameter': paramDict['PtclSize'],
+        'proc__inipicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
         'proc__refine3d__particle_diameter': mask_diam,
         'proc__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-        'proc__restpicker__topaz_particle_diameter': paramDict['PtclSize'],
-        'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSize'],
+        'proc__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
+        'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
     }
 
     if paramDict['Mode'] == "EER":
@@ -153,7 +149,7 @@ sigma_contrast          3
 """
     with open(".gui_manualpickjob.star", "w") as f:
         f.write(starString % (float(paramDict['PixelSpacing']) * bin,
-                              paramDict['PtclSize']))
+                              paramDict['PtclSizes'][1]))
 
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):

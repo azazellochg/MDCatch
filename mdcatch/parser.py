@@ -43,9 +43,8 @@ class Parser:
         self.user = None
         self.fn = None
         self.pipeline = DEF_PIPELINE
-        self.picker = DEF_PICKER
         self.symmetry = DEF_SYMMETRY
-        self.size = DEF_PARTICLE_SIZE
+        self.size = DEF_PARTICLE_SIZES
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -70,12 +69,6 @@ class Parser:
     def getPipeline(self):
         return self.pipeline
 
-    def setPicker(self, choice):
-        self.picker = choice
-
-    def getPicker(self):
-        return self.picker
-
     def setSymmetry(self, choice):
         self.symmetry = choice
 
@@ -85,8 +78,8 @@ class Parser:
     def getSize(self):
         return self.size
 
-    def setSize(self, size):
-        self.size = size
+    def setSize(self, *args):
+        self.size = args
 
     def getPrjPath(self):
         return self.prjPath
@@ -159,14 +152,14 @@ class Parser:
 
     def calcBox(self):
         """ Calculate box, mask, downsample. """
-        size = self.acqDict['PtclSize']
+        minSize, maxSize = self.acqDict['PtclSizes']
         angpix = float(self.acqDict['PixelSpacing'])
 
         if self.acqDict['Mode'] == 'Super-resolution' and self.acqDict['Binning'] == '1':
             # since we always bin by 2 in mc if using super-res and bin 1
             angpix *= 2
 
-        ptclSizePx = float(size) / angpix
+        ptclSizePx = float(maxSize) / angpix
         # use +20% for mask size
         self.acqDict['MaskSize'] = str(math.ceil(1.2 * ptclSizePx))
         # use +30% for box size, make it even
