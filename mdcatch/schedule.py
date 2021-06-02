@@ -35,6 +35,8 @@ from .config import JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
 
 def setupRelion(paramDict):
     """ Prepare and launch Relion 4.0 schedules. """
+    print(paramDict)
+    exit(1)
     try:
         subprocess.check_output(["which", "relion_scheduler"],
                                 stderr=subprocess.DEVNULL)
@@ -43,8 +45,11 @@ def setupRelion(paramDict):
         exit(1)
 
     bin, gain, defect, group_frames = precalculateVars(paramDict)
+
+    #if paramDict['PtclSize'] != 0:
+    mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
-        'prep__do_at_most': 10,
+        'prep__do_at_most': 5,
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
@@ -53,8 +58,21 @@ def setupRelion(paramDict):
         'prep__motioncorr__bin_factor': bin,
         'prep__motioncorr__dose_per_frame': paramDict['DosePerFrame'],
         'prep__motioncorr__group_frames': group_frames,
-        # Cryolo cannot read float16 MRC
-        'prep__motioncorr__do_float16': 'Yes' if paramDict['Picker'] == "Topaz" else 'No'
+        'proc__class2d_ini__particle_diameter': mask_diam,
+        'proc__class2d_rest__particle_diameter': mask_diam,
+        'proc__extract_ini__bg_diameter': paramDict['MaskSize'],
+        'proc__extract_ini__extract_size': paramDict['BoxSize'],
+        'proc__extract_ini__rescale': paramDict['BoxSizeSmall'],
+        'proc__extract_rest__bg_diameter': paramDict['MaskSize'],
+        'proc__extract_rest__extract_size': paramDict['BoxSize'],
+        'proc__extract_rest__rescale': paramDict['BoxSizeSmall'],
+        'proc__inimodel3d__particle_diameter': mask_diam,
+        'proc__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
+        'proc__inipicker__topaz_particle_diameter': paramDict['PtclSize'],
+        'proc__refine3d__particle_diameter': mask_diam,
+        'proc__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
+        'proc__restpicker__topaz_particle_diameter': paramDict['PtclSize'],
+        'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSize'],
     }
 
     if paramDict['Mode'] == "EER":
@@ -64,52 +82,6 @@ def setupRelion(paramDict):
             'prep__motioncorr__group_frames': 1,
             'prep__motioncorr__dose_per_frame': 1.0,
             'prep__motioncorr__eer_grouping': eer_group
-        })
-
-    if paramDict['PtclSize']:
-        mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
-
-    if paramDict['Picker'] == "Cryolo":
-        if paramDict['PtclSize']:  # not 0
-            mapDict.update({
-                'proc2__class2d_ini__particle_diameter': mask_diam,
-                'proc2__class2d_rest__particle_diameter': mask_diam,
-                'proc2__extract_ini__bg_diameter': paramDict['MaskSize'],
-                'proc2__extract_ini__extract_size': paramDict['BoxSize'],
-                'proc2__extract_ini__rescale': paramDict['BoxSizeSmall'],
-                'proc2__extract_rest__bg_diameter': paramDict['MaskSize'],
-                'proc2__extract_rest__extract_size': paramDict['BoxSize'],
-                'proc2__extract_rest__rescale': paramDict['BoxSizeSmall'],
-                'proc2__inimodel3d__particle_diameter': mask_diam,
-                'proc2__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-                'proc2__inipicker__box_size': paramDict['BoxSize'],
-                'proc2__refine3d__particle_diameter': mask_diam,
-                'proc2__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-                'proc2__restpicker__box_size': paramDict['BoxSize'],
-            })
-        else:
-            mapDict.update({
-                'proc2__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-                'proc2__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            })
-
-    elif paramDict['Picker'] == "Topaz":
-        mapDict.update({
-            'proc__class2d_ini__particle_diameter': mask_diam,
-            'proc__class2d_rest__particle_diameter': mask_diam,
-            'proc__extract_ini__bg_diameter': paramDict['MaskSize'],
-            'proc__extract_ini__extract_size': paramDict['BoxSize'],
-            'proc__extract_ini__rescale': paramDict['BoxSizeSmall'],
-            'proc__extract_rest__bg_diameter': paramDict['MaskSize'],
-            'proc__extract_rest__extract_size': paramDict['BoxSize'],
-            'proc__extract_rest__rescale': paramDict['BoxSizeSmall'],
-            'proc__inimodel3d__particle_diameter': mask_diam,
-            'proc__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc__inipicker__topaz_particle_diameter': paramDict['PtclSize'],
-            'proc__refine3d__particle_diameter': mask_diam,
-            'proc__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc__restpicker__topaz_particle_diameter': paramDict['PtclSize'],
-            'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSize'],
         })
 
     prjName = getPrjName(paramDict)
@@ -236,20 +208,17 @@ sigma_contrast          3
 
     for cmd in sorted(cmdList):
         print(cmd)
-        #os.system(cmd)
+        os.system(cmd)
 
-    schd_id = "" if paramDict['Picker'] == "Topaz" else "2"
     # Run scheduler
     cmdList = ['relion_scheduler --schedule prep --reset &',
                'relion_scheduler --schedule prep --run --pipeline_control Schedules/prep/ >> Schedules/prep/run.out 2>> Schedules/prep/run.err &',
-               'relion_scheduler --schedule proc%s --reset &' % schd_id,
-               'relion_scheduler --schedule proc%s --run --pipeline_control Schedules/proc%s/ >> Schedules/proc%s/run.out 2>> Schedules/proc%s/run.err &' % (
-                   schd_id, schd_id, schd_id, schd_id
-               )]
+               'relion_scheduler --schedule proc --reset &',
+               'relion_scheduler --schedule proc --run --pipeline_control Schedules/proc/ >> Schedules/proc/run.out 2>> Schedules/proc/run.err &']
 
     for cmd in cmdList:
         print(cmd)
-        #os.system(cmd)
+        os.system(cmd)
 
 
 def setupScipion(paramDict):
