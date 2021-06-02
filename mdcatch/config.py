@@ -36,7 +36,7 @@ DEF_SYMMETRY = "C1"
 
 # path to folder with EPU sessions or folder with SerialEM mdoc files
 # in SerialEM case movies and mdocs are expected in the same folder
-METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
+METADATA_PATH = "/mnt/MetaData/Krios1/EPU"
 
 # path where Relion projects are created
 PROJECT_PATH = "/cephfs"

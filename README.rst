@@ -68,10 +68,10 @@ You have two options:
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/93343573-8c08f900-f828-11ea-9554-65cebe8414ae.png
+.. image:: https://user-images.githubusercontent.com/6952870/120499027-a0415600-c3b7-11eb-98a0-fcb444d4507d.png
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/93343678-afcc3f00-f828-11ea-9cc7-a5848f5d1ee6.png
+.. image:: https://user-images.githubusercontent.com/6952870/120499078-ab948180-c3b7-11eb-90ea-6c17e49c2072.png
    :width: 640 px
 
 
@@ -162,7 +162,7 @@ GUI mode
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
   3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
   4. save found acquisition params in a text file (e.g. ``EPU_session_params``), save Relion params in ``relion_it_options.py``
-  5. modify existing Relion Schedules/Scipion templates, copy them to the project folder then launch Relion/Scipion on-the-fly processing
+  5. modify existing Relion Schedules/Scipion template, copy them to the project folder then launch Relion/Scipion on-the-fly processing
 
 Daemon mode
 ###########
