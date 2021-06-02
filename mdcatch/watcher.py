@@ -87,9 +87,11 @@ def start_app(mdFn):
               model.getSoftware(),
               model.getMdPath(),
               model.getUser(),
-              model.getPipeline())
+              model.getPipeline(),
+              model.getSymmetry(),
+              model.getSize())
 
-    print("\nFiles found: %s\n" % mdFn)
+    print("\nFile found: %s\n" % mdFn)
 
     model.parseMetadata(mdFn)
     model.calcDose()
