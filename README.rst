@@ -81,6 +81,8 @@ Running
 To run with a GUI simply type **mdcatch**.
 If you want to run in daemon mode, run **mdcatch --watch** (see the details in the user guide below)
 
+.. important:: Make sure the dose per frame is correct! The reported dose is measured directly from an image (at the camera level), so it is usually lower due to sample thickness, obj. aperture and energy filtering. If you are using EER, the reported dose is per EER frame! EER movies will be fractionated such that final frames will have 1 e/A\ :sup:`2`.
+
 User guide
 ----------
 
@@ -199,27 +201,27 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schedules description</a></summary>
 
-There are two schedules: *prep* and *proc*. Both are launched at the same time.
+There are two schedules: *prep* and *proc*. Both are launched at the same time and will run for 8 hours
 
-    1. Prep includes 3 jobs that run in a loop, processing batches of 5 movies:
+1. The prep schedule includes 3 jobs that run in a loop, processing batches of 5 movies each time:
 
-        * import movies
-        * motion correction (relion motioncor)
-        * ctffind4-4.1.14
+    a) import movies
+    b) motion correction (relion motioncor)
+    c) ctffind4-4.1.14
 
-        The schedule will terminate if no new mics were imported for ~ 4h.
-        This helps in case a user pauses EPU session for some reason and then continues.
+.. important:: The movie frames will be grouped if the dose per frame is < 0.8 e/A\ :sup:`2`. EER movies are fractionated such that final frames have 1 e/A\ :sup:`2`.
 
-    2. Proc includes multiple jobs:
+2. The proc schedule starts once ctffind results are available. Proc includes multiple jobs:
 
-        * micrograph selection (CTF res < 6A)
-        * particle picking (Topaz)
-        * particle extration
-        * 2D classification
-        * subset selections for particles/classes, auto-selection of good 2D classes
-        * 3D initial model and refinement
-
-        The proc schedule starts once ctffind results are available. The first 2D classification starts (with 25 classes) once 10000 particles have been extracted. After the classification, the best class averages are auto-selected and the corresponding particles are used for Topaz model training. Then all micrographs are picked again with the new model followed by extraction and another 2D classification (with 50 classes).
+    a) micrograph selection (CTF resolution < 6A)
+    b) particle picking (Topaz)
+    c) particle extraction (round 1)
+    d) 2D classification with 25 classes (round 1) once you have > 10000 particles
+    e) auto-selection of good 2D classes
+    f) using particles from good 2D classes to re-train Topaz picker and re-pick all micrographs
+    g) particle extraction (round 2)
+    h) 2D classification with 50 classes (round 2, 3, ...)
+    i) auto-selection of good 2D classes (round 2, 3, ...)
 
 .. raw:: html
 
