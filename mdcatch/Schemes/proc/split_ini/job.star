@@ -27,7 +27,7 @@ do_remove_duplicates         No
 do_select_values         No 
   do_split        Yes 
 duplicate_threshold         30 
-   fn_data Schedules/proc/extract_ini/particles.star 
+   fn_data Schemes/proc/extract_ini/particles.star
     fn_mic         "" 
   fn_model         "" 
 image_angpix         -1 

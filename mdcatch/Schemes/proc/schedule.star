@@ -2,20 +2,20 @@
 
 # version 30001
 
-data_schedule_general
+data_scheme_general
 
-_rlnScheduleName                       Schedules/proc/
-_rlnScheduleCurrentNodeName            WAIT
+_rlnSchemeName                       Schemes/proc/
+_rlnSchemeCurrentNodeName            WAIT
  
 
 # version 30001
 
-data_schedule_floats
+data_scheme_floats
 
 loop_ 
-_rlnScheduleFloatVariableName #1 
-_rlnScheduleFloatVariableValue #2 
-_rlnScheduleFloatVariableResetValue #3 
+_rlnSchemeFloatVariableName #1
+_rlnSchemeFloatVariableValue #2
+_rlnSchemeFloatVariableResetValue #3
 current_ini_size     0.000000     0.000000 
 current_rest_size     0.000000     0.000000 
 inibatch_size 10000.000000 10000.000000 
@@ -26,12 +26,12 @@ wait_sec   60.000000   60.000000
 
 # version 30001
 
-data_schedule_bools
+data_scheme_bools
 
 loop_ 
-_rlnScheduleBooleanVariableName #1 
-_rlnScheduleBooleanVariableValue #2 
-_rlnScheduleBooleanVariableResetValue #3 
+_rlnSchemeBooleanVariableName #1
+_rlnSchemeBooleanVariableValue #2
+_rlnSchemeBooleanVariableResetValue #3
 has_ctffind 0 0
 do_prep 1 1 
 do_2d 1 1 
@@ -45,31 +45,31 @@ has_iniref            0            0
 
 # version 30001
 
-data_schedule_strings
+data_scheme_strings
 
 loop_ 
-_rlnScheduleStringVariableName #1 
-_rlnScheduleStringVariableValue #2 
-_rlnScheduleStringVariableResetValue #3 
-ctffind_mics Schedules/prep/ctffind/micrographs_ctf.star Schedules/prep/ctffind/micrographs_ctf.star 
-ini_batch Schedules/proc/split_ini/particles_split1.star Schedules/proc/split_ini/particles_split1.star 
+_rlnSchemeStringVariableName #1
+_rlnSchemeStringVariableValue #2
+_rlnSchemeStringVariableResetValue #3
+ctffind_mics Schemes/prep/ctffind/micrographs_ctf.star Schemes/prep/ctffind/micrographs_ctf.star
+ini_batch Schemes/proc/split_ini/particles_split1.star Schemes/proc/split_ini/particles_split1.star
 particles  particles  particles 
-rest_batch Schedules/proc/extract_rest/particles.star Schedules/proc/extract_rest/particles.star 
-topaz_model Schedules/proc/train_topaz/model_epoch10.sav Schedules/proc/train_topaz/model_epoch10.sav 
+rest_batch Schemes/proc/extract_rest/particles.star Schemes/proc/extract_rest/particles.star
+topaz_model Schemes/proc/train_topaz/model_epoch10.sav Schemes/proc/train_topaz/model_epoch10.sav
 iniref None None
 myref undefined undefined
-inimodel_output Schedules/proc/inimodel3d/initial_model.mrc Schedules/proc/inimodel3d/initial_model.mrc
+inimodel_output Schemes/proc/inimodel3d/initial_model.mrc Schemes/proc/inimodel3d/initial_model.mrc
 
 # version 30001
 
-data_schedule_operators
+data_scheme_operators
 
 loop_ 
-_rlnScheduleOperatorName #1 
-_rlnScheduleOperatorType #2 
-_rlnScheduleOperatorOutput #3 
-_rlnScheduleOperatorInput1 #4 
-_rlnScheduleOperatorInput2 #5 
+_rlnSchemeOperatorName #1
+_rlnSchemeOperatorType #2
+_rlnSchemeOperatorOutput #3
+_rlnSchemeOperatorInput1 #4
+_rlnSchemeOperatorInput2 #5
 HAS_ctffind bool=file_exists has_ctffind ctffind_mics undefined
 CHECK_ini    bool=ge inibatch_big_enough current_ini_size inibatch_size
 CHECK_iniref  bool=file_exists has_iniref iniref  undefined 
@@ -86,13 +86,13 @@ WAIT       wait  undefined   wait_sec  undefined
 
 # version 30001
 
-data_schedule_jobs
+data_scheme_jobs
 
 loop_ 
-_rlnScheduleJobNameOriginal #1 
-_rlnScheduleJobName #2 
-_rlnScheduleJobMode #3 
-_rlnScheduleJobHasStarted #4 
+_rlnSchemeJobNameOriginal #1
+_rlnSchemeJobName #2
+_rlnSchemeJobMode #3
+_rlnSchemeJobHasStarted #4
 select_mics select_mics continue    0
 inipicker  inipicker   continue            0 
 extract_ini extract_ini   continue            0 
@@ -110,14 +110,14 @@ refine3d   refine3d        new            0
 
 # version 30001
 
-data_schedule_edges
+data_scheme_edges
 
 loop_ 
-_rlnScheduleEdgeInputNodeName #1 
-_rlnScheduleEdgeOutputNodeName #2 
-_rlnScheduleEdgeIsFork #3 
-_rlnScheduleEdgeOutputNodeNameIfTrue #4 
-_rlnScheduleEdgeBooleanVariable #5 
+_rlnSchemeEdgeInputNodeName #1
+_rlnSchemeEdgeOutputNodeName #2
+_rlnSchemeEdgeIsFork #3
+_rlnSchemeEdgeOutputNodeNameIfTrue #4
+_rlnSchemeEdgeBooleanVariable #5
 WAIT HAS_ctffind              0  undefined  undefined 
 HAS_ctffind WAIT             1 EXIT_maxtime has_ctffind
 EXIT_maxtime select_mics              0  undefined  undefined 

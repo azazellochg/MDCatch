@@ -30,13 +30,13 @@ import subprocess
 import json
 
 from .utils.misc import precalculateVars, getPrjName
-from .config import JSON_TEMPLATE, SCHEDULE_PATH, PATTERN_SEM_MOVIES
+from .config import JSON_TEMPLATE, SCHEMES_PATH, PATTERN_SEM_MOVIES
 
 
 def setupRelion(paramDict):
-    """ Prepare and launch Relion 4.0 schedules. """
+    """ Prepare and launch Relion 4.0 schemes. """
     try:
-        subprocess.check_output(["which", "relion_scheduler"],
+        subprocess.check_output(["which", "relion_schemer"],
                                 stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
         print("ERROR: Relion not found in PATH!")
@@ -170,8 +170,8 @@ sigma_contrast          3
     else:
         mapDict['prep__motioncorr__fn_defect'] = ''
 
-    if not os.path.exists('Schedules'):
-        shutil.copytree(SCHEDULE_PATH, os.getcwd() + '/Schedules')
+    if not os.path.exists('Schemes'):
+        shutil.copytree(SCHEMES_PATH, os.getcwd() + '/Schemes')
 
     # Save relion params in .py file
     with open("relion_it_options.py", 'w') as file:
@@ -187,17 +187,17 @@ sigma_contrast          3
         for k, v in sorted(paramDict.items()):
             fn.write("%s = %s\n" % (k, v))
 
-    # Set up scheduler vars
+    # Set up schemer vars
     cmdList = list()
     for key in mapDict:
         if mapDict[key] != '':
             opts = key.split("__")
             if key.count("__") == 2:  # job option
-                jobstar = 'Schedules/' + opts[0] + '/' + opts[1] + '/job.star'
+                jobstar = 'Schemes/' + opts[0] + '/' + opts[1] + '/job.star'
                 cmd = 'relion_pipeliner --editJob %s --editOption %s --editValue %s' % (
                     jobstar, opts[2], mapDict[key])
-            else:  # schedule option
-                cmd = 'relion_scheduler --schedule %s --set_var %s --value %s --original_value %s' % (
+            else:  # scheme option
+                cmd = 'relion_schemer --scheme %s --set_var %s --value %s --original_value %s' % (
                     opts[0], opts[1], mapDict[key], mapDict[key])
 
             cmdList.append(cmd)
@@ -206,11 +206,11 @@ sigma_contrast          3
         print(cmd)
         os.system(cmd)
 
-    # Run scheduler
-    cmdList = ['relion_scheduler --schedule prep --reset &',
-               'relion_scheduler --schedule prep --run --pipeline_control Schedules/prep/ >> Schedules/prep/run.out 2>> Schedules/prep/run.err &',
-               'relion_scheduler --schedule proc --reset &',
-               'relion_scheduler --schedule proc --run --pipeline_control Schedules/proc/ >> Schedules/proc/run.out 2>> Schedules/proc/run.err &']
+    # Run schemer
+    cmdList = ['relion_schemer --scheme prep --reset &',
+               'relion_schemer --scheme prep --run --pipeline_control Schemes/prep/ >> Schemes/prep/run.out 2>> Schemes/prep/run.err &',
+               'relion_schemer --scheme proc --reset &',
+               'relion_schemer --scheme proc --run --pipeline_control Schemes/proc/ >> Schemes/proc/run.out 2>> Schemes/proc/run.err &']
 
     for cmd in cmdList:
         print(cmd)
@@ -218,7 +218,7 @@ sigma_contrast          3
 
 
 def setupScipion(paramDict):
-    """ Prepare and schedule Scipion 3 workflow.
+    """ Prepare and scheme Scipion 3 workflow.
     The default template will run import movies, relion motioncor,
     ctffind4, cryolo picking, extraction and summary monitor protocols.
     """
@@ -295,5 +295,5 @@ def setupScipion(paramDict):
         for k, v in sorted(paramDict.items()):
             fn.write("%s = %s\n" % (k, v))
 
-    cmd2 = 'scipion3 python -m pyworkflow.project.scripts.schedule %s' % prjName
+    cmd2 = 'scipion3 python -m pyworkflow.project.scripts.scheme %s' % prjName
     proc2 = subprocess.Popen(cmd2.split(), universal_newlines=True)

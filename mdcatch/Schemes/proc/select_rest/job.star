@@ -29,7 +29,7 @@ do_select_values         No
 duplicate_threshold         30 
    fn_data         "" 
     fn_mic         "" 
-  fn_model Schedules/proc/class2d_ini/run_it020_optimiser.star 
+  fn_model Schemes/proc/class2d_rest/run_it100_optimiser.star
 image_angpix         -1 
 min_dedicated         24 
  nr_groups          1 
@@ -39,7 +39,7 @@ python_exe         $RELION_PYTHON
       qsub       qsub 
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
-rank_threshold       0.35 
+rank_threshold       0.45 
 select_label rlnCtfMaxResolution 
 select_maxval      9999. 
 select_minval     -9999. 

@@ -32,7 +32,7 @@ do_topaz_pick         No
 do_topaz_train        Yes 
 do_topaz_train_parts        Yes 
 do_write_fom_maps         No 
-fn_input_autopick Schedules/proc/select_mics/micrographs.star
+fn_input_autopick Schemes/proc/select_mics/micrographs.star
 fn_ref3d_autopick         "" 
 fn_refs_autopick         "" 
    gpu_ids          0 
@@ -67,7 +67,7 @@ topaz_model         ""
 topaz_nr_particles        300
 topaz_other_args         "" 
 topaz_particle_diameter      100.0 
-topaz_train_parts Schedules/proc/select_ini/particles.star 
+topaz_train_parts Schemes/proc/select_ini/particles.star
 topaz_train_picks         "" 
    use_gpu        Yes 
  

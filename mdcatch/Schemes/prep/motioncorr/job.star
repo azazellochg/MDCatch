@@ -34,7 +34,7 @@ fn_motioncor2_exe /public/EM/MOTIONCOR2/MotionCor2
    gpu_ids          0 
 group_for_ps          4 
 group_frames          1 
-input_star_mics Schedules/prep/importmovies/movies.star 
+input_star_mics Schemes/prep/importmovies/movies.star
 last_frame_sum         -1 
 min_dedicated         24 
     nr_mpi          5

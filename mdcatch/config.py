@@ -41,8 +41,8 @@ METADATA_PATH = "/mnt/MetaData/Krios1/EPU"
 # path where Relion projects are created
 PROJECT_PATH = "/cephfs"
 
-# Folder with Relion 4 template schedules
-SCHEDULE_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schedules"
+# Folder with Relion 4 template schemes
+SCHEMES_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schemes"
 
 # Scipion 3 pre-processing template
 JSON_TEMPLATE = "/home/gsharov/soft/MDCatch-dev/mdcatch/template.json"

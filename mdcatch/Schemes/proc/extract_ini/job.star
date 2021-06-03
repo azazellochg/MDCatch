@@ -3,7 +3,6 @@
 
 data_job
 
-_rlnJobTypeLabel             Extract
 _rlnJobTypeLabel             relion.extract
 _rlnJobIsContinue                       0
 _rlnJobIsTomo                           0
@@ -18,12 +17,12 @@ _rlnJobOptionVariable #1
 _rlnJobOptionValue #2 
 bg_diameter         -1 
 black_dust         -1 
-coords_suffix Schedules/proc/restpicker/autopick.star 
+coords_suffix Schemes/proc/inipicker/autopick.star
 do_cut_into_segments        Yes 
 do_extract_helical_tubes        Yes 
 do_extract_helix         No 
 do_float16        Yes
-do_fom_threshold        No
+do_fom_threshold         No 
  do_invert        Yes 
    do_norm        Yes 
   do_queue         No 
@@ -38,8 +37,8 @@ helical_nr_asu          1
 helical_rise          1 
 helical_tube_outer_diameter        200 
 min_dedicated         24 
-minimum_pick_fom         -3 
-    nr_mpi          12
+minimum_pick_fom          0 
+    nr_mpi          5
 other_args         "" 
       qsub       qsub 
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
@@ -48,6 +47,6 @@ recenter_x          0
 recenter_y          0 
 recenter_z          0 
    rescale         48 
- star_mics Schedules/proc/select_mics/micrographs.star 
+ star_mics Schemes/proc/select_mics/micrographs.star
 white_dust         -1 
  

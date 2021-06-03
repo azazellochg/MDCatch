@@ -126,8 +126,8 @@ Important points to mention:
 
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
-    * Relion schedules use **/ssd** as the scratch (SSD) folder, you might want to change this
-    * Relion schedules also use two GPUs: 0 and 1
+    * Relion schemes use **/ssd** as the scratch (SSD) folder, you might want to change this
+    * Relion schemes also use two GPUs: 0 and 1
 
 Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
 
@@ -164,7 +164,7 @@ GUI mode
   2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
   3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
   4. save found acquisition params in a text file (e.g. ``EPU_session_params``), save Relion params in ``relion_it_options.py``
-  5. modify existing Relion Schedules/Scipion template, copy them to the project folder then launch Relion/Scipion on-the-fly processing
+  5. modify existing Relion Schemes/Scipion template, copy them to the project folder then launch Relion/Scipion on-the-fly processing
 
 Daemon mode
 ###########
@@ -199,11 +199,11 @@ Scipion project will be created in the default Scipion projects folder.
 
    </details>
    <details>
-   <summary><a>Relion schedules description</a></summary>
+   <summary><a>Relion schemes description</a></summary>
 
-There are two schedules: *prep* and *proc*. Both are launched at the same time and will run for 8 hours
+There are two schemes: *prep* and *proc*. Both are launched at the same time and will run for 8 hours
 
-1. The prep schedule includes 3 jobs that run in a loop, processing batches of 5 movies each time:
+1. The prep scheme includes 3 jobs that run in a loop, processing batches of 5 movies each time:
 
     a) import movies
     b) motion correction (relion motioncor)
@@ -211,7 +211,7 @@ There are two schedules: *prep* and *proc*. Both are launched at the same time a
 
 .. important:: The movie frames will be grouped if the dose per frame is < 0.8 e/A\ :sup:`2`. EER movies are fractionated such that final frames have 1 e/A\ :sup:`2`.
 
-2. The proc schedule starts once ctffind results are available. Proc includes multiple jobs:
+2. The proc scheme starts once ctffind results are available. Proc includes multiple jobs:
 
     a) micrograph selection (CTF resolution < 6A)
     b) particle picking (Topaz)

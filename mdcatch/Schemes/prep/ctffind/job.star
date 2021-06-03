@@ -28,7 +28,7 @@ do_phaseshift         No
 fn_ctffind_exe $RELION_CTFFIND_EXECUTABLE
 fn_gctf_exe $RELION_GCTF_EXECUTABLE
    gpu_ids         "" 
-input_star_mics Schedules/prep/motioncorr/corrected_micrographs.star 
+input_star_mics Schemes/prep/motioncorr/corrected_micrographs.star
 min_dedicated         24 
     nr_mpi          5 
 other_args         "" 
