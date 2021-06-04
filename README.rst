@@ -201,9 +201,9 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schemes description</a></summary>
 
-There are two schemes: *prep* and *proc*. Both are launched at the same time and will run for 8 hours
+There are two schemes: *prep* and *proc*. Both are launched at the same time and will run for 12 hours
 
-1. The prep scheme includes 3 jobs that run in a loop, processing batches of 5 movies each time:
+1. The prep scheme includes 3 jobs that run in a loop, processing batches of 15 movies each time:
 
     a) import movies
     b) motion correction (relion motioncor)
@@ -218,10 +218,13 @@ There are two schemes: *prep* and *proc*. Both are launched at the same time and
     c) particle extraction (round 1)
     d) 2D classification with 25 classes (round 1) once you have > 10000 particles
     e) auto-selection of good 2D classes
-    f) using particles from good 2D classes to re-train Topaz picker and re-pick all micrographs
-    g) particle extraction (round 2)
-    h) 2D classification with 50 classes (round 2, 3, ...)
-    i) auto-selection of good 2D classes (round 2, 3, ...)
+    f) using particles from good 2D classes to re-train Topaz
+    g) pick micrographs using new Topaz trained model (round 2, 3, ...). First time it re-picks all micrographs from scratch
+    h) particle extraction (round 2, 3, ...)
+    i) 2D classification with 50 classes (round 2, 3, ...)
+    k) auto-selection of good 2D classes (round 2, 3, ...)
+
+The last two steps are always executed as new jobs (not overwriting previous results).
 
 .. raw:: html
 

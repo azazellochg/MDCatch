@@ -45,7 +45,7 @@ def setupRelion(paramDict):
     bin, gain, defect, group_frames = precalculateVars(paramDict)
     mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
-        'prep__do_at_most': 5,
+        'prep__do_at_most': 15,
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
