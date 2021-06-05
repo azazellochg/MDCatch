@@ -274,6 +274,16 @@ def setupScipion(paramDict):
     ctfProt = protocolsList[protNames["CistemProtCTFFind"]]
     ctfProt["findPhaseShift"] = paramDict['PhasePlateUsed']
 
+    # picking
+    pickProt = protocolsList[protNames["SphireProtCRYOLOPicking"]]
+    pickProt["boxSize"] = paramDict['BoxSize']
+
+    # extract
+    extrProt = protocolsList[protNames["ProtRelionExtractParticles"]]
+    extrProt["boxSize"] = paramDict['BoxSize']
+    extrProt["rescaledSize"] = paramDict['BoxSizeSmall']
+    extrProt["backDiameter"] = paramDict['MaskSize']
+
     jsonFn = "%s.json" % prjName
     with open(jsonFn, "w") as f:
         jsonStr = json.dumps(protocolsList, indent=4, separators=(',', ': '))
