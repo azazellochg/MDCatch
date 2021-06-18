@@ -204,7 +204,7 @@ sigma_contrast          3
 
     for cmd in sorted(cmdList):
         print(cmd)
-        os.system(cmd)
+        #os.system(cmd)
 
     # Run schemer
     cmdList = ['relion_schemer --scheme prep --reset &',
@@ -214,7 +214,7 @@ sigma_contrast          3
 
     for cmd in cmdList:
         print(cmd)
-        os.system(cmd)
+        #os.system(cmd)
 
 
 def setupScipion(paramDict):

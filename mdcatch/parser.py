@@ -43,6 +43,7 @@ class Parser:
         self.user = None
         self.fn = None
         self.pipeline = DEF_PIPELINE
+        self.picker = DEF_PICKER
         self.symmetry = DEF_SYMMETRY
         self.size = DEF_PARTICLE_SIZES
 
@@ -68,6 +69,12 @@ class Parser:
 
     def getPipeline(self):
         return self.pipeline
+
+    def setPicker(self, choice):
+        self.picker = choice
+
+    def getPicker(self):
+        return self.picker
 
     def setSymmetry(self, choice):
         self.symmetry = choice

@@ -73,7 +73,8 @@ class TestParser(unittest.TestCase):
               model.getSoftware(),
               model.getMdPath(),
               model.getUser(),
-              model.getPipeline())
+              model.getPipeline(),
+              model.getPicker())
         print("\nFiles found: %s\n" % mdFn)
 
         model.parseMetadata(mdFn)
