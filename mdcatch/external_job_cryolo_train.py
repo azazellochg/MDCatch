@@ -140,7 +140,7 @@ def run_job(project_dir, args):
     # Launching cryolo
     args_dict = {
         '--conf': "config.json",
-        '--gpu': gpus,
+        '--gpu': "%s" % gpus.replace('"', ''),
         '--warmup': 0,
         '--fine_tune': "",
         '--cleanup': ""
