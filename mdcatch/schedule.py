@@ -88,10 +88,10 @@ def setupRelion(paramDict):
             'proc-cryolo__extract_rest__rescale': paramDict['BoxSizeSmall'],
             'proc-cryolo__inimodel3d__particle_diameter': mask_diam,
             'proc-cryolo__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-cryolo__inipicker__box_size': paramDict['BoxSize'],
+            'proc-cryolo__inipicker__param2_value': paramDict['BoxSize'],
             'proc-cryolo__refine3d__particle_diameter': mask_diam,
             'proc-cryolo__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-cryolo__restpicker__box_size': paramDict['BoxSize'],
+            'proc-cryolo__restpicker__param2_value': paramDict['BoxSize'],
         })
     else:  # logpicker
         mapDict.update({
