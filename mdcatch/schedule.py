@@ -216,8 +216,8 @@ sigma_contrast          3
         shutil.copytree(SCHEMES_PATH, os.getcwd() + '/Schemes')
 
     for fn in ['external_job_cryolo.py', 'external_job_cryolo_train.py']:
-        shutil.copyfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), fn),
-                        os.getcwd())
+        shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), fn),
+                    os.getcwd())
 
     # Save relion params in .py file
     with open("relion_it_options.py", 'w') as file:
