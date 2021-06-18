@@ -140,7 +140,7 @@ def run_job(project_dir, args):
     # Launching cryolo
     args_dict = {
         '--conf': "config.json",
-        '--gpu': "%s" % gpus.replace('"', ''),
+        '--gpu': gpus.replace(',', ' '),
         '--warmup': 0,
         '--fine_tune': "",
         '--cleanup': ""
@@ -180,7 +180,7 @@ External job for calling cryolo fine-tune training within Relion 3.1. Run it in 
     parser.add_argument("--in_parts", help="Input particles STAR file")
     parser.add_argument("--o", dest="out_dir", help="Output directory name")
     parser.add_argument("--model", help="Cryolo training model (if not specified general is used)")
-    parser.add_argument("--gpu", help='GPUs to use (e.g. "0 1 2 3")', default="0")
+    parser.add_argument("--gpu", help='GPUs to use (e.g. "0,1,2,3")', default="0")
     parser.add_argument("--j", dest="threads", help="Not used here. required by relion")
     parser.add_argument("--pipeline_control", help="Not used here. Required by relion")
 

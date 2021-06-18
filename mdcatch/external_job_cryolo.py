@@ -152,7 +152,7 @@ def run_job(project_dir, args):
         '--conf': "config_cryolo.json",
         '--output': 'output',
         '--weights': model,
-        '--gpu': "%s" % gpus.replace('"', ''),
+        '--gpu': gpus.replace(',', ' '),
         '--threshold': thresh,
         '--distance': distance,
         '--cleanup': "",
@@ -333,7 +333,7 @@ External job for calling cryolo within Relion 4.0. Run it in the Relion project 
     parser.add_argument("--bd", dest="box_distance", help='[FILAMENT MODE] Distance in pixel between two boxes', type=int, default=None)
     parser.add_argument("--mn", dest="minimum_number_boxes", help='[FILAMENT MODE] Minimum number of boxes per filament', type=int, default=None)
     parser.add_argument("--denoise", help="Denoise with JANNI instead of lowpass filtering", default=False, action='store_true')
-    parser.add_argument("--gpu", help='GPUs to use (e.g. "0 1 2 3", default = "0")', default="0")
+    parser.add_argument("--gpu", help='GPUs to use (e.g. "0,1,2,3", default = "0")', default="0")
     parser.add_argument("--pipeline_control", help="Not used here. Required by Relion")
 
     args = parser.parse_args()

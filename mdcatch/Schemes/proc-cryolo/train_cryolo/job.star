@@ -28,7 +28,7 @@ other_args           ""
 param10_label        ""
 param10_value        ""
 param1_label        gpu
-param1_value       "0 1"
+param1_value        0,1
 param2_label         ""
 param2_value         ""
 param3_label         ""
