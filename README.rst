@@ -173,7 +173,7 @@ Daemon mode
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
-Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PREFIX, METATADA_PATH. Topaz was not designed for automation (it requires particle size), so you have to use crYOLO picker.
+Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PREFIX, METATADA_PATH.
 
 We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
@@ -215,12 +215,12 @@ There are two schemes: *prep* and *proc*. Both are launched at the same time and
 2. The proc scheme starts once ctffind results are available. Proc includes multiple jobs:
 
     a) micrograph selection (CTF resolution < 6A)
-    b) particle picking (Topaz)
+    b) particle picking (Cryolo or Topaz or Logpicker)
     c) particle extraction (round 1)
     d) 2D classification with 25 classes (round 1) once you have > 10000 particles
     e) auto-selection of good 2D classes
-    f) using particles from good 2D classes to re-train Topaz
-    g) pick micrographs using new Topaz trained model (round 2, 3, ...). First time it re-picks all micrographs from scratch
+    f) using particles from good 2D classes to re-train Cryolo or Topaz
+    g) pick micrographs using new Cryolo or Topaz trained model (round 2, 3, ...). First time it re-picks all micrographs from scratch
     h) particle extraction (round 2, 3, ...)
     i) 2D classification with 50 classes (round 2, 3, ...)
     k) auto-selection of good 2D classes (round 2, 3, ...)

@@ -15,7 +15,7 @@ loop_
 _rlnJobOptionVariable #1
 _rlnJobOptionValue #2
 do_queue         No
-fn_exe external_job_cryolo_train.py
+fn_exe ./external_job_cryolo_train.py
 in_3dref             ""
 in_coords            ""
 in_mask              ""
