@@ -168,7 +168,7 @@ class Page1(QWizardPage):
 
         self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "Cryolo")
         self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
-        self.button_log = self.addRadioButton("LogPicker", default=DEF_PICKER == "LogPicker")
+        self.button_log = self.addRadioButton("LogPicker", default=DEF_PICKER == "Logpicker")
         btgroup_picker.addButton(self.button_cryolo)
         btgroup_picker.addButton(self.button_topaz)
         btgroup_picker.addButton(self.button_log)
@@ -442,6 +442,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSize'] = self.box.text()
         App.model.acqDict['MaskSize'] = self.mask.text()
         App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
+        App.model.acqDict['Picker'] = App.model.getPicker()
         App.model.acqDict['Symmetry'] = App.model.getSymmetry()
 
         print("\nFinal parameters:\n")
