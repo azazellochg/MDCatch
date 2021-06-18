@@ -168,7 +168,7 @@ class Page1(QWizardPage):
 
         self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "Cryolo")
         self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
-        self.button_log = self.addRadioButton("LogPicker", default=DEF_PICKER == "Logpicker")
+        self.button_log = self.addRadioButton("LoG", default=DEF_PICKER == "Log")
         btgroup_picker.addButton(self.button_cryolo)
         btgroup_picker.addButton(self.button_topaz)
         btgroup_picker.addButton(self.button_log)

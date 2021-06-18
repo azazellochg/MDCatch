@@ -30,7 +30,7 @@ DEBUG = 1
 # some default vars
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
-DEF_PICKER = "Topaz"  # default particle picker: Cryolo or Topaz or Logpicker
+DEF_PICKER = "Cryolo"  # default particle picker: Cryolo or Topaz or Log
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 DEF_PARTICLE_SIZES = (150, 180)  # default min/max size in Angstroms
 DEF_SYMMETRY = "C1"
