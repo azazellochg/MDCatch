@@ -29,7 +29,7 @@ param10_value        ""
 param1_label        gpu
 param1_value          0
 param2_label   box_size
-param2_value          0
+param2_value $$box_size
 param3_label         ""
 param3_value         ""
 param4_label         ""
