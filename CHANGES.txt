@@ -5,6 +5,7 @@
     - Relion 4.0 support with the new scheduler, old Schedules removed
     - Topaz / 2D cls selection is now run by Relion
     - tif/mrc parsers updated, add EER support
+1.1: fix installer
 1.0:
     - separate mdoc parser, enable bigtiff header parser
     - add Cryoassess for 2D cls sorting, use it by default
