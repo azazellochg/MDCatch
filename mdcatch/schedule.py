@@ -53,23 +53,65 @@ def setupRelion(paramDict):
         'prep__importmovies__optics_group_name': '"%s"' % paramDict['OpticalGroup'],
         'prep__motioncorr__bin_factor': bin,
         'prep__motioncorr__dose_per_frame': paramDict['DosePerFrame'],
-        'prep__motioncorr__group_frames': group_frames,
-        'proc__class2d_ini__particle_diameter': mask_diam,
-        'proc__class2d_rest__particle_diameter': mask_diam,
-        'proc__extract_ini__bg_diameter': paramDict['MaskSize'],
-        'proc__extract_ini__extract_size': paramDict['BoxSize'],
-        'proc__extract_ini__rescale': paramDict['BoxSizeSmall'],
-        'proc__extract_rest__bg_diameter': paramDict['MaskSize'],
-        'proc__extract_rest__extract_size': paramDict['BoxSize'],
-        'proc__extract_rest__rescale': paramDict['BoxSizeSmall'],
-        'proc__inimodel3d__particle_diameter': mask_diam,
-        'proc__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-        'proc__inipicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-        'proc__refine3d__particle_diameter': mask_diam,
-        'proc__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-        'proc__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-        'proc__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+        'prep__motioncorr__group_frames': group_frames
     }
+
+    picker = paramDict['Picker'].lower()
+    if picker == 'topaz':
+        mapDict.update({
+            'proc-topaz__class2d_ini__particle_diameter': mask_diam,
+            'proc-topaz__class2d_rest__particle_diameter': mask_diam,
+            'proc-topaz__extract_ini__bg_diameter': paramDict['MaskSize'],
+            'proc-topaz__extract_ini__extract_size': paramDict['BoxSize'],
+            'proc-topaz__extract_ini__rescale': paramDict['BoxSizeSmall'],
+            'proc-topaz__extract_rest__bg_diameter': paramDict['MaskSize'],
+            'proc-topaz__extract_rest__extract_size': paramDict['BoxSize'],
+            'proc-topaz__extract_rest__rescale': paramDict['BoxSizeSmall'],
+            'proc-topaz__inimodel3d__particle_diameter': mask_diam,
+            'proc-topaz__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-topaz__inipicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-topaz__refine3d__particle_diameter': mask_diam,
+            'proc-topaz__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-topaz__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-topaz__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+        })
+    elif picker == 'cryolo':
+        mapDict.update({
+            'prep__motioncorr__do_float16': "No",  # Cryolo cant read mrc 16-bit
+            'proc-cryolo__class2d_ini__particle_diameter': mask_diam,
+            'proc-cryolo__class2d_rest__particle_diameter': mask_diam,
+            'proc-cryolo__extract_ini__bg_diameter': paramDict['MaskSize'],
+            'proc-cryolo__extract_ini__extract_size': paramDict['BoxSize'],
+            'proc-cryolo__extract_ini__rescale': paramDict['BoxSizeSmall'],
+            'proc-cryolo__extract_rest__bg_diameter': paramDict['MaskSize'],
+            'proc-cryolo__extract_rest__extract_size': paramDict['BoxSize'],
+            'proc-cryolo__extract_rest__rescale': paramDict['BoxSizeSmall'],
+            'proc-cryolo__inimodel3d__particle_diameter': mask_diam,
+            'proc-cryolo__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-cryolo__inipicker__param2_value': paramDict['BoxSize'],
+            'proc-cryolo__refine3d__particle_diameter': mask_diam,
+            'proc-cryolo__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-cryolo__restpicker__param2_value': paramDict['BoxSize'],
+        })
+    else:  # logpicker
+        mapDict.update({
+            'proc-log__class2d_ini__particle_diameter': mask_diam,
+            'proc-log__class2d_rest__particle_diameter': mask_diam,
+            'proc-log__extract_ini__bg_diameter': paramDict['MaskSize'],
+            'proc-log__extract_ini__extract_size': paramDict['BoxSize'],
+            'proc-log__extract_ini__rescale': paramDict['BoxSizeSmall'],
+            'proc-log__extract_rest__bg_diameter': paramDict['MaskSize'],
+            'proc-log__extract_rest__extract_size': paramDict['BoxSize'],
+            'proc-log__extract_rest__rescale': paramDict['BoxSizeSmall'],
+            'proc-log__inimodel3d__particle_diameter': mask_diam,
+            'proc-log__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-log__inipicker__log_diam_min': paramDict['PtclSizes'][0],
+            'proc-log__inipicker__log_diam_max': paramDict['PtclSizes'][1],
+            'proc-log__refine3d__particle_diameter': mask_diam,
+            'proc-log__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-log__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-log__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+        })
 
     if paramDict['Mode'] == "EER":
         eer_group = 1 // float(paramDict['DosePerFrame'])  # group to achieve 1 e/A^2/frame
@@ -173,6 +215,10 @@ sigma_contrast          3
     if not os.path.exists('Schemes'):
         shutil.copytree(SCHEMES_PATH, os.getcwd() + '/Schemes')
 
+    for fn in ['external_job_cryolo.py', 'external_job_cryolo_train.py']:
+        shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), fn),
+                    os.getcwd())
+
     # Save relion params in .py file
     with open("relion_it_options.py", 'w') as file:
         file.write("{\n")
@@ -209,8 +255,8 @@ sigma_contrast          3
     # Run schemer
     cmdList = ['relion_schemer --scheme prep --reset &',
                'relion_schemer --scheme prep --run --pipeline_control Schemes/prep/ >> Schemes/prep/run.out 2>> Schemes/prep/run.err &',
-               'relion_schemer --scheme proc --reset &',
-               'relion_schemer --scheme proc --run --pipeline_control Schemes/proc/ >> Schemes/proc/run.out 2>> Schemes/proc/run.err &']
+               f'relion_schemer --scheme proc-{picker} --reset &',
+               f'relion_schemer --scheme proc-{picker} --run --pipeline_control Schemes/proc-{picker}/ >> Schemes/proc-{picker}/run.out 2>> Schemes/proc-{picker}/run.err &']
 
     for cmd in cmdList:
         print(cmd)

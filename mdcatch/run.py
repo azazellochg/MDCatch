@@ -98,12 +98,14 @@ class Page1(QWizardPage):
         label_soft = QLabel('Software')
         label_path = QLabel('Path')
         label_pipeline = QLabel('Run pipeline in')
+        label_picker = QLabel('Particle picker')
         label_sym = QLabel('Symmetry')
         label_diam = QLabel('Particle size (A)')
 
         vbox.addWidget(label_soft, alignment=Qt.Alignment())
         vbox.addWidget(label_path, alignment=Qt.Alignment())
         vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
+        vbox.addWidget(label_picker, alignment=Qt.Alignment())
         vbox.addWidget(label_sym, alignment=Qt.Alignment())
         vbox.addWidget(label_diam, alignment=Qt.Alignment())
 
@@ -159,6 +161,23 @@ class Page1(QWizardPage):
         hbox_pipeline.addWidget(button_scipion, alignment=Qt.Alignment())
         grid.addLayout(hbox_pipeline)
 
+        # particle picker
+        hbox_picker = QHBoxLayout()
+        hbox_picker.setAlignment(Qt.AlignLeft)
+        btgroup_picker = QButtonGroup()
+
+        self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "Cryolo")
+        self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
+        self.button_log = self.addRadioButton("LoG", default=DEF_PICKER == "Log")
+        btgroup_picker.addButton(self.button_cryolo)
+        btgroup_picker.addButton(self.button_topaz)
+        btgroup_picker.addButton(self.button_log)
+        btgroup_picker.buttonClicked.connect(lambda: self.updPicker(btgroup_picker))
+        hbox_picker.addWidget(self.button_cryolo, alignment=Qt.Alignment())
+        hbox_picker.addWidget(self.button_topaz, alignment=Qt.Alignment())
+        hbox_picker.addWidget(self.button_log, alignment=Qt.Alignment())
+        grid.addLayout(hbox_picker)
+
         # symmetry box
         hbox_sym = QHBoxLayout()
         self.symm = QLineEdit()
@@ -201,6 +220,11 @@ class Page1(QWizardPage):
         bt = btgroup.checkedButton()
         App.model.setPipeline(bt.text())
 
+    def updPicker(self, btgroup):
+        bt = btgroup.checkedButton()
+        App.model.setPicker(bt.text())
+        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
+
     def browseSlot(self, var):
         """ Called when "Browse" is pressed. """
         folder = METADATA_PATH if var.text() is None else var.text()
@@ -233,6 +257,7 @@ class Page1(QWizardPage):
                    App.model.getMdPath(),
                    App.model.getUser(),
                    App.model.getPipeline(),
+                   App.model.getPicker(),
                    App.model.getSymmetry(),
                    App.model.getSize()])
 
@@ -417,6 +442,7 @@ class Page2(QWizardPage):
         App.model.acqDict['BoxSize'] = self.box.text()
         App.model.acqDict['MaskSize'] = self.mask.text()
         App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
+        App.model.acqDict['Picker'] = App.model.getPicker()
         App.model.acqDict['Symmetry'] = App.model.getSymmetry()
 
         print("\nFinal parameters:\n")
