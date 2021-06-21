@@ -128,7 +128,7 @@ Important points to mention:
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
     * Relion schemes use **/ssd** as the scratch (SSD) folder, you might want to change this
-    * Relion schemes also use two GPUs: 0 and 1
+    * Relion schemes use two GPUs: 0 and 1
 
 Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
 
@@ -173,7 +173,7 @@ Daemon mode
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
-Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PREFIX, METATADA_PATH.
+Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PARTICLE_SIZES, DEF_PREFIX, METATADA_PATH.
 
 We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
@@ -191,7 +191,7 @@ RELION vs Scipion
 #################
 
 So far RELION cases are more tested than Scipion. In the latter case, the app provides a single **template.json**,
-so irrespective of particle picker choice crYOLO will always be used. Particle size is also ignored.
+so irrespective of particle picker choice crYOLO will always be used.
 Have a look into the json file to see what pipeline will be launched.
 
 Scipion project will be created in the default Scipion projects folder.
