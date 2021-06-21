@@ -69,10 +69,10 @@ You have two options:
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/120499027-a0415600-c3b7-11eb-98a0-fcb444d4507d.png
+.. image:: https://user-images.githubusercontent.com/6952870/122745759-3bc03b00-d281-11eb-942c-2f7c3fbdc4a5.png
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/120499078-ab948180-c3b7-11eb-90ea-6c17e49c2072.png
+.. image:: https://user-images.githubusercontent.com/6952870/122745846-5692af80-d281-11eb-8206-be8e38c28e1d.png
    :width: 640 px
 
 
