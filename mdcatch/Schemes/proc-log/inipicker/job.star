@@ -30,7 +30,7 @@ do_topaz_pick         No
 do_topaz_train         No 
 do_topaz_train_parts         No 
 do_write_fom_maps         No 
-fn_input_autopick Schemes/proc/select_mics/micrographs.star 
+fn_input_autopick Schemes/proc-log/select_mics/micrographs.star
 fn_ref3d_autopick         "" 
 fn_refs_autopick         "" 
    gpu_ids         "" 
