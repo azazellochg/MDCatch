@@ -29,7 +29,7 @@ from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import RegexMatchingEventHandler
 
 from .config import *
-from .utils.misc import getUsername, setParticleSizes
+from .utils.misc import getUsername
 from .parser import Parser
 from .schedule import setupRelion, setupScipion
 
@@ -73,31 +73,31 @@ def start_app(mdFn):
     model = Parser()
     model.setSoftware(DEF_SOFTWARE)
     model.setPipeline(DEF_PIPELINE)
+    model.setSize(DEF_PARTICLE_SIZES)
+    model.setSymmetry(DEF_SYMMETRY)
     model.setMdPath(mdPath)
     model.setFn(mdFn)
 
-    username, uid = getUsername(mdPath)
+    username, uid = getUsername()
     model.setUser(username, uid)
-    model.acqDict['User'] = model.getUser()
+    model.acqDict['User'] = username
 
     if DEBUG:
         print("\n\nInput params: ",
               model.getSoftware(),
               model.getMdPath(),
               model.getUser(),
-              model.getPipeline())
+              model.getPipeline(),
+              model.getSymmetry(),
+              model.getSize())
 
-    print("\nFiles found: %s\n" % mdFn)
+    print("\nFile found: %s\n" % mdFn)
 
-    if DEF_SOFTWARE == 'EPU':
-        model.parseImgEpu(mdFn)
-    else:  # SerialEM
-        model.parseImgSem(mdFn)
-
+    model.parseMetadata(mdFn)
     model.calcDose()
     model.guessDataDir(wait=True)
-    model.acqDict['Picker'] = DEF_PICKER
-    setParticleSizes(model)
+    model.acqDict['PtclSizes'] = DEF_PARTICLE_SIZES
+    model.calcBox()
 
     print("\nFinal parameters:\n")
     for k, v in sorted(model.acqDict.items()):
