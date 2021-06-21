@@ -46,7 +46,7 @@ setup(
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3'
     ],
