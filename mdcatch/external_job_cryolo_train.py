@@ -107,7 +107,11 @@ def run_job(project_dir, args):
         json.dump(json_dict, json_file, indent=4)
 
     # Reading the particles from relion
-    parttable = Table(fileName=getPath(in_parts), tableName='particles')
+    try:
+        parttable = Table(fileName=getPath(in_parts), tableName='particles')
+    except:
+        print("Could not read particles table from %s. Stopping" % in_parts)
+        return
     mics_dict = {}
 
     # Arranging files for cryolo: making symlinks for mics and creating box files

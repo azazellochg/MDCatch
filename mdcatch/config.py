@@ -25,7 +25,7 @@
 # **************************************************************************
 
 # set to 1 for more diagnostic output
-DEBUG = 1
+DEBUG = 0
 
 # some default vars
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
@@ -121,9 +121,6 @@ SERIALEM_PARAMS = [
     'DefectFile',
     'GainReference'
 ]
-
-# do not change this
-REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 # help message for path selection
 help_message = """Select the following folder:\n\n

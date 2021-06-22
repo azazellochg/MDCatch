@@ -29,7 +29,10 @@
 
 import re
 
-from ..config import DEBUG, REGEX_MDOC_VAR, SERIALEM_PARAMS, SCOPE_DICT
+from ..config import DEBUG, SERIALEM_PARAMS, SCOPE_DICT
+
+
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 
 def parseMdoc(fn):
