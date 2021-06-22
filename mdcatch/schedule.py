@@ -224,7 +224,7 @@ sigma_contrast          3
         file.write("{\n")
         for k, v in mapDict.items():
             if v != '':
-                file.write("'%s' : %s, \n" % (k, v))
+                file.write("'%s' : '%s',:q\n" % (k, v.replace('"', '')))
         file.write("}\n")
 
     # Save acquisition params
