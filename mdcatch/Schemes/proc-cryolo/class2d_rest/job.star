@@ -39,7 +39,7 @@ nr_classes        50
    nr_iter        100 
     nr_mpi          1 
    nr_pool         30 
-nr_threads         12 
+nr_threads         4
 offset_range          5 
 offset_step          1 
 other_args         "" 
