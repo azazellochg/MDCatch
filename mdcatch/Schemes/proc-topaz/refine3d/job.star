@@ -33,7 +33,7 @@ do_zero_mask        Yes
     fn_img Schemes/proc-topaz/select_rest/particles.star
    fn_mask         "" 
     fn_ref $$myref
-   gpu_ids        0:1 
+   gpu_ids        "2:3"
 helical_nr_asu          1 
 helical_range_distance         -1 
 helical_rise_inistep          0 

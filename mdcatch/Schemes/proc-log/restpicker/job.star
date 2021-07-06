@@ -35,7 +35,7 @@ do_write_fom_maps         No
 fn_input_autopick Schemes/proc-log/select_mics/micrographs.star
 fn_ref3d_autopick         "" 
 fn_refs_autopick         "" 
-   gpu_ids          0
+   gpu_ids          ""
 helical_nr_asu          1 
 helical_rise         -1 
 helical_tube_kappa_max        0.1 

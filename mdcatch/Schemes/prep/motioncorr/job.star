@@ -31,7 +31,7 @@ fn_gain_ref ""
 fn_motioncor2_exe /public/EM/MOTIONCOR2/MotionCor2 
  gain_flip "No flipping (0)" 
   gain_rot "No rotation (0)" 
-   gpu_ids          0 
+   gpu_ids          ""
 group_for_ps          4 
 group_frames          1 
 input_star_mics Schemes/prep/importmovies/movies.star

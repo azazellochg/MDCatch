@@ -24,7 +24,7 @@ do_preread_images         No
 do_solvent        Yes 
    fn_cont         "" 
     fn_img Schemes/proc-cryolo/select_rest/particles.star
-   gpu_ids        0,1 
+   gpu_ids        "2,3"
 min_dedicated         24 
 nr_classes          1 
    nr_iter        100 
