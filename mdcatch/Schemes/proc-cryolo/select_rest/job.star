@@ -39,7 +39,7 @@ python_exe         $RELION_PYTHON
       qsub       qsub 
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
-rank_threshold       0.45 
+rank_threshold       0.35
 select_label rlnCtfMaxResolution 
 select_maxval      9999. 
 select_minval     -9999. 
