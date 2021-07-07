@@ -284,7 +284,6 @@ _rlnJobOptionValue #2
  black_val          0
 blue_value          0
 color_label rlnParticleSelectZScore
-  ctfscale          1
   diameter         %d
   do_color         No
   do_queue         No
