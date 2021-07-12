@@ -24,61 +24,70 @@
 # *
 # **************************************************************************
 
-# Config variables
+# set to 1 for more diagnostic output
 DEBUG = 0
 
-# daemon mode vars
-DEF_USER = ("emuser", 11048)  # default name: (username, uid)
+# some default vars
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
-DEF_PICKER = "crYOLO"  # default particle picker: crYOLO or Topaz or LogPicker
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
+DEF_PICKER = "Cryolo"  # default particle picker: Cryolo or Topaz or Log
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
-LOGPICKER_SIZES = (150, 180)  # default min/max size in A for Relion LogPicker
-TOPAZ_SIZE = 150  # default diameter in A for Topaz
+DEF_PARTICLE_SIZES = (150, 180)  # default min/max size in Angstroms
+DEF_SYMMETRY = "C1"
 
-# path to EPU session or folder with SerialEM mdoc files
-METADATA_PATH = "/mnt/MetaData/Krios1/EPU/OTFP"
-#METADATA_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Metadata-examples/EPU"
+# path to folder with EPU sessions or folder with SerialEM mdoc files
+# in SerialEM case movies and mdocs are expected in the same folder
+METADATA_PATH = "/mnt/MetaData/Krios1/EPU"
 
 # path where Relion projects are created
-# for Scipion mtf, defects, gain and template files are copied here
 PROJECT_PATH = "/cephfs"
 
-# Folder with Relion 3.1 schedules
-SCHEDULE_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schedules"
+# Folder with Relion 4 template schemes
+SCHEMES_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schemes"
 
-# Scipion pre-processing template
-JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
+# Scipion 3 pre-processing template
+JSON_TEMPLATE = "/home/gsharov/soft/MDCatch-dev/mdcatch/template.json"
 
 # main dictionary
 # instrumentID: [name, Cs, TFS camera, Gatan camera]
-SCOPE_DICT = {'3299': ['Krios1', 2.7, 'Falcon', 'K2'],
-              '3413': ['Krios2', 2.7, 'Falcon', 'K2'],
-              '3593': ['Krios3', 2.7, 'Falcon', 'K3'],
-              '9952833': ['Glacios', 2.7, 'Falcon', None]
-              }
+SCOPE_DICT = {
+    '3299': ['Krios1', 2.7, 'Falcon3', 'K3'],
+    '3413': ['Krios2', 2.7, 'Falcon4', 'K2'],
+    '3593': ['Krios3', 2.7, 'Falcon3', 'K3'],
+    '9952833': ['Glacios', 2.7, 'Falcon3', None]
+}
 
 ###############################################################################
 # EPU params
-EPU_MOVIES_DICT = {'Falcon': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
-                   'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
-                   'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
-                   }
-GAIN_DICT = {'K2': "FoilHole_*_Data_*-gain-ref.MRC",
-             'K3': "FoilHole_*_Data_*_gain.tiff"
-             }
 
+# EPU-produced movie file patterns per each camera
+EPU_MOVIES_DICT = {
+    'Falcon3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_Fractions.mrc",
+    'Falcon4': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_EER.eer",
+    'K2': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.mrc",
+    'K3': "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*_fractions.tiff"
+}
+# EPU-produced gain reference file patterns per each camera
+GAIN_DICT = {
+    'K2': "FoilHole_*_Data_*-gain-ref.MRC",
+    'K3': "FoilHole_*_Data_*_gain.tiff",
+    # Falcon 4 EER gain is not copied by EPU, so we need to provide a full path
+    'Falcon4': "/home/gsharov/20210128_135200_EER_GainReference.gain"
+}
+
+# Which EPU session files to parse for metadata (default is xml)
 # change the pattern below if you want to parse movie sums mrc instead
 PATTERN_EPU = "Images-Disc*/GridSquare_*/Data/FoilHole_*_Data_*.xml"
 
-# path to MTF files for Relion (300 kV only)
+# path to MTF files for Relion, %s is replaced by e.g. 300
 # examples: Name-count, Name-linear or Name,
 # camera names should match SCOPE_DICT
 MTF_DICT = {
-    'Falcon-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_300kV.star',
-    'Falcon-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_300kV.star',
-    'K2': '/home/gsharov/soft/MTFs/mtf_k2_300kV.star',
-    'K3': '/home/gsharov/soft/MTFs/mtf_K3_300kv_nocds.star'
+    'Falcon4-count': '/home/gsharov/soft/MTFs/mtf_falcon4EC_%skV.star',
+    'Falcon3-count': '/home/gsharov/soft/MTFs/mtf_falcon3EC_%skV.star',
+    'Falcon3-linear': '/home/gsharov/soft/MTFs/mtf_falcon2_%skV.star',
+    'K2': '/home/gsharov/soft/MTFs/mtf_k2_%skV.star',
+    'K3': '/home/gsharov/soft/MTFs/mtf_K3_%skv_nocds.star'
 }
 
 # path to raw movies folder depending on camera name
@@ -92,12 +101,12 @@ MOVIE_PATH_DICT = {
 ###############################################################################
 # SerialEM params
 
+# SerialEM-produced movies pattern
 PATTERN_SEM_MOVIES = "*.tif"
 # change the pattern below if you want to parse movie tif instead
 PATTERN_SEM = "*.tif.mdoc"
-REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
-# SerialEM mdoc vars to parse
+# Which SerialEM mdoc variables to parse
 SERIALEM_PARAMS = [
     'T',  # Microscope ID
     'Voltage',
@@ -110,24 +119,13 @@ SERIALEM_PARAMS = [
     'NumSubFrames',
     # 'DateTime',
     'DefectFile',
-    'GainReference',
-    # optional vars below can be added to mdoc using "AddToNextFrameStackMdoc key value"
-    'OpticalGroup',
-    'PhasePlateInserted',
-    'BeamTiltCompensation',
-    'Beamtilt'
+    'GainReference'
 ]
 
 # help message for path selection
 help_message = """Select the following folder:\n\n
    For EPU: the EPU session folder on /mnt/MetaData/
-   with Images-DiscX folder inside.\n
+   with Images-Disc folder inside.\n
    OR\n
    For SerialEM: the folder on /mnt/Data/ that
    contains tif movies and mdoc files.\n"""
-
-# help message for particle size
-help_picker = """Provide particle size in Angstroms.\n\n
-   - crYOLO can estimate it automatically (set this to 0)\n
-   - Topaz requires this parameter to remove neighboring picks\n
-   - LogPicker requires Min and Max diameter"""

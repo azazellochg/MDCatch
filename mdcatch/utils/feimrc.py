@@ -26,52 +26,31 @@
 
 """ This script parses MRC 2014 FEI1/FEI2 file header. """
 
-import numpy as np
+import mrcfile
 import math
-from struct import unpack
 
-from .dtypes import mrc_tags, fei1_tags, fei2_tags
 from ..config import DEBUG, SCOPE_DICT
 
 
 def parseMrc(fn):
-    with open(fn, 'rb') as fin:
-        fin.seek(0)
-        header = fin.read(1024)
-        map = header[208:212]
-        machst = header[212:214]
-        exttyp = header[104:108]
+    acqDict = {}
+    with mrcfile.open(fn, header_only=True) as mrc:
+        main = mrc.header
+        ext = mrc.extended_header
 
-        if map != b'MAP ' or machst != b'DD':  # 0x44 0x44 is little endian
-            print("Not a MRC file or not little endian byte order!")
-            return None
-        if exttyp not in [b'FEI1', b'FEI2']:
-            print("No FEI1 or FEI2 extended header found!")
-            return None
+    for item in main.dtype.names:
+        acqDict[item] = main[item]
 
-        fin.seek(1024)
-        md_size = unpack('<L', fin.read(4))[0]
-        fin.seek(1024)
-        ext_header = fin.read(md_size)
+    if len(ext):
+        for item in ext.dtype.names:
+            acqDict[item] = ext[item][0]
 
-    # parse main header
-    header_arr = np.frombuffer(header[:52], dtype=mrc_tags)
-    keys = header_arr.dtype.names
-    header_dict = [dict(zip(keys, value)) for value in header_arr][0]
-
-    header_dict["apix_x"] = header_dict["CELLA"]["X"] / header_dict["NX"]
-    header_dict["apix_y"] = header_dict["CELLA"]["Y"] / header_dict["NY"]
-
-    # parse extended header
-    fei_tags = fei1_tags if exttyp == b'FEI1' else fei2_tags
-    ext_header_arr = np.frombuffer(ext_header, dtype=fei_tags)
-    keys = ext_header_arr.dtype.names
-    ext_header_dict = [dict(zip(keys, value)) for value in ext_header_arr][0]
-
-    acqDict = {**header_dict, **ext_header_dict}
     newDict = _standardizeDict(acqDict)
 
     if DEBUG:
+        for k, v in sorted(acqDict.items()):
+            print("%s = %s" % (k, v))
+        print(40 * "=")
         for k, v in sorted(newDict.items()):
             print("%s = %s" % (k, v))
 
@@ -100,6 +79,7 @@ def _standardizeDict(acqDict):
         'SpotSize': acqDict['Spot index'],
         'Voltage': float(acqDict['HT']) // 1000,
         'PhasePlateUsed': bool(acqDict['Phase Plate']),
+        'Warning': 'MRC header does not contain frame number, please check the fluence!'
     }
 
     sr = 1

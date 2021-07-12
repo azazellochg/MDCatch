@@ -29,7 +29,10 @@
 
 import re
 
-from ..config import DEBUG, REGEX_MDOC_VAR, SERIALEM_PARAMS, SCOPE_DICT
+from ..config import DEBUG, SERIALEM_PARAMS, SCOPE_DICT
+
+
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 
 def parseMdoc(fn):
@@ -66,8 +69,11 @@ def parseMdoc(fn):
     if 'TargetDefocus' in acqDict:
         acqDict['AppliedDefocus'] = acqDict.pop('TargetDefocus')
     if 'Binning' in acqDict:
-        acqDict['Mode'] = 'Super-resolution' if acqDict['Binning'] == '0.5' else 'Counting'
-        acqDict.pop('Binning')
+        if acqDict['Binning'] == '0.5':
+            acqDict['Mode'] = 'Super-resolution'
+            acqDict['Binning'] = 1
+        else:
+            acqDict['Mode'] = 'Counting'
     if 'PhasePlateInserted' in acqDict:
         acqDict['PhasePlateUsed'] = acqDict.pop('PhasePlateInserted')
 

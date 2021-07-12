@@ -40,11 +40,12 @@ class Parser:
         self.mdPath = METADATA_PATH
         self.prjPath = PROJECT_PATH
         self.software = DEF_SOFTWARE
-        self.user = DEF_USER
+        self.user = None
         self.fn = None
         self.pipeline = DEF_PIPELINE
         self.picker = DEF_PICKER
-        self.size = (0, 0)
+        self.symmetry = DEF_SYMMETRY
+        self.size = DEF_PARTICLE_SIZES
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -74,6 +75,12 @@ class Parser:
 
     def getPicker(self):
         return self.picker
+
+    def setSymmetry(self, choice):
+        self.symmetry = choice
+
+    def getSymmetry(self):
+        return self.symmetry
 
     def getSize(self):
         return self.size
@@ -116,47 +123,50 @@ class Parser:
 
         return img
 
-    def parseImgEpu(self, fn):
-        """ Parse xml or mrc and return updated acqDict. """
-        acqDict = parseXml(fn) if fn.endswith("xml") else parseMrc(fn)
-        self.acqDict.update(acqDict)
-
-    def parseImgSem(self, fn):
-        """ Parse mdoc or tif and return updated acqDict. """
-        acqDict = parseMdoc(fn) if fn.endswith("mdoc") else parseTif(fn)
+    def parseMetadata(self, fn):
+        """ Parse metadata file and return updated acqDict. """
+        if fn.endswith("xml"):
+            acqDict = parseXml(fn)
+        elif fn.endswith("tif") or fn.endswith("tiff"):
+            acqDict = parseTif(fn)
+        elif fn.endswith("mdoc"):
+            acqDict = parseMdoc(fn)
+        elif fn.endswith("mrc") or fn.endswith("mrcs"):
+            acqDict = parseMrc(fn)
+        else:
+            raise Exception("Metadata format not recognized.")
         self.acqDict.update(acqDict)
 
     def calcDose(self):
-        """ Calculate dose rate per unbinned px. """
+        """ Calculate dose rate per unbinned px per s. """
         numFr = int(self.acqDict['NumSubFrames'])
         dose_total = float(self.acqDict['Dose'])  # e/A^2
         exp = float(self.acqDict['ExposureTime'])  # s
 
         if self.acqDict['Mode'] == 'Super-resolution':
-            pix = 2 * float(self.acqDict['PixelSpacing'])  # A
+            pix = 2 * float(self.acqDict['PixelSpacing']) / int(self.acqDict['Binning'])  # A
         else:
-            pix = float(self.acqDict['PixelSpacing'])  # A
+            pix = float(self.acqDict['PixelSpacing']) / int(self.acqDict['Binning'])  # A
 
         if numFr:  # not 0
             dose_per_frame = dose_total / numFr  # e/A^2/frame
         else:
             dose_per_frame = 0
-        dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/ubpx/s
+        dose_on_camera = dose_total * math.pow(pix, 2) / exp  # e/unbinned_px/s
 
         self.acqDict['DosePerFrame'] = str(dose_per_frame)
         self.acqDict['DoseOnCamera'] = str(dose_on_camera)
 
-    def calcBox(self, picker):
+    def calcBox(self):
         """ Calculate box, mask, downsample. """
         minSize, maxSize = self.acqDict['PtclSizes']
-        ptclSizeAng = max(minSize, maxSize) if picker == 'LogPicker' else minSize
         angpix = float(self.acqDict['PixelSpacing'])
 
-        if self.acqDict['Mode'] == 'Super-resolution':
-            # since we always bin by 2 in mc if using super-res
+        if self.acqDict['Mode'] == 'Super-resolution' and self.acqDict['Binning'] == '1':
+            # since we always bin by 2 in mc if using super-res and bin 1
             angpix *= 2
 
-        ptclSizePx = float(ptclSizeAng) / angpix
+        ptclSizePx = float(maxSize) / angpix
         # use +20% for mask size
         self.acqDict['MaskSize'] = str(math.ceil(1.2 * ptclSizePx))
         # use +30% for box size, make it even
@@ -165,7 +175,7 @@ class Parser:
 
         # from relion_it.py script
         # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
-        for box in (32, 48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
                     360, 384, 400, 420, 450, 480, 512, 640, 768,
                     896, 1024):
             # Don't go larger than the original box
@@ -184,18 +194,19 @@ class Parser:
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
         scopeID = self.acqDict['MicroscopeID']
+        voltage = self.acqDict['Voltage']
 
         # get MTF file
         if camera == 'EF-CCD':
             model = SCOPE_DICT[scopeID][3]
             if model is not None:
-                self.acqDict['MTF'] = MTF_DICT[model]
+                self.acqDict['MTF'] = MTF_DICT[model] % voltage
         else:
             model = SCOPE_DICT[scopeID][2]
             if self.acqDict['Mode'] == 'Linear':
-                self.acqDict['MTF'] = MTF_DICT['%s-linear' % model]
+                self.acqDict['MTF'] = MTF_DICT['%s-linear' % model] % voltage
             else:
-                self.acqDict['MTF'] = MTF_DICT['%s-count' % model]
+                self.acqDict['MTF'] = MTF_DICT['%s-count' % model] % voltage
 
         # update with real camera name
         self.acqDict['Detector'] = model
@@ -212,11 +223,14 @@ class Parser:
             else:
                 movieDir = os.path.join(p1, session, EPU_MOVIES_DICT[model])
                 movieBaseDir = os.path.join(p1, session)
+                # Falcon 4 gain reference
+                if model == "Falcon4":
+                    gainFn = GAIN_DICT[model]
 
             if wait:  # in daemon mode wait for movie folder to appear
                 while True:
                     if not os.path.exists(movieBaseDir):
-                        print("Movie folder %s not found, waiting for 1 min.." % movieBaseDir)
+                        print("Movie folder %s not found, waiting for 60 s.." % movieBaseDir)
                         time.sleep(60)
                     else:
                         print("Movie folder found! Continuing..")

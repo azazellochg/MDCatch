@@ -25,33 +25,14 @@
 # **************************************************************************
 
 import os
-import subprocess
 from datetime import datetime
 
-from ..config import (DEF_USER, SCOPE_DICT, DEF_PICKER,
-                      TOPAZ_SIZE, LOGPICKER_SIZES)
+from ..config import SCOPE_DICT
 
 
-def getUsername(mdPath):
-    """ Return username and uid using NIS database. """
-    mdFolder = os.path.basename(mdPath)
-    try:
-        username = mdFolder.split("_")[1]
-    except IndexError:
-        return DEF_USER
-
-    cmd = "/usr/bin/ypmatch %s passwd" % username
-    try:
-        res = subprocess.check_output(cmd.split())
-    except subprocess.CalledProcessError:
-        print("Warning: username %s not found! Using defaults: " % username, DEF_USER)
-        return DEF_USER
-    except FileNotFoundError:
-        print("Warning: command %s failed! Using defaults: " % cmd, DEF_USER)
-        return DEF_USER
-    else:
-        uid = str(res).split(":")[2]
-        return username, uid
+def getUsername():
+    """ Return username and uid. """
+    return os.getlogin(), os.getuid()
 
 
 def getPrjName(paramDict):
@@ -70,10 +51,10 @@ def getPrjName(paramDict):
 def precalculateVars(paramDict):
     """ Returns binning, gain, defect files and frame grouping. """
     # set motioncor bin to 2 if using super-res data
-    bin = 2.0 if paramDict['Mode'] == 'Super-resolution' else 1.0
+    bin = 2.0 if (paramDict['Mode'] == 'Super-resolution' and paramDict['Binning'] == '1') else 1.0
     gain = '' if paramDict['GainReference'] == 'None' else paramDict['GainReference']
     defect = '' if paramDict['DefectFile'] == 'None' else paramDict['DefectFile']
-    # group frames if dose rate < 0.8 e/A^2/frame
+    # group frames if fluence < 0.8 e/A^2/frame
     group_frames = 1
     dpf = float(paramDict['DosePerFrame'])
     if dpf < 0.8:
@@ -82,15 +63,3 @@ def precalculateVars(paramDict):
             group_frames += 1
 
     return bin, gain, defect, group_frames
-
-
-def setParticleSizes(model):
-    """ Setup particle sizes when running in non-GUI mode. """
-    if DEF_PICKER == 'Topaz':
-        model.acqDict['PtclSizes'] = TOPAZ_SIZE, LOGPICKER_SIZES[1]
-        model.calcBox(DEF_PICKER)
-    elif DEF_PICKER == 'LogPicker':
-        model.acqDict['PtclSizes'] = LOGPICKER_SIZES
-        model.calcBox(DEF_PICKER)
-    else:
-        model.acqDict['PtclSizes'] = 0, LOGPICKER_SIZES[1]

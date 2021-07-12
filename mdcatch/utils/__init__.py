@@ -26,5 +26,5 @@
 
 from .feixml import parseXml
 from .feimrc import parseMrc
-from .bigtiff import parseTif
+from .tiff import parseTif
 from .mdoc import parseMdoc

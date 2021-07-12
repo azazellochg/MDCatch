@@ -39,17 +39,22 @@ def parseXml(fn):
     nspace = {'so': '{http://schemas.datacontract.org/2004/07/Fei.SharedObjects}',
               'ar': '{http://schemas.microsoft.com/2003/10/Serialization/Arrays}',
               'fr': '{http://schemas.datacontract.org/2004/07/Fei.Applications.Common.Omp.Interface}',
-              'tp': '{http://schemas.datacontract.org/2004/07/Fei.Types}'}
+              'tp': '{http://schemas.datacontract.org/2004/07/Fei.Types}',
+              'dr': '{http://schemas.datacontract.org/2004/07/System.Drawing}'}
 
     items = {'ExposureTime': "./{so}microscopeData/{so}acquisition/{so}camera/{so}ExposureTime",
              'Detector': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Name",
              'GunLens': "./{so}microscopeData/{so}gun/{so}GunLens",
              'SpotSize': "./{so}microscopeData/{so}optics/{so}SpotIndex",
+             'ProbeMode': "./{so}microscopeData/{so}optics/{so}ProbeMode",
              'Magnification': "./{so}microscopeData/{so}optics/{so}TemMagnification/{so}NominalMagnification",
              'BeamSize': "./{so}microscopeData/{so}optics/{so}BeamDiameter",
              'Voltage': "./{so}microscopeData/{so}gun/{so}AccelerationVoltage",
+             'ExtractorVoltage': "./{so}microscopeData/{so}gun/{so}ExtractorVoltage",
              'MicroscopeID': "./{so}microscopeData/{so}instrument/{so}InstrumentID",
              'PixelSpacing': "./{so}SpatialScale/{so}pixelSize/{so}x/{so}numericValue",
+             'EnergySelectionSlitWidth': "./{so}microscopeData/{so}optics/{so}EnergyFilter/{so}EnergySelectionSlitWidth",
+             'Binning': "./{so}microscopeData/{so}acquisition/{so}camera/{so}Binning/{dr}x",
              'EPUversion': "./{so}microscopeData/{so}core/{so}ApplicationSoftwareVersion",
              'BeamTiltX': "./{so}microscopeData/{so}optics/{so}BeamTilt/{tp}_x",
              'BeamTiltY': "./{so}microscopeData/{so}optics/{so}BeamTilt/{tp}_y",
@@ -60,13 +65,17 @@ def parseXml(fn):
              }
 
     for key in items:
-        acqDict[key] = root.find(items[key].format(**nspace)).text
+        try:
+            acqDict[key] = root.find(items[key].format(**nspace)).text
+        except:
+            pass
 
     if acqDict['MicroscopeID'] in SCOPE_DICT:
         acqDict['Cs'] = SCOPE_DICT[acqDict['MicroscopeID']][1]
 
     acqDict['BeamSize'] = float(acqDict['BeamSize']) * math.pow(10, 6)
     acqDict['Voltage'] = int(acqDict['Voltage']) // 1000
+    acqDict['Binning'] = int(acqDict['Binning'])
 
     # get cameraSpecificInput: ElectronCountingEnabled, SuperResolutionFactor etc.
     customDict = dict()
@@ -77,10 +86,12 @@ def parseXml(fn):
 
     # check if counting/super-res is enabled
     sr = 1.0
+    acqDict['Mode'] = 'Linear'
     if customDict['ElectronCountingEnabled'] == 'true':
         sr = float(customDict['SuperResolutionFactor'])  # 1 - counting, 2 - super-res
         acqDict['Mode'] = 'Counting' if sr == 1.0 else 'Super-resolution'
 
+    # EPU's pixel size refers to a physical pixel, which is already multiplied by Binning factor
     acqDict['PixelSpacing'] = float(acqDict['PixelSpacing']) * math.pow(10, 10) / sr
 
     if acqDict['Detector'] == 'EF-CCD':
@@ -89,7 +100,10 @@ def parseXml(fn):
     else:
         # count number of DoseFractions for Falcon 3
         elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}DoseFractions"
-        acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
+        try:
+            acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
+        except:
+            pass
 
     # get customData: Dose, DoseOnCamera, PhasePlateUsed, AppliedDefocus
     customDict = dict()
@@ -98,19 +112,23 @@ def parseXml(fn):
     for k, v in zip(root.findall(keys.format(**nspace)), root.findall(values.format(**nspace))):
         customDict[k.text] = v.text
 
+    if 'Detectors[BM-Falcon].EerGainReference' in customDict:
+        acqDict['NumSubFrames'] = int(float(acqDict['ExposureTime']) * 248)
+        acqDict['Mode'] = "EER"
     if 'AppliedDefocus' in customDict:
         acqDict['AppliedDefocus'] = float(customDict['AppliedDefocus']) * math.pow(10, 6)
     if 'Dose' in customDict:
         acqDict['Dose'] = float(customDict['Dose']) * math.pow(10, -20)
     if 'PhasePlateUsed' in customDict:
         acqDict['PhasePlateUsed'] = customDict['PhasePlateUsed']
+    if 'Aperture[C2].Name' in customDict:
+        acqDict['C2Aperture'] = customDict['Aperture[C2].Name']
+    if 'Aperture[OBJ].Name' in customDict:
+        acqDict['ObjAperture'] = customDict['Aperture[OBJ].Name']
 
         if customDict['PhasePlateUsed'] == 'true':
             acqDict['PhasePlateNumber'] = customDict['PhasePlateApertureName'].split(" ")[-1]
             acqDict['PhasePlatePosition'] = customDict['PhasePlatePosition']
-
-    if 'DoseOnCamera' in customDict:
-        acqDict['DoseOnCamera'] = customDict['DoseOnCamera']
 
     if DEBUG:
         for k, v in sorted(acqDict.items()):
