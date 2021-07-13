@@ -103,7 +103,7 @@ def run_job(project_dir, args):
     if DEBUG:
         print("Using following config.json: ", json_dict)
 
-    with open("config.json", "w") as json_file:
+    with open("config_cryolo.json", "w") as json_file:
         json.dump(json_dict, json_file, indent=4)
 
     # Reading the particles from relion
@@ -143,7 +143,7 @@ def run_job(project_dir, args):
 
     # Launching cryolo
     args_dict = {
-        '--conf': "config.json",
+        '--conf': "config_cryolo.json",
         '--gpu': gpus.replace(',', ' '),
         '--warmup': 0,
         '--fine_tune': "",
@@ -159,15 +159,23 @@ def run_job(project_dir, args):
     if proc.returncode:
         raise Exception("Command failed with return code %d" % proc.returncode)
 
-    # Required output star file
-    with open("_manualpick.star", "w") as f:
-        f.write(in_parts)
+    # Required output job_pipeline.star file
+    pipeline_fn = getPath(job_dir, "job_pipeline.star")
+    table_gen = Table(columns=['rlnPipeLineJobCounter'])
+    table_gen.addRow(2)
+    table_proc = Table(columns=['rlnPipeLineProcessName', 'rlnPipeLineProcessAlias',
+                                'rlnPipeLineProcessTypeLabel', 'rlnPipeLineProcessStatusLabel'])
+    table_proc.addRow(job_dir, 'None', 'relion.external', 'Running')
+    table_nodes = Table(columns=['rlnPipeLineNodeName', 'rlnPipeLineNodeTypeLabel'])
+    table_nodes.addRow(in_parts, "relion.ParticleStar")
+    table_input = Table(columns=['rlnPipeLineEdgeFromNode', 'rlnPipeLineEdgeProcess'])
+    table_input.addRow(in_parts, job_dir)
 
-    # Required output nodes star file
-    nodes = Table(columns=['rlnPipeLineNodeName', 'rlnPipeLineNodeType'])
-    nodes.addRow(os.path.join(job_dir, "_manualpick.star"), "2")
-    with open("RELION_OUTPUT_NODES.star", "w") as nodes_star:
-        nodes.writeStar(nodes_star, tableName="output_nodes")
+    with open(pipeline_fn, "w") as f:
+        table_gen.writeStar(f, tableName="pipeline_general", singleRow=True)
+        table_proc.writeStar(f, tableName="pipeline_processes")
+        table_nodes.writeStar(f, tableName="pipeline_nodes")
+        table_input.writeStar(f, tableName="pipeline_input_edges")
 
     end = time.time()
     diff = end - start
@@ -177,7 +185,7 @@ def run_job(project_dir, args):
 def main():
     """Change to the job working directory, then call run_job()"""
     help = """
-External job for calling cryolo fine-tune training within Relion 3.1. Run it in the Relion project directory, e.g.:
+External job for calling cryolo fine-tune training within Relion 4.0. Run it in the Relion project directory, e.g.:
     external_job_cryolo_train.py --o External/cryolo_training --in_parts Select/job004/particles.star
 """
     parser = argparse.ArgumentParser(usage=help)
