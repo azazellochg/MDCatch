@@ -101,7 +101,7 @@ def run_job(project_dir, args):
     }
 
     if DEBUG:
-        print("Using following config.json: ", json_dict)
+        print("Using following config: ", json_dict)
 
     with open("config_cryolo.json", "w") as json_file:
         json.dump(json_dict, json_file, indent=4)
