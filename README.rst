@@ -2,7 +2,7 @@ MDCatch
 =======
 
 A simple app to fetch acquisition metadata from a EPU session or SerialEM.
-It parses the first found xml/mdoc/mrc/tif/eer file (from EPU/SerialEM) associated with a
+It parses the first found xml/mdoc/mrc/tif file (from EPU/SerialEM) associated with a
 data collection session and launches Relion 4 or Scipion 3 pipeline.
 
 Installation

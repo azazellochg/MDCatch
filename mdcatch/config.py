@@ -103,6 +103,7 @@ MOVIE_PATH_DICT = {
 
 # SerialEM-produced movies pattern
 PATTERN_SEM_MOVIES = "*.tif"
+# Default metadata format is mdoc,
 # change the pattern below if you want to parse movie tif instead
 PATTERN_SEM = "*.tif.mdoc"
 
