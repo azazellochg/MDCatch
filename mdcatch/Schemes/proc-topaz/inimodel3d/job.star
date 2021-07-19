@@ -5,7 +5,6 @@ data_job
 
 _rlnJobTypeLabel             relion.initialmodel
 _rlnJobIsContinue                       0
-_rlnJobIsTomo                           0
  
 
 # version 30001
@@ -23,8 +22,8 @@ do_preread_images         No
   do_queue         No 
 do_solvent        Yes 
    fn_cont         "" 
-    fn_img Schemes/proc-topaz/select_rest/particles.star
-   gpu_ids        "2,3"
+    fn_img Schemes/proc-topaz/select_parts/particles.star
+   gpu_ids        0,1 
 min_dedicated         24 
 nr_classes          1 
    nr_iter        100 

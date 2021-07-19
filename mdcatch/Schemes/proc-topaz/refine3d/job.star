@@ -5,7 +5,6 @@ data_job
 
 _rlnJobTypeLabel             relion.refine3d
 _rlnJobIsContinue                       0
-_rlnJobIsTomo                           0
  
 
 # version 30001
@@ -30,10 +29,10 @@ do_preread_images         No
 do_solvent_fsc         No 
 do_zero_mask        Yes 
    fn_cont         "" 
-    fn_img Schemes/proc-topaz/select_rest/particles.star
+    fn_img Schemes/proc-topaz/select_parts/particles.star
    fn_mask         "" 
     fn_ref $$myref
-   gpu_ids        "2:3"
+   gpu_ids        0:1 
 helical_nr_asu          1 
 helical_range_distance         -1 
 helical_rise_inistep          0 
