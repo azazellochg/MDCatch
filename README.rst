@@ -128,7 +128,7 @@ Important points to mention:
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
     * Relion schemes use **/ssd** as the scratch (SSD) folder, you might want to change this
-    * Relion schemes use four GPUs: 0-3
+    * Relion schemes use two GPUs: 0-1
 
 Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
 
@@ -215,13 +215,10 @@ There are two schemes: *prep* and *proc*. Both are launched at the same time, *p
 2. The proc scheme starts once ctffind results are available. Proc includes multiple jobs:
 
     a) micrograph selection (CTF resolution < 6A)
-    b) particle picking (Cryolo or Topaz or Logpicker)
+    b) particle picking: Cryolo (proc-cryolo) or Topaz/Logpicker (proc-topaz)
     c) particle extraction
-    d) 2D classification with 50 classes (round 1)
-    e) auto-selection of good 2D classes
-    f) particle extraction (round 2, 3, ...)
-    g) 2D classification with 50 classes (round 2, 3, ...)
-    h) auto-selection of good 2D classes (round 2, 3, ...)
+    d) 2D classification with 50 classes
+    e) auto-selection of good 2D classes (thr=0.35)
 
 The last two steps are always executed as new jobs (not overwriting previous results).
 
