@@ -45,7 +45,7 @@ def setupRelion(paramDict):
     bin, gain, defect, group_frames = precalculateVars(paramDict)
     mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
     mapDict = {
-        'prep__do_at_most': 15,
+        'prep__do_at_most': 30,
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
@@ -80,8 +80,9 @@ def setupRelion(paramDict):
             'proc-topaz__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
             'proc-topaz__autopick__do_log': True if picker == 'log' else False,
             'proc-topaz__autopick__do_topaz': True if picker == 'topaz' else False,
+            'proc-topaz__autopick__use_gpu': 'Yes' if picker == 'topaz' else 'No',
             #'proc-topaz__autopick__topaz_model': "",
-            'proc-topaz__autopick__log_diam_min': paramDict['PtclSize'] * 0.8333,  # particle circularity
+            'proc-topaz__autopick__log_diam_min': int(paramDict['PtclSize'] * 0.8333),  # particle circularity
             'proc-topaz__autopick__log_diam_max': paramDict['PtclSize'],
             'proc-topaz__autopick__topaz_particle_diameter': paramDict['PtclSize'],
             'proc-topaz__refine3d__particle_diameter': mask_diam,

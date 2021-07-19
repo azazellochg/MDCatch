@@ -128,7 +128,7 @@ Important points to mention:
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
     * Relion schemes use **/ssd** as the scratch (SSD) folder, you might want to change this
-    * Relion schemes use two GPUs: 0 and 1
+    * Relion schemes use four GPUs: 0-3
 
 Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
 
@@ -202,9 +202,9 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schemes description</a></summary>
 
-There are two schemes: *prep* and *proc*. Both are launched at the same time and will run for 12 hours
+There are two schemes: *prep* and *proc*. Both are launched at the same time, *prep* will run for 12 hours and *proc* - for 8 hours
 
-1. The prep scheme includes 3 jobs that run in a loop, processing batches of 15 movies each time:
+1. The prep scheme includes 3 jobs that run in a loop, processing batches of 30 movies each time:
 
     a) import movies
     b) motion correction (relion motioncor)
@@ -216,14 +216,12 @@ There are two schemes: *prep* and *proc*. Both are launched at the same time and
 
     a) micrograph selection (CTF resolution < 6A)
     b) particle picking (Cryolo or Topaz or Logpicker)
-    c) particle extraction (round 1)
-    d) 2D classification with 25 classes (round 1) once you have > 10000 particles
+    c) particle extraction
+    d) 2D classification with 50 classes (round 1)
     e) auto-selection of good 2D classes
-    f) using particles from good 2D classes to re-train Cryolo or Topaz
-    g) pick micrographs using new Cryolo or Topaz trained model (round 2, 3, ...). First time it re-picks all micrographs from scratch
-    h) particle extraction (round 2, 3, ...)
-    i) 2D classification with 50 classes (round 2, 3, ...)
-    k) auto-selection of good 2D classes (round 2, 3, ...)
+    f) particle extraction (round 2, 3, ...)
+    g) 2D classification with 50 classes (round 2, 3, ...)
+    h) auto-selection of good 2D classes (round 2, 3, ...)
 
 The last two steps are always executed as new jobs (not overwriting previous results).
 
