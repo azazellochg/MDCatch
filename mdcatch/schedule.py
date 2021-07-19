@@ -69,11 +69,11 @@ def setupRelion(paramDict):
             'proc-topaz__extract_rest__rescale': paramDict['BoxSizeSmall'],
             'proc-topaz__inimodel3d__particle_diameter': mask_diam,
             'proc-topaz__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-topaz__inipicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-topaz__inipicker__topaz_particle_diameter': paramDict['PtclSize'],
             'proc-topaz__refine3d__particle_diameter': mask_diam,
             'proc-topaz__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-topaz__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-            'proc-topaz__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-topaz__restpicker__topaz_particle_diameter': paramDict['PtclSize'],
+            'proc-topaz__train_topaz__topaz_particle_diameter': paramDict['PtclSize'],
         })
     elif picker == 'cryolo':
         mapDict.update({
@@ -105,12 +105,12 @@ def setupRelion(paramDict):
             'proc-log__extract_rest__rescale': paramDict['BoxSizeSmall'],
             'proc-log__inimodel3d__particle_diameter': mask_diam,
             'proc-log__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-log__inipicker__log_diam_min': paramDict['PtclSizes'][0],
-            'proc-log__inipicker__log_diam_max': paramDict['PtclSizes'][1],
+            'proc-log__inipicker__log_diam_min': paramDict['PtclSize'] * 0.8333,  # particle circularity
+            'proc-log__inipicker__log_diam_max': paramDict['PtclSize'],
             'proc-log__refine3d__particle_diameter': mask_diam,
             'proc-log__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-log__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-            'proc-log__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-log__restpicker__topaz_particle_diameter': paramDict['PtclSize'],
+            'proc-log__train_topaz__topaz_particle_diameter': paramDict['PtclSize'],
         })
 
     if paramDict['Mode'] == "EER":
@@ -191,7 +191,7 @@ sigma_contrast          3
 """
     with open(".gui_manualpickjob.star", "w") as f:
         f.write(starString % (float(paramDict['PixelSpacing']) * bin,
-                              paramDict['PtclSizes'][1]))
+                              paramDict['PtclSize']))
 
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
