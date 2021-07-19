@@ -30,14 +30,11 @@ nr_classes          1
     nr_mpi          1 
    nr_pool         30 
 nr_threads         12 
-offset_range          6 
-offset_step          2 
-other_args         "" 
+other_args         ""
 particle_diameter        200 
       qsub       qsub 
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
-  sampling "15 degrees" 
 scratch_dir       "/ssd"
 skip_gridding        Yes 
   sym_name         C1
