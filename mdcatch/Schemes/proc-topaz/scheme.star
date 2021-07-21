@@ -52,7 +52,7 @@ selected_mics Schemes/proc-topaz/select_mics/micrographs.star Schemes/proc-topaz
 selected_parts Schemes/proc-topaz/select_parts/particles.star Schemes/proc-topaz/select_parts/particles.star
 particles  particles  particles
 micrographs  micrographs  micrographs 
-topaz_model Schemes/proc-topaz/train_topaz/model_epoch10.sav Schemes/proc-topaz/train_topaz/model_epoch10.sav
+topaz_model ""  ""
 iniref None None
 myref undefined undefined
 inimodel_output Schemes/proc-topaz/inimodel3d/initial_model.mrc Schemes/proc-topaz/inimodel3d/initial_model.mrc

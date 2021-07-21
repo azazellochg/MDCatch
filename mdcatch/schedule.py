@@ -60,6 +60,7 @@ def setupRelion(paramDict):
     if picker == 'cryolo':
         mapDict.update({
             'prep__motioncorr__do_float16': "No",  # Cryolo cannot read mrc 16-bit
+            'proc-cryolo__cryolo_model': None,  # TODO
             'proc-cryolo__class2d__particle_diameter': mask_diam,
             'proc-cryolo__extract__bg_diameter': paramDict['MaskSize'],
             'proc-cryolo__extract__extract_size': paramDict['BoxSize'],
@@ -72,16 +73,16 @@ def setupRelion(paramDict):
         })
     else:  # logpicker or topaz
         mapDict.update({
+            'proc-topaz__do_log': 1 if picker == 'log' else 0,
+            'proc-topaz__do_topaz': 1 if picker == 'topaz' else 0,
+            'proc-topaz__topaz_model': "",  # TODO
             'proc-topaz__class2d__particle_diameter': mask_diam,
             'proc-topaz__extract__bg_diameter': paramDict['MaskSize'],
             'proc-topaz__extract__extract_size': paramDict['BoxSize'],
             'proc-topaz__extract__rescale': paramDict['BoxSizeSmall'],
             'proc-topaz__inimodel3d__particle_diameter': mask_diam,
             'proc-topaz__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-topaz__autopick__do_log': True if picker == 'log' else False,
-            'proc-topaz__autopick__do_topaz': True if picker == 'topaz' else False,
             'proc-topaz__autopick__use_gpu': 'Yes' if picker == 'topaz' else 'No',
-            #'proc-topaz__autopick__topaz_model': "",
             'proc-topaz__autopick__log_diam_min': int(paramDict['PtclSize'] * 0.8333),  # particle circularity
             'proc-topaz__autopick__log_diam_max': paramDict['PtclSize'],
             'proc-topaz__autopick__topaz_particle_diameter': paramDict['PtclSize'],

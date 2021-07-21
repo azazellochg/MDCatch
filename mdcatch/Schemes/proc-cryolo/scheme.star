@@ -50,7 +50,7 @@ selected_mics Schemes/proc-cryolo/select_mics/micrographs.star Schemes/proc-cryo
 selected_parts Schemes/proc-cryolo/select_parts/particles.star Schemes/proc-cryolo/select_parts/particles.star
 particles  particles  particles
 micrographs  micrographs  micrographs 
-cryolo_model Schemes/proc-cryolo/fine_tuned_model.h5 Schemes/proc-cryolo/fine_tuned_model.h5
+cryolo_model None None
 iniref None None
 myref undefined undefined
 inimodel_output Schemes/proc-cryolo/inimodel3d/initial_model.mrc Schemes/proc-cryolo/inimodel3d/initial_model.mrc

@@ -62,7 +62,7 @@ ref3d_sampling "30 degrees"
 ref3d_symmetry         "" 
     shrink          0 
 threshold_autopick         "" 
-topaz_model ""
+topaz_model $$topaz_model
 topaz_nr_particles        900 
 topaz_other_args         "--threshold 0"
 topaz_particle_diameter      180.0
