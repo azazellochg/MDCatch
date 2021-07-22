@@ -227,16 +227,16 @@ class Page1(QWizardPage):
 
     def updSoftware(self, btgroup):
         bt = btgroup.checkedButton()
-        App.model.setSoftware(bt.text())
+        App.model.software = bt.text()
 
     def updPipeline(self, btgroup):
         bt = btgroup.checkedButton()
-        App.model.setPipeline(bt.text())
+        App.model.pipeline = bt.text()
 
     def updPicker(self, btgroup):
         bt = btgroup.checkedButton()
-        App.model.setPicker(bt.text())
-        App.model.setSize(self.spbox_diam.value())
+        App.model.picker = bt.text()
+        App.model.size = self.spbox_diam.value()
 
     def browseFolderSlot(self, var):
         """ Called when "Browse" is pressed. """
@@ -258,31 +258,31 @@ class Page1(QWizardPage):
 
     def refreshPath(self, path):
         """ Update line widget with selected path. """
-        App.model.setMdPath(path)
-        self.rawPath.setText(App.model.getMdPath())
+        App.model.mdPath = path
+        self.rawPath.setText(App.model.mdPath)
 
     def refreshModel(self, path):
         """ Update line widget with selected path. """
-        App.model.setPickerModel(path)
-        self.modelPath.setText(App.model.getPickerModel())
+        App.model.pickerModel = path
+        self.modelPath.setText(App.model.pickerModel)
 
     def validatePage(self):
         """ Executed when Next is pressed.
         Returns True or False. """
-        App.model.setSymmetry(self.symm.text())
-        App.model.setSize(self.spbox_diam.value())
+        App.model.symmetry = self.symm.text()
+        App.model.size = self.spbox_diam.value()
         App.model.run3dsteps = self.do_3d.isChecked()
 
-        if App.model.getMdPath() is None:
-            App.model.setMdPath(METADATA_PATH)
+        if App.model.mdPath is None:
+            App.model.mdPath = METADATA_PATH
 
         username, uid = getUsername()
-        App.model.setUser(username, uid)
+        App.model.user = (username, uid)
 
         if DEBUG:
             print("\n\nInput params: ", sorted(App.model.__dict__.items()))
 
-        prog = App.model.getSoftware()
+        prog = App.model.software
         fnList = App.model.guessFn(prog)
 
         if fnList is None:
@@ -290,7 +290,7 @@ class Page1(QWizardPage):
             return False
         else:
             print("\nFile found: %s\n" % fnList)
-            App.model.setFn(fnList)
+            App.model.fn = fnList
             return True
 
     def reset(self):
@@ -298,8 +298,8 @@ class Page1(QWizardPage):
         App.model.acqDict.clear()
         App.model.__init__()
         # keep the old path until updated
-        App.model.setMdPath(self.rawPath.text())
-        App.model.setPickerModel(self.modelPath.text())
+        App.model.mdPath = self.rawPath.text()
+        App.model.pickerModel = self.modelPath.text()
 
     def addRadioButton(self, choice, default=False):
         """ Util func to add QRadioButton widget. """
@@ -324,8 +324,8 @@ class Page2(QWizardPage):
     def initializePage(self):
         # executed before showing page 2
         acqDict = App.model.acqDict
-        prog = App.model.getSoftware()
-        fnList = App.model.getFn()
+        prog = App.model.software
+        fnList = App.model.fn
 
         App.model.parseMetadata(fnList)
 
@@ -447,7 +447,7 @@ class Page2(QWizardPage):
 
     def addPtclSizeWidgets(self, acqDict):
         """ Add particle size widgets. """
-        size = App.model.getSize()
+        size = App.model.size
         acqDict['PtclSize'] = size
         App.model.calcBox()
         self.mainLayout.addWidget(self.group3(), 1, 0)
@@ -458,15 +458,15 @@ class Page2(QWizardPage):
     def onFinish(self):
         """ Finish is pressed, we need to update all editable vars. """
         App.model.acqDict.update({
-            'User': App.model.getUser(),
+            'User': App.model.user,
             'DosePerFrame': self.dosepf.text(),
             'PixelSpacing': self.px.text(),
             'PhasePlateUsed': self.vpp.isChecked(),
             'BoxSize': self.box.text(),
             'MaskSize': self.mask.text(),
             'BoxSizeSmall': self.box_bin.text(),
-            'Picker': App.model.getPicker(),
-            'Symmetry': App.model.getSymmetry()
+            'Picker': App.model.picker,
+            'Symmetry': App.model.symmetry
         })
 
         print("\nFinal parameters:\n")
@@ -474,7 +474,7 @@ class Page2(QWizardPage):
             print(k, v)
         print('\n')
 
-        if App.model.getPipeline() == 'Relion':
+        if App.model.pipeline == 'Relion':
             setupRelion(App.model.acqDict)
         else:
             setupScipion(App.model.acqDict)
