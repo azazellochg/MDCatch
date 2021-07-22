@@ -36,9 +36,8 @@ REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
 
 
 def parseMdoc(fn):
-    acqDict = dict()
     # we assume SerialEM is only used for Gatan detectors
-    acqDict['Detector'] = 'EF-CCD'
+    acqDict = {'Detector': 'EF-CCD'}
 
     with open(fn, 'r') as fname:
         regex = re.compile(REGEX_MDOC_VAR)
