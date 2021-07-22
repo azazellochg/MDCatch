@@ -48,7 +48,7 @@ class TestParser(unittest.TestCase):
             if fn.endswith("mdoc"):
                 continue
             else:
-                model.setSoftware("EPU")
+                model.software = "EPU"
             self._runParser(model, self.cwd, os.path.abspath(fn))
 
         # Test SerialEM cases
@@ -56,25 +56,19 @@ class TestParser(unittest.TestCase):
             if fn.endswith("xml"):
                 continue
             else:
-                model.setSoftware("SerialEM")
+                model.software = "SerialEM"
             self._runParser(model, self.cwd, os.path.abspath(fn))
 
     def _runParser(self, model, mdPath, mdFn):
         """ Run the parser and return model acqDict. """
-        model.setPipeline(DEF_PIPELINE)
-        model.setMdPath(mdPath)
-        model.setFn(mdFn)
+        model.pipeline = DEF_PIPELINE
+        model.mdPath = mdPath
+        model.fn = mdFn
 
-        username, uid = getUsername()
-        model.setUser(username, uid)
-        model.acqDict['User'] = model.getUser()
+        model.user = getUsername()
+        model.acqDict['User'] = model.user
 
-        print("\n\nInput params: ",
-              model.getSoftware(),
-              model.getMdPath(),
-              model.getUser(),
-              model.getPipeline(),
-              model.getPicker())
+        print("\n\nInput params: ", sorted(model.__dict__.items()))
         print("\nFiles found: %s\n" % mdFn)
 
         model.parseMetadata(mdFn)

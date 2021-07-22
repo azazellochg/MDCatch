@@ -71,25 +71,19 @@ def start_app(mdFn):
     else:
         mdPath = "/".join(mdFn.split("/")[:-1])
     model = Parser()
-    model.setSoftware(DEF_SOFTWARE)
-    model.setPipeline(DEF_PIPELINE)
-    model.setSize(DEF_PARTICLE_SIZE)
-    model.setSymmetry(DEF_SYMMETRY)
-    model.setMdPath(mdPath)
-    model.setFn(mdFn)
+    model.software = DEF_SOFTWARE
+    model.pipeline = DEF_PIPELINE
+    model.size = DEF_PARTICLE_SIZE
+    model.symmetry = DEF_SYMMETRY
+    model.mdPath = mdPath
+    model.fn = mdFn
 
     username, uid = getUsername()
-    model.setUser(username, uid)
+    model.user = (username, uid)
     model.acqDict['User'] = username
 
     if DEBUG:
-        print("\n\nInput params: ",
-              model.getSoftware(),
-              model.getMdPath(),
-              model.getUser(),
-              model.getPipeline(),
-              model.getSymmetry(),
-              model.getSize())
+        print("\n\nInput params: ", sorted(model.__dict__.items()))
 
     print("\nFile found: %s\n" % mdFn)
 

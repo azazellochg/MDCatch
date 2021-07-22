@@ -69,10 +69,10 @@ You have two options:
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/122745759-3bc03b00-d281-11eb-942c-2f7c3fbdc4a5.png
+.. image:: https://user-images.githubusercontent.com/6952870/126645233-5a40e5df-49bb-45ca-9612-060201d1a618.png
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/122745846-5692af80-d281-11eb-8206-be8e38c28e1d.png
+.. image:: https://user-images.githubusercontent.com/6952870/126645242-651d8b1f-40fe-412c-a681-13c860e0046b.png
    :width: 640 px
 
 
@@ -173,7 +173,7 @@ Daemon mode
 From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
-Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PARTICLE_SIZES, DEF_PREFIX, METATADA_PATH.
+Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PARTICLE_SIZES, DEF_PREFIX, METATADA_PATH, BATCH_SIZE.
 
 We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
@@ -204,7 +204,7 @@ Scipion project will be created in the default Scipion projects folder.
 
 There are two schemes: *prep* and *proc*. Both are launched at the same time, *prep* will run for 12 hours and *proc* - for 8 hours
 
-1. The prep scheme includes 3 jobs that run in a loop, processing batches of 30 movies each time:
+1. The prep scheme includes 3 jobs that run in a loop, processing batches of 50 movies (default BATCH_SIZE) each time:
 
     a) import movies
     b) motion correction (relion motioncor)

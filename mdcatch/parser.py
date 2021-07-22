@@ -44,8 +44,10 @@ class Parser:
         self.fn = None
         self.pipeline = DEF_PIPELINE
         self.picker = DEF_PICKER
+        self.pickerModel = None
         self.symmetry = DEF_SYMMETRY
         self.size = DEF_PARTICLE_SIZE
+        self.run3dsteps = False
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -58,67 +60,13 @@ class Parser:
             'MTF': 'None'
         }
 
-    def setMdPath(self, path):
-        self.mdPath = path
-
-    def getMdPath(self):
-        return self.mdPath
-
-    def setPipeline(self, choice):
-        self.pipeline = choice
-
-    def getPipeline(self):
-        return self.pipeline
-
-    def setPicker(self, choice):
-        self.picker = choice
-
-    def getPicker(self):
-        return self.picker
-
-    def setSymmetry(self, choice):
-        self.symmetry = choice
-
-    def getSymmetry(self):
-        return self.symmetry
-
-    def getSize(self):
-        return self.size
-
-    def setSize(self, size):
-        self.size = size
-
-    def getPrjPath(self):
-        return self.prjPath
-
-    def setPrjPath(self, path):
-        self.prjPath = path
-
-    def getUser(self):
-        return self.user
-
-    def setUser(self, login, uid):
-        self.user = (login, uid)
-
-    def getSoftware(self):
-        return self.software
-
-    def setSoftware(self, soft):
-        self.software = soft
-
-    def setFn(self, fn):
-        self.fn = fn
-
-    def getFn(self):
-        return self.fn
-
     def guessFn(self, prog="EPU"):
         """ Return the first matching filename. """
         regex = PATTERN_EPU if prog == "EPU" else PATTERN_SEM
 
         print("\nUsing regex: ", regex)
 
-        files = iglob(os.path.join(self.getMdPath(), regex))
+        files = iglob(os.path.join(self.mdPath, regex))
         img = next(files, None)
 
         return img
@@ -211,9 +159,9 @@ class Parser:
         # update with real camera name
         self.acqDict['Detector'] = model
 
-        if self.getSoftware() == 'EPU':
+        if self.software == 'EPU':
             p1 = MOVIE_PATH_DICT[camera] % (SCOPE_DICT[scopeID][0], model)
-            session = os.path.basename(self.getMdPath())
+            session = os.path.basename(self.mdPath)
 
             if camera == 'EF-CCD':
                 movieDir = os.path.join(p1, "DoseFractions", session, EPU_MOVIES_DICT[model])
@@ -240,14 +188,19 @@ class Parser:
                     raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
-            movieDir = os.path.join(self.getMdPath(), PATTERN_SEM_MOVIES)
-            gainFn = os.path.join(self.getMdPath(), self.acqDict['GainReference'])
-            defFn = os.path.join(self.getMdPath(), self.acqDict['DefectFile'])
+            movieDir = os.path.join(self.mdPath, PATTERN_SEM_MOVIES)
+            gainFn = os.path.join(self.mdPath, self.acqDict['GainReference'])
+            defFn = os.path.join(self.mdPath, self.acqDict['DefectFile'])
 
         # populate dict
-        self.acqDict['Software'] = self.getSoftware()
-        self.acqDict['PrjPath'] = self.getPrjPath()
-        self.acqDict['MoviePath'] = movieDir
+        self.acqDict.update({
+            'Software': self.software,
+            'PrjPath': self.prjPath,
+            'MoviePath': movieDir,
+            'PickerModel': self.pickerModel,
+            'Run3dSteps': self.run3dsteps
+        })
+
         if os.path.exists(gainFn):
             self.acqDict['GainReference'] = gainFn
         if os.path.exists(defFn):

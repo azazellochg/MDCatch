@@ -99,15 +99,19 @@ class Page1(QWizardPage):
         label_path = QLabel('Path')
         label_pipeline = QLabel('Run pipeline in')
         label_picker = QLabel('Particle picker')
-        label_sym = QLabel('Symmetry')
+        label_model = QLabel('Trained model for picking')
         label_diam = QLabel('Particle size (A)')
+        label_sym = QLabel('Symmetry')
+        label_3d = QLabel('Run 3D steps?')
 
         vbox.addWidget(label_soft, alignment=Qt.Alignment())
         vbox.addWidget(label_path, alignment=Qt.Alignment())
         vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
         vbox.addWidget(label_picker, alignment=Qt.Alignment())
-        vbox.addWidget(label_sym, alignment=Qt.Alignment())
+        vbox.addWidget(label_model, alignment=Qt.Alignment())
         vbox.addWidget(label_diam, alignment=Qt.Alignment())
+        vbox.addWidget(label_sym, alignment=Qt.Alignment())
+        vbox.addWidget(label_3d, alignment=Qt.Alignment())
 
         return vbox
 
@@ -140,7 +144,7 @@ class Page1(QWizardPage):
 
         button_browse = QPushButton('Browse')
         button_browse.setToolTip(help_message)
-        button_browse.clicked.connect(lambda: self.browseSlot(self.rawPath))
+        button_browse.clicked.connect(lambda: self.browseFolderSlot(self.rawPath))
 
         hbox_path.addWidget(self.rawPath, alignment=Qt.Alignment())
         hbox_path.addWidget(button_browse, alignment=Qt.Alignment())
@@ -178,15 +182,20 @@ class Page1(QWizardPage):
         hbox_picker.addWidget(self.button_log, alignment=Qt.Alignment())
         grid.addLayout(hbox_picker)
 
-        # symmetry box
-        hbox_sym = QHBoxLayout()
-        self.symm = QLineEdit()
-        self.symm.setMinimumWidth(60)
-        self.symm.setMaximumWidth(60)
-        self.symm.setText(DEF_SYMMETRY)
+        # picker model box
+        hbox_model = QHBoxLayout()
+        self.modelPath = QLineEdit()
+        self.modelPath.setMinimumWidth(300)
+        self.modelPath.setReadOnly(True)
+        self.modelPath.setToolTip(help_message2)
 
-        hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
-        grid.addLayout(hbox_sym)
+        button_browse = QPushButton('Browse')
+        button_browse.setToolTip(help_message)
+        button_browse.clicked.connect(lambda: self.browseFileSlot(self.modelPath))
+
+        hbox_model.addWidget(self.modelPath, alignment=Qt.Alignment())
+        hbox_model.addWidget(button_browse, alignment=Qt.Alignment())
+        grid.addLayout(hbox_model)
 
         # size box
         hbox_diam = QHBoxLayout()
@@ -198,22 +207,38 @@ class Page1(QWizardPage):
         hbox_diam.setAlignment(Qt.AlignLeft)
         grid.addLayout(hbox_diam)
 
+        # symmetry box
+        hbox_sym = QHBoxLayout()
+        self.symm = QLineEdit()
+        self.symm.setMinimumWidth(60)
+        self.symm.setMaximumWidth(60)
+        self.symm.setText(DEF_SYMMETRY)
+        hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
+        grid.addLayout(hbox_sym)
+
+        # run 3D steps?
+        hbox_3d = QHBoxLayout()
+        hbox_3d.setAlignment(Qt.AlignLeft)
+        self.do_3d = QCheckBox()
+        hbox_3d.addWidget(self.do_3d, alignment=Qt.Alignment())
+        grid.addLayout(hbox_3d)
+
         return grid
 
     def updSoftware(self, btgroup):
         bt = btgroup.checkedButton()
-        App.model.setSoftware(bt.text())
+        App.model.software = bt.text()
 
     def updPipeline(self, btgroup):
         bt = btgroup.checkedButton()
-        App.model.setPipeline(bt.text())
+        App.model.pipeline = bt.text()
 
     def updPicker(self, btgroup):
         bt = btgroup.checkedButton()
-        App.model.setPicker(bt.text())
-        App.model.setSize(self.spbox_diam.value())
+        App.model.picker = bt.text()
+        App.model.size = self.spbox_diam.value()
 
-    def browseSlot(self, var):
+    def browseFolderSlot(self, var):
         """ Called when "Browse" is pressed. """
         folder = METADATA_PATH if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
@@ -222,34 +247,42 @@ class Page1(QWizardPage):
         if path:
             self.refreshPath(path)
 
+    def browseFileSlot(self, var):
+        """ Called when "Browse" is pressed. """
+        file = "" if var.text() is None else var.text()
+        path = QFileDialog.getOpenFileName(self, "Select model file",
+                                           file,
+                                           filter="Pretrained picking model (*.h5 *.sav)")
+        if path:
+            self.refreshModel(path[0])
+
     def refreshPath(self, path):
         """ Update line widget with selected path. """
-        App.model.setMdPath(path)
-        self.rawPath.setText(App.model.getMdPath())
+        App.model.mdPath = path
+        self.rawPath.setText(App.model.mdPath)
+
+    def refreshModel(self, path):
+        """ Update line widget with selected path. """
+        App.model.pickerModel = path
+        self.modelPath.setText(App.model.pickerModel)
 
     def validatePage(self):
         """ Executed when Next is pressed.
         Returns True or False. """
-        App.model.setSymmetry(self.symm.text())
-        App.model.setSize(self.spbox_diam.value())
+        App.model.symmetry = self.symm.text()
+        App.model.size = self.spbox_diam.value()
+        App.model.run3dsteps = self.do_3d.isChecked()
 
-        if App.model.getMdPath() is None:
-            App.model.setMdPath(METADATA_PATH)
+        if App.model.mdPath is None:
+            App.model.mdPath = METADATA_PATH
 
         username, uid = getUsername()
-        App.model.setUser(username, uid)
+        App.model.user = (username, uid)
 
         if DEBUG:
-            print("\n\nInput params: ",
-                  [App.model.getSoftware(),
-                   App.model.getMdPath(),
-                   App.model.getUser(),
-                   App.model.getPipeline(),
-                   App.model.getPicker(),
-                   App.model.getSymmetry(),
-                   App.model.getSize()])
+            print("\n\nInput params: ", sorted(App.model.__dict__.items()))
 
-        prog = App.model.getSoftware()
+        prog = App.model.software
         fnList = App.model.guessFn(prog)
 
         if fnList is None:
@@ -257,7 +290,7 @@ class Page1(QWizardPage):
             return False
         else:
             print("\nFile found: %s\n" % fnList)
-            App.model.setFn(fnList)
+            App.model.fn = fnList
             return True
 
     def reset(self):
@@ -265,7 +298,8 @@ class Page1(QWizardPage):
         App.model.acqDict.clear()
         App.model.__init__()
         # keep the old path until updated
-        App.model.setMdPath(self.rawPath.text())
+        App.model.mdPath = self.rawPath.text()
+        App.model.pickerModel = self.modelPath.text()
 
     def addRadioButton(self, choice, default=False):
         """ Util func to add QRadioButton widget. """
@@ -290,8 +324,8 @@ class Page2(QWizardPage):
     def initializePage(self):
         # executed before showing page 2
         acqDict = App.model.acqDict
-        prog = App.model.getSoftware()
-        fnList = App.model.getFn()
+        prog = App.model.software
+        fnList = App.model.fn
 
         App.model.parseMetadata(fnList)
 
@@ -299,7 +333,7 @@ class Page2(QWizardPage):
         App.model.calcDose()
         App.model.guessDataDir()
 
-        msg = "Found the following metadata from %s session:" % prog
+        msg = f"Found the following metadata from {prog} session: {App.model.mdPath.split('/')[-1]}"
         if 'Warning' in acqDict:
             msg += "\n%s" % acqDict['Warning']
         self.setSubTitle(msg)
@@ -413,7 +447,7 @@ class Page2(QWizardPage):
 
     def addPtclSizeWidgets(self, acqDict):
         """ Add particle size widgets. """
-        size = App.model.getSize()
+        size = App.model.size
         acqDict['PtclSize'] = size
         App.model.calcBox()
         self.mainLayout.addWidget(self.group3(), 1, 0)
@@ -423,22 +457,24 @@ class Page2(QWizardPage):
 
     def onFinish(self):
         """ Finish is pressed, we need to update all editable vars. """
-        App.model.acqDict['User'] = App.model.getUser()
-        App.model.acqDict['DosePerFrame'] = self.dosepf.text()
-        App.model.acqDict['PixelSpacing'] = self.px.text()
-        App.model.acqDict['PhasePlateUsed'] = self.vpp.isChecked()
-        App.model.acqDict['BoxSize'] = self.box.text()
-        App.model.acqDict['MaskSize'] = self.mask.text()
-        App.model.acqDict['BoxSizeSmall'] = self.box_bin.text()
-        App.model.acqDict['Picker'] = App.model.getPicker()
-        App.model.acqDict['Symmetry'] = App.model.getSymmetry()
+        App.model.acqDict.update({
+            'User': App.model.user,
+            'DosePerFrame': self.dosepf.text(),
+            'PixelSpacing': self.px.text(),
+            'PhasePlateUsed': self.vpp.isChecked(),
+            'BoxSize': self.box.text(),
+            'MaskSize': self.mask.text(),
+            'BoxSizeSmall': self.box_bin.text(),
+            'Picker': App.model.picker,
+            'Symmetry': App.model.symmetry
+        })
 
         print("\nFinal parameters:\n")
         for k, v in sorted(App.model.acqDict.items()):
             print(k, v)
         print('\n')
 
-        if App.model.getPipeline() == 'Relion':
+        if App.model.pipeline == 'Relion':
             setupRelion(App.model.acqDict)
         else:
             setupScipion(App.model.acqDict)
