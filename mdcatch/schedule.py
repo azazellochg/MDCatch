@@ -60,7 +60,8 @@ def setupRelion(paramDict):
     if picker == 'cryolo':
         mapDict.update({
             'prep__motioncorr__do_float16': "No",  # Cryolo cannot read mrc 16-bit
-            'proc-cryolo__cryolo_model': None,  # TODO
+            'proc-cryolo__cryolo_model': paramDict['PickerModel'],
+            'proc-cryolo__do_3d': paramDict['Run3dSteps'],
             'proc-cryolo__class2d__particle_diameter': mask_diam,
             'proc-cryolo__extract__bg_diameter': paramDict['MaskSize'],
             'proc-cryolo__extract__extract_size': paramDict['BoxSize'],
@@ -75,7 +76,8 @@ def setupRelion(paramDict):
         mapDict.update({
             'proc-topaz__do_log': 1 if picker == 'log' else 0,
             'proc-topaz__do_topaz': 1 if picker == 'topaz' else 0,
-            'proc-topaz__topaz_model': "",  # TODO
+            'proc-topaz__topaz_model': paramDict['PickerModel'] or "",
+            'proc-topaz__do_3d': paramDict['Run3dSteps'],
             'proc-topaz__class2d__particle_diameter': mask_diam,
             'proc-topaz__extract__bg_diameter': paramDict['MaskSize'],
             'proc-topaz__extract__extract_size': paramDict['BoxSize'],

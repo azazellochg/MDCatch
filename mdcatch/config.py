@@ -130,3 +130,7 @@ help_message = """Select the following folder:\n\n
    OR\n
    For SerialEM: the folder on /mnt/Data/ that
    contains tif movies and mdoc files.\n"""
+
+# help message for model selection
+help_message2 = """Select a pretrained model for crYOLO or Topaz.
+If empty, the general model will be used."""

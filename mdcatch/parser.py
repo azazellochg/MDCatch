@@ -44,8 +44,10 @@ class Parser:
         self.fn = None
         self.pipeline = DEF_PIPELINE
         self.picker = DEF_PICKER
+        self.pickerModel = None
         self.symmetry = DEF_SYMMETRY
         self.size = DEF_PARTICLE_SIZE
+        self.run3dsteps = False
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -75,6 +77,12 @@ class Parser:
 
     def getPicker(self):
         return self.picker
+
+    def setPickerModel(self, path):
+        self.pickerModel = path
+
+    def getPickerModel(self):
+        return self.pickerModel
 
     def setSymmetry(self, choice):
         self.symmetry = choice
@@ -252,3 +260,5 @@ class Parser:
             self.acqDict['GainReference'] = gainFn
         if os.path.exists(defFn):
             self.acqDict['DefectFile'] = defFn
+        self.acqDict['PickerModel'] = self.getPickerModel()
+        self.acqDict['Run3dSteps'] = self.run3dsteps
