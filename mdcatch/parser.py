@@ -193,12 +193,15 @@ class Parser:
             defFn = os.path.join(self.mdPath, self.acqDict['DefectFile'])
 
         # populate dict
-        self.acqDict['Software'] = self.software
-        self.acqDict['PrjPath'] = self.prjPath
-        self.acqDict['MoviePath'] = movieDir
+        self.acqDict.update({
+            'Software': self.software,
+            'PrjPath': self.prjPath,
+            'MoviePath': movieDir,
+            'PickerModel': self.pickerModel,
+            'Run3dSteps': self.run3dsteps
+        })
+
         if os.path.exists(gainFn):
             self.acqDict['GainReference'] = gainFn
         if os.path.exists(defFn):
             self.acqDict['DefectFile'] = defFn
-        self.acqDict['PickerModel'] = self.pickerModel
-        self.acqDict['Run3dSteps'] = self.run3dsteps
