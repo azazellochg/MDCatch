@@ -3,9 +3,8 @@
 
 data_job
 
-_rlnJobTypeLabel             relion.select.onvalue
+_rlnJobTypeLabel             relion.select
 _rlnJobIsContinue                       0
-_rlnJobIsTomo                           0
  
 
 # version 30001
@@ -34,8 +33,7 @@ image_angpix         -1
 min_dedicated         24 
  nr_groups          1 
   nr_split         -1 
-other_args         ""
-python_exe         ""
+other_args         "" 
       qsub       qsub 
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 

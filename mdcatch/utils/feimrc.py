@@ -66,6 +66,7 @@ def _standardizeDict(acqDict):
         'ImageShiftX': acqDict['Shift offset X'],  # TEM pure image shift
         'ImageShiftY': acqDict['Shift offset Y'],
         'BeamSize': float(acqDict['Illuminated area']) * math.pow(10, 6),
+        'Binning': 1,
         'Detector': acqDict['Camera name'].decode("utf-8"),
         'Dose': float(acqDict['Dose']) * math.pow(10, -20),
         'EPUversion': acqDict['Application version'].decode("utf-8"),
@@ -79,7 +80,7 @@ def _standardizeDict(acqDict):
         'SpotSize': acqDict['Spot index'],
         'Voltage': float(acqDict['HT']) // 1000,
         'PhasePlateUsed': bool(acqDict['Phase Plate']),
-        'Warning': 'MRC header does not contain frame number, please check the fluence!'
+        'Warning': 'MRC header does not contain enough metadata, please check these values!'
     }
 
     sr = 1

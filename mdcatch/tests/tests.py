@@ -81,7 +81,7 @@ class TestParser(unittest.TestCase):
 
         model.calcDose()
         model.guessDataDir(testmode=True)
-        model.acqDict['PtclSizes'] = DEF_PARTICLE_SIZES
+        model.acqDict['PtclSize'] = DEF_PARTICLE_SIZE
         model.calcBox()
 
         print("\nFinal parameters:\n")

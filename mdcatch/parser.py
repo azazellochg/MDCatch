@@ -45,7 +45,7 @@ class Parser:
         self.pipeline = DEF_PIPELINE
         self.picker = DEF_PICKER
         self.symmetry = DEF_SYMMETRY
-        self.size = DEF_PARTICLE_SIZES
+        self.size = DEF_PARTICLE_SIZE
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -85,8 +85,8 @@ class Parser:
     def getSize(self):
         return self.size
 
-    def setSize(self, *args):
-        self.size = args
+    def setSize(self, size):
+        self.size = size
 
     def getPrjPath(self):
         return self.prjPath
@@ -159,18 +159,18 @@ class Parser:
 
     def calcBox(self):
         """ Calculate box, mask, downsample. """
-        minSize, maxSize = self.acqDict['PtclSizes']
+        size = self.acqDict['PtclSize']
         angpix = float(self.acqDict['PixelSpacing'])
 
         if self.acqDict['Mode'] == 'Super-resolution' and self.acqDict['Binning'] == '1':
             # since we always bin by 2 in mc if using super-res and bin 1
             angpix *= 2
 
-        ptclSizePx = float(maxSize) / angpix
-        # use +20% for mask size
-        self.acqDict['MaskSize'] = str(math.ceil(1.2 * ptclSizePx))
-        # use +30% for box size, make it even
-        boxSize = 1.3 * ptclSizePx
+        ptclSizePx = float(size) / angpix
+        # use +10% for mask size
+        self.acqDict['MaskSize'] = str(math.ceil(1.1 * ptclSizePx))
+        # use +50% for box size, make it even
+        boxSize = 1.5 * ptclSizePx
         self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
 
         # from relion_it.py script
@@ -182,10 +182,10 @@ class Parser:
             if box > boxSize:
                 self.acqDict['BoxSizeSmall'] = str(boxSize)
                 break
-            # If Nyquist freq. is better than 8.5 A, use this
+            # If Nyquist freq. is better than 7.5 A, use this
             # downscaled box, otherwise continue to next size up
             small_box_angpix = angpix * boxSize / box
-            if small_box_angpix < 4.25:
+            if small_box_angpix < 3.75:
                 self.acqDict['BoxSizeSmall'] = str(box)
                 break
 

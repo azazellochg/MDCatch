@@ -43,9 +43,9 @@ def setupRelion(paramDict):
         exit(1)
 
     bin, gain, defect, group_frames = precalculateVars(paramDict)
-    mask_diam = int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing'])
+    mask_diam = int(int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing']))
     mapDict = {
-        'prep__do_at_most': 15,
+        'prep__do_at_most': 50,
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
@@ -57,60 +57,37 @@ def setupRelion(paramDict):
     }
 
     picker = paramDict['Picker'].lower()
-    if picker == 'topaz':
+    if picker == 'cryolo':
         mapDict.update({
-            'proc-topaz__class2d_ini__particle_diameter': mask_diam,
-            'proc-topaz__class2d_rest__particle_diameter': mask_diam,
-            'proc-topaz__extract_ini__bg_diameter': paramDict['MaskSize'],
-            'proc-topaz__extract_ini__extract_size': paramDict['BoxSize'],
-            'proc-topaz__extract_ini__rescale': paramDict['BoxSizeSmall'],
-            'proc-topaz__extract_rest__bg_diameter': paramDict['MaskSize'],
-            'proc-topaz__extract_rest__extract_size': paramDict['BoxSize'],
-            'proc-topaz__extract_rest__rescale': paramDict['BoxSizeSmall'],
-            'proc-topaz__inimodel3d__particle_diameter': mask_diam,
-            'proc-topaz__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-topaz__inipicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-            'proc-topaz__refine3d__particle_diameter': mask_diam,
-            'proc-topaz__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-topaz__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-            'proc-topaz__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
-        })
-    elif picker == 'cryolo':
-        mapDict.update({
-            'prep__motioncorr__do_float16': "No",  # Cryolo cant read mrc 16-bit
-            'proc-cryolo__class2d_ini__particle_diameter': mask_diam,
-            'proc-cryolo__class2d_rest__particle_diameter': mask_diam,
-            'proc-cryolo__extract_ini__bg_diameter': paramDict['MaskSize'],
-            'proc-cryolo__extract_ini__extract_size': paramDict['BoxSize'],
-            'proc-cryolo__extract_ini__rescale': paramDict['BoxSizeSmall'],
-            'proc-cryolo__extract_rest__bg_diameter': paramDict['MaskSize'],
-            'proc-cryolo__extract_rest__extract_size': paramDict['BoxSize'],
-            'proc-cryolo__extract_rest__rescale': paramDict['BoxSizeSmall'],
+            'prep__motioncorr__do_float16': "No",  # Cryolo cannot read mrc 16-bit
+            'proc-cryolo__cryolo_model': None,  # TODO
+            'proc-cryolo__class2d__particle_diameter': mask_diam,
+            'proc-cryolo__extract__bg_diameter': paramDict['MaskSize'],
+            'proc-cryolo__extract__extract_size': paramDict['BoxSize'],
+            'proc-cryolo__extract__rescale': paramDict['BoxSizeSmall'],
             'proc-cryolo__inimodel3d__particle_diameter': mask_diam,
             'proc-cryolo__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-cryolo__inipicker__param2_value': paramDict['BoxSize'],
+            'proc-cryolo__autopick__param2_value': paramDict['BoxSize'],
             'proc-cryolo__refine3d__particle_diameter': mask_diam,
             'proc-cryolo__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-cryolo__restpicker__param2_value': paramDict['BoxSize'],
         })
-    else:  # logpicker
+    else:  # logpicker or topaz
         mapDict.update({
-            'proc-log__class2d_ini__particle_diameter': mask_diam,
-            'proc-log__class2d_rest__particle_diameter': mask_diam,
-            'proc-log__extract_ini__bg_diameter': paramDict['MaskSize'],
-            'proc-log__extract_ini__extract_size': paramDict['BoxSize'],
-            'proc-log__extract_ini__rescale': paramDict['BoxSizeSmall'],
-            'proc-log__extract_rest__bg_diameter': paramDict['MaskSize'],
-            'proc-log__extract_rest__extract_size': paramDict['BoxSize'],
-            'proc-log__extract_rest__rescale': paramDict['BoxSizeSmall'],
-            'proc-log__inimodel3d__particle_diameter': mask_diam,
-            'proc-log__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-log__inipicker__log_diam_min': paramDict['PtclSizes'][0],
-            'proc-log__inipicker__log_diam_max': paramDict['PtclSizes'][1],
-            'proc-log__refine3d__particle_diameter': mask_diam,
-            'proc-log__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
-            'proc-log__restpicker__topaz_particle_diameter': paramDict['PtclSizes'][1],
-            'proc-log__train_topaz__topaz_particle_diameter': paramDict['PtclSizes'][1],
+            'proc-topaz__do_log': 1 if picker == 'log' else 0,
+            'proc-topaz__do_topaz': 1 if picker == 'topaz' else 0,
+            'proc-topaz__topaz_model': "",  # TODO
+            'proc-topaz__class2d__particle_diameter': mask_diam,
+            'proc-topaz__extract__bg_diameter': paramDict['MaskSize'],
+            'proc-topaz__extract__extract_size': paramDict['BoxSize'],
+            'proc-topaz__extract__rescale': paramDict['BoxSizeSmall'],
+            'proc-topaz__inimodel3d__particle_diameter': mask_diam,
+            'proc-topaz__inimodel3d__sym_name': '"%s"' % paramDict['Symmetry'],
+            'proc-topaz__autopick__use_gpu': 'Yes' if picker == 'topaz' else 'No',
+            'proc-topaz__autopick__log_diam_min': int(paramDict['PtclSize'] * 0.8333),  # particle circularity
+            'proc-topaz__autopick__log_diam_max': paramDict['PtclSize'],
+            'proc-topaz__autopick__topaz_particle_diameter': paramDict['PtclSize'],
+            'proc-topaz__refine3d__particle_diameter': mask_diam,
+            'proc-topaz__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
         })
 
     if paramDict['Mode'] == "EER":
@@ -191,7 +168,7 @@ sigma_contrast          3
 """
     with open(".gui_manualpickjob.star", "w") as f:
         f.write(starString % (float(paramDict['PixelSpacing']) * bin,
-                              paramDict['PtclSizes'][1]))
+                              paramDict['PtclSize']))
 
     for i in [gain, defect, paramDict['MTF']]:
         if os.path.exists(i):
@@ -255,10 +232,11 @@ sigma_contrast          3
         os.system(cmd)
 
     # Run schemer
+    sch_name = 'cryolo' if picker == 'cryolo' else 'topaz'
     cmdList = ['relion_schemer --scheme prep --reset &',
                'relion_schemer --scheme prep --run --pipeline_control Schemes/prep/ >> Schemes/prep/run.out 2>> Schemes/prep/run.err &',
-               f'relion_schemer --scheme proc-{picker} --reset &',
-               f'relion_schemer --scheme proc-{picker} --run --pipeline_control Schemes/proc-{picker}/ >> Schemes/proc-{picker}/run.out 2>> Schemes/proc-{picker}/run.err &']
+               f'relion_schemer --scheme proc-{sch_name} --reset &',
+               f'relion_schemer --scheme proc-{sch_name} --run --pipeline_control Schemes/proc-{sch_name}/ >> Schemes/proc-{sch_name}/run.out 2>> Schemes/proc-{sch_name}/run.err &']
 
     for cmd in cmdList:
         print(cmd)

@@ -32,7 +32,7 @@ DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PICKER = "Cryolo"  # default particle picker: Cryolo or Topaz or Log
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
-DEF_PARTICLE_SIZES = (150, 180)  # default min/max size in Angstroms
+DEF_PARTICLE_SIZE = 180  # default size in Angstroms
 DEF_SYMMETRY = "C1"
 
 # path to folder with EPU sessions or folder with SerialEM mdoc files
@@ -103,6 +103,7 @@ MOVIE_PATH_DICT = {
 
 # SerialEM-produced movies pattern
 PATTERN_SEM_MOVIES = "*.tif"
+# Default metadata format is mdoc,
 # change the pattern below if you want to parse movie tif instead
 PATTERN_SEM = "*.tif.mdoc"
 

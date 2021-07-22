@@ -190,23 +190,11 @@ class Page1(QWizardPage):
 
         # size box
         hbox_diam = QHBoxLayout()
-        self.label_diamMin = QLabel('min')
-        hbox_diam.addWidget(self.label_diamMin)
-
-        self.spbox_diamMin = QSpinBox()
-        self.spbox_diamMin.setRange(0, 9999)
-        self.spbox_diamMin.setValue(DEF_PARTICLE_SIZES[0])
-        self.spbox_diamMin.setFixedSize(60, 25)
-        hbox_diam.addWidget(self.spbox_diamMin)
-
-        self.label_diamMax = QLabel('max')
-        hbox_diam.addWidget(self.label_diamMax)
-
-        self.spbox_diamMax = QSpinBox()
-        self.spbox_diamMax.setRange(10, 9999)
-        self.spbox_diamMax.setValue(DEF_PARTICLE_SIZES[1])
-        self.spbox_diamMax.setFixedSize(60, 25)
-        hbox_diam.addWidget(self.spbox_diamMax)
+        self.spbox_diam = QSpinBox()
+        self.spbox_diam.setRange(10, 9999)
+        self.spbox_diam.setValue(DEF_PARTICLE_SIZE)
+        self.spbox_diam.setFixedSize(60, 25)
+        hbox_diam.addWidget(self.spbox_diam)
         hbox_diam.setAlignment(Qt.AlignLeft)
         grid.addLayout(hbox_diam)
 
@@ -223,7 +211,7 @@ class Page1(QWizardPage):
     def updPicker(self, btgroup):
         bt = btgroup.checkedButton()
         App.model.setPicker(bt.text())
-        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
+        App.model.setSize(self.spbox_diam.value())
 
     def browseSlot(self, var):
         """ Called when "Browse" is pressed. """
@@ -243,7 +231,7 @@ class Page1(QWizardPage):
         """ Executed when Next is pressed.
         Returns True or False. """
         App.model.setSymmetry(self.symm.text())
-        App.model.setSize(self.spbox_diamMin.value(), self.spbox_diamMax.value())
+        App.model.setSize(self.spbox_diam.value())
 
         if App.model.getMdPath() is None:
             App.model.setMdPath(METADATA_PATH)
@@ -333,7 +321,7 @@ class Page2(QWizardPage):
             self.vpp.setChecked(False)
 
         self.camera_name.setText(acqDict['Detector'])
-        self.mode.setText(acqDict['Mode'])
+        self.mode.setText("%s, bin %s" % (acqDict['Mode'], acqDict['Binning']))
         self.time.setText(str(time))
         self.frames.setText(acqDict['NumSubFrames'])
         self.dosepf.setText(str(dosepf))
@@ -425,8 +413,8 @@ class Page2(QWizardPage):
 
     def addPtclSizeWidgets(self, acqDict):
         """ Add particle size widgets. """
-        sizes = App.model.getSize()
-        acqDict['PtclSizes'] = sizes
+        size = App.model.getSize()
+        acqDict['PtclSize'] = size
         App.model.calcBox()
         self.mainLayout.addWidget(self.group3(), 1, 0)
         self.box.setText(acqDict['BoxSize'])

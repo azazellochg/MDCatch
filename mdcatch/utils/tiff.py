@@ -69,8 +69,9 @@ def parseTif(fn):
     with TiffFile(fn) as tif:
         for page in tif.pages:
             for tag in page.tags:
-                acqDict[tif_tags[tag.code]] = tag.value
                 # print(tag.code, tag.dtype)
+                if tag.code in tif_tags:
+                    acqDict[tif_tags[tag.code]] = tag.value
             break
 
         acqDict["nimg"] = len(tif.pages)
