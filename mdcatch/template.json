@@ -70,7 +70,7 @@
         "eerGroup": 32,
         "eerSampling": 0,
         "hostName": "localhost",
-        "numberOfThreads": 24,
+        "numberOfThreads": 40,
         "numberOfMpi": 1,
         "inputMovies": "2.outputMovies"
     },
@@ -103,7 +103,7 @@
         "maxPhaseShift": 180.0,
         "stepPhaseShift": 10.0,
         "hostName": "localhost",
-        "numberOfThreads": 1,
+        "numberOfThreads": 5,
         "numberOfMpi": 1,
         "streamingWarning": null,
         "streamingSleepOnWait": 0,
@@ -129,7 +129,7 @@
         "boxSize": 0,
         "max_box_per_image": 600,
         "useGpu": true,
-        "gpuList": "0",
+        "gpuList": "0, 1",
         "hostName": "localhost",
         "numberOfThreads": 1,
         "numberOfMpi": 1,
@@ -161,7 +161,7 @@
         "streamingSleepOnWait": 0,
         "streamingBatchSize": 5,
         "hostName": "localhost",
-        "numberOfMpi": 4,
+        "numberOfMpi": 5,
         "inputCoordinates": "241.outputCoordinates"
     },
     {

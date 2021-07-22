@@ -30,7 +30,7 @@ import subprocess
 import json
 
 from .utils.misc import precalculateVars, getPrjName
-from .config import JSON_TEMPLATE, SCHEMES_PATH, PATTERN_SEM_MOVIES
+from .config import JSON_TEMPLATE, SCHEMES_PATH, PATTERN_SEM_MOVIES, BATCH_SIZE
 
 
 def setupRelion(paramDict):
@@ -45,7 +45,7 @@ def setupRelion(paramDict):
     bin, gain, defect, group_frames = precalculateVars(paramDict)
     mask_diam = int(int(paramDict['MaskSize']) * bin * float(paramDict['PixelSpacing']))
     mapDict = {
-        'prep__do_at_most': 50,
+        'prep__do_at_most': BATCH_SIZE,
         'prep__ctffind__do_phaseshift': paramDict['PhasePlateUsed'],
         'prep__importmovies__Cs': paramDict['Cs'],
         'prep__importmovies__angpix': paramDict['PixelSpacing'],
@@ -301,16 +301,19 @@ def setupScipion(paramDict):
     # ctffind
     ctfProt = protocolsList[protNames["CistemProtCTFFind"]]
     ctfProt["findPhaseShift"] = paramDict['PhasePlateUsed']
+    ctfProt["streamingBatchSize"] = BATCH_SIZE
 
     # picking
     pickProt = protocolsList[protNames["SphireProtCRYOLOPicking"]]
     pickProt["boxSize"] = paramDict['BoxSize']
+    pickProt["streamingBatchSize"] = BATCH_SIZE
 
     # extract
     extrProt = protocolsList[protNames["ProtRelionExtractParticles"]]
     extrProt["boxSize"] = paramDict['BoxSize']
     extrProt["rescaledSize"] = paramDict['BoxSizeSmall']
     extrProt["backDiameter"] = paramDict['MaskSize']
+    extrProt["streamingBatchSize"] = BATCH_SIZE
 
     jsonFn = "%s.json" % prjName
     with open(jsonFn, "w") as f:

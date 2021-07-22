@@ -34,6 +34,7 @@ DEF_PICKER = "Cryolo"  # default particle picker: Cryolo or Topaz or Log
 DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
 DEF_PARTICLE_SIZE = 180  # default size in Angstroms
 DEF_SYMMETRY = "C1"
+BATCH_SIZE = 50  # number of movies to process in batches
 
 # path to folder with EPU sessions or folder with SerialEM mdoc files
 # in SerialEM case movies and mdocs are expected in the same folder
