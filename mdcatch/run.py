@@ -333,8 +333,7 @@ class Page2(QWizardPage):
         App.model.calcDose()
         App.model.guessDataDir()
 
-        mdDir = os.path.dirname(App.model.mdPath)
-        msg = f"Found the following metadata from {prog} session: {os.path.basename(mdDir)}"
+        msg = f"Found the following metadata from {prog} session: {App.model.mdPath.split('/')[-1]}"
         if 'Warning' in acqDict:
             msg += "\n%s" % acqDict['Warning']
         self.setSubTitle(msg)
