@@ -31,7 +31,7 @@ DEBUG = 0
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PICKER = "Cryolo"  # default particle picker: Cryolo or Topaz or Log
-DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix
+DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix (only for daemon mode)
 DEF_PARTICLE_SIZE = 180  # default size in Angstroms
 DEF_SYMMETRY = "C1"
 BATCH_SIZE = 50  # number of movies to process in batches
@@ -46,7 +46,7 @@ PROJECT_PATH = "/cephfs"
 # Folder with Relion 4 template schemes
 SCHEMES_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schemes"
 
-# Scipion 3 pre-processing template
+# Scipion 3 template
 JSON_TEMPLATE = "/home/gsharov/soft/MDCatch-dev/mdcatch/template.json"
 
 # main dictionary

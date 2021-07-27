@@ -3,7 +3,7 @@
     - Add input picker model for crYOLO / Topaz
     - Watcher mode not tested yet
 2.0:
-    - Relion 4.0 support with the new scheduler, old Schedules removed
+    - Relion 4.0 support with the new scheduler, old Schedules removed, Relion 3.x is not supported!
     - Topaz / 2D cls selection is now run by Relion
     - tif/mrc parsers updated, add EER support
 1.1: fix installer

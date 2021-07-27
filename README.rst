@@ -127,7 +127,7 @@ raw movies folder. In our case both storage systems are mounted via NFSv4.
    <summary><a>Configuration</a></summary>
 
 Most of the configuration is done in **config.py**. As explained in the next section, the app can run in either interactive (GUI) or daemon mode.
-For the very first run it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
+For the very first time it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
 
 Important points to mention:
 
