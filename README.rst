@@ -218,9 +218,9 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schemes description</a></summary>
 
-There are two schemes: *prep* and *proc*. Both are launched at the same time, *prep* will run for 12 hours and *proc* - for 8 hours
+There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is available in 3 variants: cryolo, topaz and log. Both schemes launched at the same time and will run for 12 hours
 
-1. The prep scheme includes 3 jobs that run in a loop, processing batches of 50 movies (default BATCH_SIZE) each time:
+1. The *prep* scheme includes 3 jobs that run in a loop, processing batches of 50 movies each time:
 
     a) import movies
     b) motion correction (relion motioncor)
@@ -228,15 +228,17 @@ There are two schemes: *prep* and *proc*. Both are launched at the same time, *p
 
 .. important:: The movie frames will be grouped if the dose per frame is < 0.8 e/A\ :sup:`2`. EER movies are fractionated such that final frames have 1 e/A\ :sup:`2`.
 
-2. The proc scheme starts once ctffind results are available. Proc includes multiple jobs:
+2. The *proc* scheme starts once ctffind results are available. Proc includes multiple jobs:
 
     a) micrograph selection (CTF resolution < 6A)
     b) particle picking: Cryolo (proc-cryolo) or Topaz/Logpicker (proc-topaz)
     c) particle extraction
     d) 2D classification with 50 classes
     e) auto-selection of good 2D classes (thr=0.35)
+    f) 3D initial model if number of good particles from e) is > 1500
+    g) 3D refinement
 
-The last two steps are always executed as new jobs (not overwriting previous results).
+The last four steps are always executed as new jobs (not overwriting previous results).
 
 .. raw:: html
 
