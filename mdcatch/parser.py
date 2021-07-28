@@ -171,8 +171,8 @@ class Parser:
             else:
                 movieDir = os.path.join(p1, session, EPU_MOVIES_DICT[model])
                 movieBaseDir = os.path.join(p1, session)
-                # Falcon 4 gain reference
-                if model == "Falcon4":
+                # Falcon 4 EER gain reference
+                if model == "Falcon4" and self.acqDict['Mode'] == "EER":
                     gainFn = GAIN_DICT[model]
 
             if wait:  # in daemon mode wait for movie folder to appear

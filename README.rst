@@ -97,13 +97,19 @@ Here you can find information about how the app works and how to configure it fo
 The app is installed on a pre-processing server with GPU(s).
 The server requires the following software installed:
 
-    - `RELION 4.0 <https://www3.mrc-lmb.cam.ac.uk/relion//index.php/Main_Page>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
+    - `RELION 4.0 <https://relion.readthedocs.io/en/release-4.0/>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
     - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
 
-Relion and/or Scipion should be available from your shell **PATH**. For Ctffind make sure you have **RELION_CTFFIND_EXECUTABLE** variable defined.
-For Relion class ranker provide a path to Python with Torch using **RELION_PYTHON** (e.g. Python from Topaz env).
-For Topaz define e.g. **RELION_TOPAZ_EXECUTABLE=topaz** variable, where *topaz* is a bash script like this:
+Relion and/or Scipion should be available from your shell **PATH**. You also need to define the following variables:
+
+.. code-block:: bash
+
+    export RELION_CTFFIND_EXECUTABLE=/home/gsharov/soft/ctffind
+    export RELION_TOPAZ_EXECUTABLE=/home/gsharov/soft/topaz
+    export RELION_PYTHON=/home/gsharov/soft/miniconda3/envs/topaz-0.2.4/bin/python  # is used by Relion's PyTorch for 2D cls sorting
+
+*/home/gsharov/soft/topaz* is a bash script like this:
 
 .. code-block:: bash
 
@@ -121,7 +127,7 @@ raw movies folder. In our case both storage systems are mounted via NFSv4.
    <summary><a>Configuration</a></summary>
 
 Most of the configuration is done in **config.py**. As explained in the next section, the app can run in either interactive (GUI) or daemon mode.
-For the very first run it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
+For the very first time it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
 
 Important points to mention:
 
@@ -138,13 +144,13 @@ Below is an example of the folders setup on our server. Data points to movies st
     ├── Data
     │   ├── Krios1
     │   │   ├── Falcon3
-    │   │   └── K2
+    │   │   └── K2 (with DoseFractions folder inside)
     │   ├── Krios2
     │   │   ├── Falcon4
-    │   │   └── K2
+    │   │   └── K2 (with DoseFractions folder inside)
     │   └── Krios3
     │       ├── Falcon3
-    │       └── K3
+    │       └── K3 (with DoseFractions folder inside)
     └── MetaData
         ├── Krios1
         ├── Krios2
@@ -175,14 +181,24 @@ Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, t
 
 Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PARTICLE_SIZES, DEF_PREFIX, METATADA_PATH, BATCH_SIZE.
 
-We usually setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
+You could setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
 This prevents launching pre-processing on the data twice and/or concurrently.
+
+Metadata formats
+################
+
+While EPU xml files are most rich in terms of needed metadata, other formats can be used as well. If you set PATTERN_EPU to mrc format, the app will try to parse MRC header of unaligned movie sums in the EPU session folder.
+However we cannot detect number of movie frames and super-resolution mode from such a header, so you would need to check and input correct pixel size and/or fluence per frame.
+
+In case of SerialEM, mdoc file is expected to contain a microscope D-number (see example in *tests/testdata*). If you set PATTERN_SEM to tif, the TIF header of a movie will be parsed.
+Unfortunately SerialEM does not save much metadata in such header, so a lot of values will be missing. Default values will be used for microscope ID, detector, voltage and binning (see *utils/tiff.py*). So, parsing tif is not recommended.
+EER header parsing is also possible, but again, it's just a special kind of TIF format.
 
 EPU vs SerialEM
 ###############
 
 When choosing EPU option, the user must browse to the EPU session folder (that contains Images-Disc folder) with the GUI.
-The app will search and parse the first found xml or mrc file from that folder (see PATTERN_EPU).
+The app will search and parse the first found xml or mrc file from that folder (depending on PATTERN_EPU).
 The metadata folder name (EPU session name) matches the folder name with movies on a storage server.
 
 In case of SerialEM, the movies and metadata (mdoc file) are expected to be in the same folder, so here user must select a folder with movies in the GUI.
@@ -190,7 +206,7 @@ In case of SerialEM, the movies and metadata (mdoc file) are expected to be in t
 RELION vs Scipion
 #################
 
-So far RELION cases are more tested than Scipion. In the latter case, the app provides a single **template.json**,
+So far RELION runs are more tested than Scipion. In the latter case, the app provides a single **template.json**,
 so irrespective of particle picker choice crYOLO will always be used.
 Have a look into the json file to see what pipeline will be launched.
 
@@ -202,9 +218,9 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schemes description</a></summary>
 
-There are two schemes: *prep* and *proc*. Both are launched at the same time, *prep* will run for 12 hours and *proc* - for 8 hours
+There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is available in 3 variants: cryolo, topaz and log. Both schemes launched at the same time and will run for 12 hours
 
-1. The prep scheme includes 3 jobs that run in a loop, processing batches of 50 movies (default BATCH_SIZE) each time:
+1. The *prep* scheme includes 3 jobs that run in a loop, processing batches of 50 movies each time:
 
     a) import movies
     b) motion correction (relion motioncor)
@@ -212,15 +228,17 @@ There are two schemes: *prep* and *proc*. Both are launched at the same time, *p
 
 .. important:: The movie frames will be grouped if the dose per frame is < 0.8 e/A\ :sup:`2`. EER movies are fractionated such that final frames have 1 e/A\ :sup:`2`.
 
-2. The proc scheme starts once ctffind results are available. Proc includes multiple jobs:
+2. The *proc* scheme starts once ctffind results are available. Proc includes multiple jobs:
 
     a) micrograph selection (CTF resolution < 6A)
     b) particle picking: Cryolo (proc-cryolo) or Topaz/Logpicker (proc-topaz)
     c) particle extraction
     d) 2D classification with 50 classes
     e) auto-selection of good 2D classes (thr=0.35)
+    f) 3D initial model if number of good particles from e) is > 1500
+    g) 3D refinement
 
-The last two steps are always executed as new jobs (not overwriting previous results).
+The last four steps are always executed as new jobs (not overwriting previous results).
 
 .. raw:: html
 

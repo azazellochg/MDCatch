@@ -73,6 +73,7 @@ def start_app(mdFn):
     model = Parser()
     model.software = DEF_SOFTWARE
     model.pipeline = DEF_PIPELINE
+    model.picker = DEF_PICKER
     model.size = DEF_PARTICLE_SIZE
     model.symmetry = DEF_SYMMETRY
     model.mdPath = mdPath

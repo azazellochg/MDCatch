@@ -340,7 +340,7 @@ class Page2(QWizardPage):
 
         scopeID = acqDict['MicroscopeID']
         time = round(float(acqDict['ExposureTime']), 3)
-        dosepf = round(float(acqDict['DosePerFrame']), 2)
+        dosepf = round(float(acqDict['DosePerFrame']), 3)
         px = round(float(acqDict['PixelSpacing']), 4)
 
         self.scope_name.setText(SCOPE_DICT[scopeID][0])
