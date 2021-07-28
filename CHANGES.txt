@@ -2,6 +2,8 @@
     - Cryolo / LoGpicker added back as an option
     - Add input picker model for crYOLO / Topaz
     - Watcher mode not tested yet
+    - fix calculation of number of EER frames
+    - add 3D steps switch (not used yet)
 2.0:
     - Relion 4.0 support with the new scheduler, old Schedules removed, Relion 3.x is not supported!
     - Topaz / 2D cls selection is now run by Relion
