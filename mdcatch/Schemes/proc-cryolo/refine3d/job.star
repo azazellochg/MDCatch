@@ -14,7 +14,7 @@ data_joboptions_values
 loop_ 
 _rlnJobOptionVariable #1 
 _rlnJobOptionValue #2 
-auto_faster        Yes 
+auto_faster        No
 auto_local_sampling "1.8 degrees" 
 ctf_intact_first_peak         No 
 do_apply_helical_symmetry        Yes 
@@ -65,7 +65,7 @@ range_tilt         15
 ref_correct_greyscale        Yes 
  relax_sym         "" 
   sampling "7.5 degrees" 
-scratch_dir       "/ssd"
+scratch_dir       $RELION_SCRATCH_DIR
 skip_gridding        Yes 
   sym_name         C1
    use_gpu        Yes 

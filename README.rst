@@ -105,6 +105,7 @@ Relion and/or Scipion should be available from your shell **PATH**. You also nee
 
 .. code-block:: bash
 
+    export RELION_SCRATCH_DIR="/ssd/$USER"
     export RELION_CTFFIND_EXECUTABLE=/home/gsharov/soft/ctffind
     export RELION_TOPAZ_EXECUTABLE=/home/gsharov/soft/topaz
     export RELION_PYTHON=/home/gsharov/soft/miniconda3/envs/topaz-0.2.4/bin/python  # is used by Relion's PyTorch for 2D cls sorting
