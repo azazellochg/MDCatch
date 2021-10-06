@@ -1,3 +1,5 @@
+2.1.1:
+    - Fix: Falcon 4 non-EER movies case now works
 2.1:
     - Cryolo / LoGpicker added back as an option
     - Add input picker model for crYOLO / Topaz
