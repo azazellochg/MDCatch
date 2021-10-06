@@ -177,7 +177,7 @@ class Parser:
                         gainFn = GAIN_DICT[model]
                     else:  # MRC
                         if not EPU_MOVIES_DICT[model].endswith(".mrc"):
-                            movieDir.replace("_EER.eer", ".mrc")
+                            movieDir = movieDir.replace("_EER.eer", ".mrc")
 
             if wait:  # in daemon mode wait for movie folder to appear
                 while True:
