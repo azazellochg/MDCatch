@@ -167,7 +167,7 @@ def run_job(project_dir, args):
                                 'rlnPipeLineProcessTypeLabel', 'rlnPipeLineProcessStatusLabel'])
     table_proc.addRow(job_dir, 'None', 'relion.external', 'Running')
     table_nodes = Table(columns=['rlnPipeLineNodeName', 'rlnPipeLineNodeTypeLabel'])
-    table_nodes.addRow(in_parts, "relion.ParticleStar")
+    table_nodes.addRow(in_parts, "ParticlesData.star.relion")
     table_input = Table(columns=['rlnPipeLineEdgeFromNode', 'rlnPipeLineEdgeProcess'])
     table_input.addRow(in_parts, job_dir)
 
