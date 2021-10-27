@@ -166,6 +166,7 @@ def run_job(project_dir, args):
             '--box_distance': box_dist,
             '--minimum_number_boxes': min_boxes
         })
+        args_dict.pop('--distance')
 
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
