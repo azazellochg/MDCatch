@@ -184,13 +184,14 @@ def run_job(project_dir, args):
 
     # Moving output star files for Relion to use
     table_coords = Table(columns=['rlnMicrographName', 'rlnMicrographCoordinates'])
+    star_dir = "STAR_START_END" if filament else "STAR"
     with open(DONE_MICS, "a+") as f, open("autopick.star", "w") as mics_star:
         for mic in mic_dict:
             f.write("%s\n" % mic)
             mic_base = os.path.basename(mic)
             os.remove(mic)  # clean up symlink
             coord_cryolo = os.path.splitext(mic_base)[0] + ".star"
-            coord_cryolo = getPath(job_dir, "output", "STAR", coord_cryolo)
+            coord_cryolo = getPath(job_dir, "output", star_dir, coord_cryolo)
             coord_relion = mic_dict[mic]
             if os.path.exists(coord_cryolo):
                 os.rename(coord_cryolo, getPath(job_dir, coord_relion))
@@ -207,8 +208,8 @@ def run_job(project_dir, args):
                                 'rlnPipeLineProcessTypeLabel', 'rlnPipeLineProcessStatusLabel'])
     table_proc.addRow(job_dir, 'None', 'relion.external', 'Running')
     table_nodes = Table(columns=['rlnPipeLineNodeName', 'rlnPipeLineNodeTypeLabel'])
-    table_nodes.addRow(in_mics, "relion.MicrographStar")
-    table_nodes.addRow(os.path.join(job_dir, "autopick.star"), "relion.CoordinateStar")
+    table_nodes.addRow(in_mics, "MicrographsData.star.relion")
+    table_nodes.addRow(os.path.join(job_dir, "autopick.star"), "MicrographsCoords.star.relion.autopick")
     table_input = Table(columns=['rlnPipeLineEdgeFromNode', 'rlnPipeLineEdgeProcess'])
     table_input.addRow(in_mics, job_dir)
     table_output = Table(columns=['rlnPipeLineEdgeProcess', 'rlnPipeLineEdgeToNode'])
