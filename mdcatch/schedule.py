@@ -73,11 +73,12 @@ def setupRelion(paramDict):
             'proc-cryolo__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
         })
         if 'TubeDiam' in paramDict:
+            filament_width = int(float(paramDict['PtclSize']) / bin / float(paramDict['PixelSpacing']))
             mapDict.update({
                 'proc-cryolo__do_3d': True,
                 'proc-cryolo__autopick__param4_label': 'filament',
                 'proc-cryolo__autopick__param5_label': 'fw',
-                'proc-cryolo__autopick__param5_value': float(paramDict['PtclSize']) / (bin * float(paramDict['PixelSpacing'])),
+                'proc-cryolo__autopick__param5_value': filament_width,
                 'proc-cryolo__autopick__param6_label': 'bd',
                 'proc-cryolo__autopick__param6_value': 40,
                 'proc-cryolo__autopick__param7_label': 'mn',
