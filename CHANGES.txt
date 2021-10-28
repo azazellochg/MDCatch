@@ -1,3 +1,4 @@
+2.2b1: Helical picking mode/schedule added (beta)
 2.1.1:
     - Fix: Falcon 4 non-EER movies case now works
 2.1:

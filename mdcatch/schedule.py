@@ -61,7 +61,7 @@ def setupRelion(paramDict):
         mapDict.update({
             'prep__motioncorr__do_float16': "No",  # Cryolo cannot read mrc 16-bit
             'proc-cryolo__cryolo_model': paramDict['PickerModel'],
-            'proc-cryolo__do_3d': paramDict['Run3dSteps'],
+            'proc-cryolo__do_3d': 'Yes',
             'proc-cryolo__class2d__particle_diameter': mask_diam,
             'proc-cryolo__extract__bg_diameter': paramDict['MaskSize'],
             'proc-cryolo__extract__extract_size': paramDict['BoxSize'],
@@ -72,12 +72,35 @@ def setupRelion(paramDict):
             'proc-cryolo__refine3d__particle_diameter': mask_diam,
             'proc-cryolo__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
         })
+        if 'TubeDiam' in paramDict:
+            mapDict.update({
+                'proc-cryolo__do_3d': 'No',
+                'proc-cryolo__autopick__param4_label': 'filament',
+                'proc-cryolo__autopick__param5_label': 'fw',
+                'proc-cryolo__autopick__param5_value': float(paramDict['PtclSize']) / (bin * float(paramDict['PixelSpacing'])),
+                'proc-cryolo__autopick__param6_label': 'bd',
+                'proc-cryolo__autopick__param6_value': 40,
+                'proc-cryolo__autopick__param7_label': 'mn',
+                'proc-cryolo__autopick__param7_value': 1,
+                'proc-cryolo__extract__do_cut_into_segments': 'Yes',
+                'proc-cryolo__extract__do_extract_helical_tubes': 'Yes',
+                'proc-cryolo__extract__do_extract_helix': 'Yes',
+                'proc-cryolo__extract__helical_bimodal_angular_priors': 'Yes',
+                'proc-cryolo__extract__helical_nr_asu': 1,
+                'proc-cryolo__extract__helical_rise': paramDict['HelixRise'],
+                'proc-cryolo__extract__helical_tube_outer_diameter': paramDict['TubeDiam'],
+                'proc-cryolo__class2d__do_bimodal_psi': 'Yes',
+                'proc-cryolo__class2d__do_helix': 'Yes',
+                'proc-cryolo__class2d__helical_tube_outer_diameter': paramDict['TubeDiam'],
+                'proc-cryolo__class2d__do_restrict_xoff': 'No',
+                'proc-cryolo__class2d__range_psi': 6
+            })
     else:  # logpicker or topaz
         mapDict.update({
             'proc-topaz__do_log': 1 if picker == 'log' else 0,
             'proc-topaz__do_topaz': 1 if picker == 'topaz' else 0,
             'proc-topaz__topaz_model': paramDict['PickerModel'] or "",
-            'proc-topaz__do_3d': paramDict['Run3dSteps'],
+            'proc-topaz__do_3d': 'Yes',
             'proc-topaz__class2d__particle_diameter': mask_diam,
             'proc-topaz__extract__bg_diameter': paramDict['MaskSize'],
             'proc-topaz__extract__extract_size': paramDict['BoxSize'],

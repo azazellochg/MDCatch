@@ -47,7 +47,8 @@ class Parser:
         self.pickerModel = None
         self.symmetry = DEF_SYMMETRY
         self.size = DEF_PARTICLE_SIZE
-        self.run3dsteps = False
+        self.mode = 'SPA'
+        self.helixRise = 1
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -115,11 +116,22 @@ class Parser:
             angpix *= 2
 
         ptclSizePx = float(size) / angpix
-        # use +10% for mask size
-        self.acqDict['MaskSize'] = str(math.ceil(1.1 * ptclSizePx))
-        # use +50% for box size, make it even
-        boxSize = 1.5 * ptclSizePx
-        self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
+
+        if self.mode == 'SPA':
+            # use +10% for mask size
+            self.acqDict['MaskSize'] = str(math.ceil(1.1 * ptclSizePx))
+            # use +50% for box size, make it even
+            boxSize = 1.5 * ptclSizePx
+            self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
+        elif self.mode == 'Helical':
+            # ptclSizePx is filament width
+            # use +20% for tube diameter
+            self.acqDict['TubeDiam'] = str(math.ceil(1.2 * float(size)))
+            # use +100% for mask size
+            self.acqDict['MaskSize'] = str(math.ceil(2 * ptclSizePx))
+            # use +150% for box size, make it even
+            boxSize = 2.5 * ptclSizePx
+            self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
 
         # from relion_it.py script
         # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
@@ -201,8 +213,7 @@ class Parser:
             'Software': self.software,
             'PrjPath': self.prjPath,
             'MoviePath': movieDir,
-            'PickerModel': self.pickerModel,
-            'Run3dSteps': self.run3dsteps
+            'PickerModel': self.pickerModel
         })
 
         if os.path.exists(gainFn):
