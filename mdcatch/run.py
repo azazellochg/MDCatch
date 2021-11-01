@@ -196,7 +196,7 @@ class Page1(QWizardPage):
         self.modelPath.setToolTip(help_message2)
 
         button_browse = QPushButton('Browse')
-        button_browse.setToolTip(help_message)
+        button_browse.setToolTip(help_message2)
         button_browse.clicked.connect(lambda: self.browseFileSlot(self.modelPath))
 
         hbox_model.addWidget(self.modelPath, alignment=Qt.Alignment())
