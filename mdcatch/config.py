@@ -25,7 +25,7 @@
 # **************************************************************************
 
 # set to 1 for more diagnostic output
-DEBUG = 1
+DEBUG = 0
 
 # some default vars
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
