@@ -69,10 +69,10 @@ You have two options:
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/126645233-5a40e5df-49bb-45ca-9612-060201d1a618.png
+.. image:: https://user-images.githubusercontent.com/6952870/139845150-d1aa465c-98cd-4a11-8c84-df099fbeb397.png
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/126645242-651d8b1f-40fe-412c-a681-13c860e0046b.png
+.. image:: https://user-images.githubusercontent.com/6952870/139845338-4ee9b0be-0a94-41ee-8710-f730b71f1177.png
    :width: 640 px
 
 
@@ -278,7 +278,8 @@ The test only checks if the parsers are working correctly using files from *test
 How to cite
 -----------
 
-Please cite the code repository DOI: `10.5281/zenodo.4383190 <http://doi.org/10.5281/zenodo.4383190>`_
+Dari Kimanius, Liyi Dong, Grigory Sharov, Takanori Nakane, Sjors H.W. Scheres. New tools for automated cryo-EM single-particle analysis in RELION-4.0.
+bioRxiv 2021.09.30.462538; doi: https://doi.org/10.1101/2021.09.30.462538
 
 Feedback
 --------
