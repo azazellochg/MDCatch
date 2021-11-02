@@ -73,22 +73,18 @@ def setupRelion(paramDict):
             'proc-cryolo__refine3d__sym_name': '"%s"' % paramDict['Symmetry'],
         })
         if 'TubeDiam' in paramDict:
-            filament_width = int(float(paramDict['PtclSize']) / bin / float(paramDict['PixelSpacing']))
+            box_dist = int(int(paramDict['BoxSize']) * 0.1)  # 10% of the box
             mapDict.update({
                 'proc-cryolo__do_3d': True,
                 'proc-cryolo__autopick__param4_label': 'filament',
-                'proc-cryolo__autopick__param5_label': 'fw',
-                'proc-cryolo__autopick__param5_value': filament_width,
-                'proc-cryolo__autopick__param6_label': 'bd',
-                'proc-cryolo__autopick__param6_value': 40,
-                'proc-cryolo__autopick__param7_label': 'mn',
-                'proc-cryolo__autopick__param7_value': 1,
-                'proc-cryolo__extract__do_cut_into_segments': True,
-                'proc-cryolo__extract__do_extract_helical_tubes': True,
+                'proc-cryolo__autopick__param5_label': 'bd',
+                'proc-cryolo__autopick__param5_value': box_dist,
+                'proc-cryolo__autopick__param6_label': 'mn',
+                'proc-cryolo__autopick__param6_value': 1,
+                'proc-cryolo__extract__do_cut_into_segments': False,
+                'proc-cryolo__extract__do_extract_helical_tubes': False,
                 'proc-cryolo__extract__do_extract_helix': True,
                 'proc-cryolo__extract__helical_bimodal_angular_priors': True,
-                'proc-cryolo__extract__helical_nr_asu': 1,
-                'proc-cryolo__extract__helical_rise': paramDict['HelixRise'],
                 'proc-cryolo__extract__helical_tube_outer_diameter': paramDict['TubeDiam'],
                 'proc-cryolo__class2d__do_bimodal_psi': True,
                 'proc-cryolo__class2d__do_helix': True,

@@ -105,8 +105,6 @@ class Page1(QWizardPage):
         self.label_sym = QLabel('Symmetry')
         self.label_filament_width = QLabel('Filament width (A)')
         self.label_filament_width.setVisible(False)
-        self.label_filament_rise = QLabel('Helical rise (A)')
-        self.label_filament_rise.setVisible(False)
 
         vbox.addWidget(label_soft, alignment=Qt.Alignment())
         vbox.addWidget(label_path, alignment=Qt.Alignment())
@@ -117,7 +115,6 @@ class Page1(QWizardPage):
         vbox.addWidget(self.label_diam, alignment=Qt.Alignment())
         vbox.addWidget(self.label_sym, alignment=Qt.Alignment())
         vbox.addWidget(self.label_filament_width, alignment=Qt.Alignment())
-        vbox.addWidget(self.label_filament_rise, alignment=Qt.Alignment())
 
         return vbox
 
@@ -237,17 +234,6 @@ class Page1(QWizardPage):
         hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
         grid.addLayout(hbox_sym)
 
-        # rise box
-        hbox_rise = QHBoxLayout()
-        self.spbox_rise = QSpinBox()
-        self.spbox_rise.setRange(1, 999)
-        self.spbox_rise.setValue(1)
-        self.spbox_rise.setFixedSize(60, 25)
-        self.spbox_rise.setVisible(False)
-        hbox_rise.addWidget(self.spbox_rise)
-        hbox_rise.setAlignment(Qt.AlignLeft)
-        grid.addLayout(hbox_rise)
-
         return grid
 
     def updSoftware(self, btgroup):
@@ -271,8 +257,6 @@ class Page1(QWizardPage):
         self.label_sym.setVisible(btValue == 'SPA')
         self.symm.setVisible(btValue == 'SPA')
         self.label_filament_width.setVisible(btValue == 'Helical')
-        self.label_filament_rise.setVisible(btValue == 'Helical')
-        self.spbox_rise.setVisible(btValue == 'Helical')
 
     def browseFolderSlot(self, var):
         """ Called when "Browse" is pressed. """
@@ -316,7 +300,6 @@ class Page1(QWizardPage):
             if App.model.pickerModel is None:
                 App.showDialog("ERROR", "Helical picking requires a pre-trained crYOLO model")
                 return False
-            App.model.helixRise = self.spbox_rise.value()
 
         if App.model.mdPath is None:
             App.model.mdPath = METADATA_PATH
@@ -525,8 +508,7 @@ class Page2(QWizardPage):
 
         if App.model.mode == 'Helical':
             App.model.acqDict.update({
-                'TubeDiam': self.tube.text(),
-                'HelixRise': App.model.helixRise
+                'TubeDiam': self.tube.text()
             })
 
         print("\nFinal parameters:\n")

@@ -59,7 +59,6 @@ def run_job(project_dir, args):
     model = args.model
     filament = args.filament
     if filament:
-        fil_width = args.filament_width
         box_dist = args.box_distance
         min_boxes = args.minimum_number_boxes
     denoise = args.denoise
@@ -122,7 +121,8 @@ def run_job(project_dir, args):
     else:
         input_job = ""
         keys = mic_fns
-    values = [os.path.splitext(i)[0] + "_autopick.star" for i in keys]
+    ext = ".box" if filament else ".star"
+    values = [os.path.splitext(i)[0] + "_autopick" + ext for i in keys]
     mic_dict = {k: v for k, v in zip(keys, values) if k not in done_mics}
 
     for mic in mic_dict:
@@ -162,9 +162,9 @@ def run_job(project_dir, args):
     if filament:
         args_dict.update({
             '--filament': "",
-            '--filament_width': fil_width,
             '--box_distance': box_dist,
-            '--minimum_number_boxes': min_boxes
+            '--minimum_number_boxes': min_boxes,
+            '--directional_method': 'PREDICTED'
         })
         args_dict.pop('--distance')
 
@@ -184,13 +184,13 @@ def run_job(project_dir, args):
 
     # Moving output star files for Relion to use
     table_coords = Table(columns=['rlnMicrographName', 'rlnMicrographCoordinates'])
-    star_dir = "STAR_START_END" if filament else "STAR"
+    star_dir = "EMAN_HELIX_SEGMENTED" if filament else "STAR"
     with open(DONE_MICS, "a+") as f, open("autopick.star", "w") as mics_star:
         for mic in mic_dict:
             f.write("%s\n" % mic)
             mic_base = os.path.basename(mic)
             os.remove(mic)  # clean up symlink
-            coord_cryolo = os.path.splitext(mic_base)[0] + ".star"
+            coord_cryolo = os.path.splitext(mic_base)[0] + ext
             coord_cryolo = getPath(job_dir, "output", star_dir, coord_cryolo)
             coord_relion = mic_dict[mic]
             if os.path.exists(coord_cryolo):
@@ -330,7 +330,6 @@ External job for calling cryolo within Relion 4.0. Run it in the Relion project 
     parser.add_argument("--threshold", help="Threshold for picking (default = 0.3)", type=float, default=0.3)
     parser.add_argument("--model", help="Cryolo training model (if not specified general model is used)", default="None")
     parser.add_argument("--filament", help='Enable filament mode', default=False, action='store_true')
-    parser.add_argument("--fw", dest="filament_width", help='[FILAMENT MODE] Filament width (in pixel)', type=int, default=None)
     parser.add_argument("--bd", dest="box_distance", help='[FILAMENT MODE] Distance in pixel between two boxes', type=int, default=None)
     parser.add_argument("--mn", dest="minimum_number_boxes", help='[FILAMENT MODE] Minimum number of boxes per filament', type=int, default=None)
     parser.add_argument("--denoise", help="Denoise with JANNI instead of lowpass filtering", default=False, action='store_true')
@@ -348,8 +347,8 @@ External job for calling cryolo within Relion 4.0. Run it in the Relion project 
         exit(1)
 
     if args.filament:
-        if None in [args.filament_width, args.box_distance, args.minimum_number_boxes]:
-            print("Error: --fw, --bd, --mn are required in filament mode!")
+        if None in [args.box_size, args.box_distance, args.minimum_number_boxes]:
+            print("Error: --box_size, --bd, --mn are required in filament mode!")
             exit(1)
 
     project_dir = os.getcwd()

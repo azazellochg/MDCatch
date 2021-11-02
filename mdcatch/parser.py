@@ -48,7 +48,6 @@ class Parser:
         self.symmetry = DEF_SYMMETRY
         self.size = DEF_PARTICLE_SIZE
         self.mode = 'SPA'
-        self.helixRise = 1
 
         self.acqDict = {
             'Mode': 'Linear',
@@ -127,10 +126,10 @@ class Parser:
             # ptclSizePx is filament width
             # use +20% for tube diameter
             self.acqDict['TubeDiam'] = str(math.ceil(1.2 * float(size)))
-            # use +100% for mask size
-            self.acqDict['MaskSize'] = str(math.ceil(2 * ptclSizePx))
-            # use +150% for box size, make it even
-            boxSize = 2.5 * ptclSizePx
+            # use mask size = 90% box size
+            self.acqDict['MaskSize'] = str(math.ceil(1.62 * ptclSizePx))
+            # use box size = 1.5x tube diam, make it even
+            boxSize = 1.8 * ptclSizePx
             self.acqDict['BoxSize'] = str(math.ceil(boxSize / 2.) * 2)
 
         # from relion_it.py script
