@@ -204,6 +204,24 @@ The metadata folder name (EPU session name) matches the folder name with movies 
 
 In case of SerialEM, the movies and metadata (mdoc file) are expected to be in the same folder, so here user must select a folder with movies in the GUI.
 
+SPA and Helical mode
+####################
+
+From version 2.2 onwards crYOLO picker can be run in helical mode (crYOLO v1.8.0+ recommended). Instead of a particle size, user provides the filament width. A pre-trained crYOLO model is also required.
+The suggested parameters in this case are:
+
+    - tube diameter = 1.2 x filament width
+    - box size = 1.5 x tube diameter
+    - mask size = 0.9 x box size
+    - inter-box distance = 0.1 x box size
+
+When running standard SPA, the suggested parameters are:
+
+    - box size = 1.5 x particle size
+    - mask size = 1.1 x particle size
+
+More details can be found in the code, see **calcBox()** inside *parser.py*
+
 RELION vs Scipion
 #################
 
