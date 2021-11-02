@@ -91,7 +91,7 @@ def setupRelion(paramDict):
                 'proc-cryolo__class2d__do_restrict_xoff': False,
                 'proc-cryolo__class2d__range_psi': 6,
                 'proc-cryolo__class2d__psi_sampling': 1,
-                'proc-cryolo__class2d__other_args': "--dont_check_norm"
+                'proc-cryolo__class2d__other_args': '"--dont_check_norm"'
             })
     else:  # logpicker or topaz
         mapDict.update({
