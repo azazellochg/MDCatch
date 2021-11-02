@@ -59,7 +59,6 @@ def setupRelion(paramDict):
     picker = paramDict['Picker'].lower()
     if picker == 'cryolo':
         mapDict.update({
-            'prep__motioncorr__do_float16': False,  # Cryolo cannot read mrc 16-bit
             'proc-cryolo__cryolo_model': paramDict['PickerModel'],
             'proc-cryolo__do_3d': True,
             'proc-cryolo__class2d__particle_diameter': mask_diam,
@@ -90,7 +89,9 @@ def setupRelion(paramDict):
                 'proc-cryolo__class2d__do_helix': True,
                 'proc-cryolo__class2d__helical_tube_outer_diameter': paramDict['TubeDiam'],
                 'proc-cryolo__class2d__do_restrict_xoff': False,
-                'proc-cryolo__class2d__range_psi': 6
+                'proc-cryolo__class2d__range_psi': 6,
+                'proc-cryolo__class2d__psi_sampling': 1,
+                'proc-cryolo__class2d__other_args': "--dont_check_norm"
             })
     else:  # logpicker or topaz
         mapDict.update({
