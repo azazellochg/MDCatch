@@ -237,48 +237,59 @@ def run_job(project_dir, args):
         # calculate diameter, original (boxSize) and downsampled (boxSizeSmall) box
         optics = Table(fileName=getPath(in_mics), tableName='optics')
         angpix = float(optics[0].rlnMicrographPixelSize)
-        # use + 20% for diameter
-        diam = math.ceil(estim_sizepx * angpix * 1.2)
-        # use +30% for box size, make it even
-        boxSize = 1.3 * estim_sizepx
-        boxSize = math.ceil(boxSize / 2.) * 2
 
-        # from relion_it.py script
-        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
-        boxSizeSmall = None
-        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
-                    360, 384, 400, 420, 450, 480, 512, 640, 768,
-                    896, 1024):
-            # Don't go larger than the original box
-            if box > boxSize:
-                boxSizeSmall = boxSize
-                break
-            # If Nyquist freq. is better than 8.5 A, use this
-            # downscaled box, otherwise continue to next size up
-            small_box_angpix = angpix * boxSize / box
-            if small_box_angpix < 4.25:
-                boxSizeSmall = box
-                break
+        if filament:
+            # box size = 1.5x tube diam
+            diam = 0.66 * box_size
+        else:
+            # use + 20% for diameter
+            diam = math.ceil(estim_sizepx * angpix * 1.2)
+            # use +30% for box size, make it even
+            boxSize = 1.3 * estim_sizepx
+            boxSize = math.ceil(boxSize / 2.) * 2
 
-        print("\nSuggested parameters:\n\tDiameter (A): %d\n\tBox size (px): %d\n"
-              "\tBox size binned (px): %d" % (diam, boxSize, boxSizeSmall))
+            # from relion_it.py script
+            # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
+            boxSizeSmall = None
+            for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+                        360, 384, 400, 420, 450, 480, 512, 640, 768,
+                        896, 1024):
+                # Don't go larger than the original box
+                if box > boxSize:
+                    boxSizeSmall = boxSize
+                    break
+                # If Nyquist freq. is better than 7.5 A, use this
+                # downscaled box, otherwise continue to next size up
+                small_box_angpix = angpix * boxSize / box
+                if small_box_angpix < 3.75:
+                    boxSizeSmall = box
+                    break
 
-        # output all params into a star file
-        tableCryolo = Table(columns=['rlnParticleDiameter',
-                                     'rlnOriginalImageSize',
-                                     'rlnImageSize'])
-        tableCryolo.addRow(diam, boxSize, boxSizeSmall)
-        with open(outputFn, "w") as f:
-            tableCryolo.writeStar(f, tableName='picker')
+            print("\nSuggested parameters:\n\tDiameter (A): %d\n\tBox size (px): %d\n"
+                  "\tBox size binned (px): %d" % (diam, boxSize, boxSizeSmall))
+
+            # output all params into a star file
+            tableCryolo = Table(columns=['rlnParticleDiameter',
+                                         'rlnOriginalImageSize',
+                                         'rlnImageSize'])
+            tableCryolo.addRow(diam, boxSize, boxSizeSmall)
+            with open(outputFn, "w") as f:
+                tableCryolo.writeStar(f, tableName='picker')
 
         # create .gui_manualpickjob.star for easy display
         starString = """
 # version 30001
+
 data_job
-_rlnJobType                             3
+
+_rlnJobTypeLabel             relion.manualpick%s
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
+
 # version 30001
+
 data_joboptions_values
+
 loop_
 _rlnJobOptionVariable #1
 _rlnJobOptionValue #2
@@ -288,6 +299,7 @@ blue_value          0
 color_label rlnParticleSelectZScore
   diameter         %d
   do_color         No
+do_fom_threshold         No
   do_queue         No
 do_startend        No
   fn_color         ""
@@ -296,6 +308,7 @@ do_startend        No
    lowpass         20
   micscale        0.2
 min_dedicated       1
+minimum_pick_fom          0
 other_args         ""
       qsub       qsub
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
@@ -304,8 +317,9 @@ qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
 sigma_contrast      3
  white_val          0
 """
+        label = ".helical" if filament else ""
         with open(getPath(".gui_manualpickjob.star"), "w") as f:
-            f.write(starString % (angpix, diam))
+            f.write(starString % (label, angpix, diam))
 
     # remove output dir
     if os.path.isdir("output"):
