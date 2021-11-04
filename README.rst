@@ -69,10 +69,10 @@ You have two options:
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/126645233-5a40e5df-49bb-45ca-9612-060201d1a618.png
+.. image:: https://user-images.githubusercontent.com/6952870/139845150-d1aa465c-98cd-4a11-8c84-df099fbeb397.png
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/126645242-651d8b1f-40fe-412c-a681-13c860e0046b.png
+.. image:: https://user-images.githubusercontent.com/6952870/139845338-4ee9b0be-0a94-41ee-8710-f730b71f1177.png
    :width: 640 px
 
 
@@ -204,6 +204,24 @@ The metadata folder name (EPU session name) matches the folder name with movies 
 
 In case of SerialEM, the movies and metadata (mdoc file) are expected to be in the same folder, so here user must select a folder with movies in the GUI.
 
+SPA and Helical mode
+####################
+
+From version 2.2 onwards crYOLO picker can be run in helical mode (crYOLO v1.8.0+ recommended). Instead of a particle size, user provides the filament width. A pre-trained crYOLO model is also required.
+The suggested parameters in this case are:
+
+    - tube diameter = 1.2 x filament width
+    - box size = 1.5 x tube diameter
+    - mask size = 0.9 x box size
+    - inter-box distance = 0.1 x box size
+
+When running standard SPA, the suggested parameters are:
+
+    - box size = 1.5 x particle size
+    - mask size = 1.1 x particle size
+
+More details can be found in the code, see **calcBox()** inside *parser.py*
+
 RELION vs Scipion
 #################
 
@@ -260,7 +278,8 @@ The test only checks if the parsers are working correctly using files from *test
 How to cite
 -----------
 
-Please cite the code repository DOI: `10.5281/zenodo.4383190 <http://doi.org/10.5281/zenodo.4383190>`_
+Dari Kimanius, Liyi Dong, Grigory Sharov, Takanori Nakane, Sjors H.W. Scheres. New tools for automated cryo-EM single-particle analysis in RELION-4.0.
+bioRxiv 2021.09.30.462538; doi: https://doi.org/10.1101/2021.09.30.462538
 
 Feedback
 --------

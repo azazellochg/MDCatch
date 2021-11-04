@@ -41,7 +41,7 @@ from emtable import Table  # requires pip install emtable
 RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
 RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
 DONE_MICS = "done_mics.txt"
-CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.7.7"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_GEN_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
@@ -59,7 +59,6 @@ def run_job(project_dir, args):
     model = args.model
     filament = args.filament
     if filament:
-        fil_width = args.filament_width
         box_dist = args.box_distance
         min_boxes = args.minimum_number_boxes
     denoise = args.denoise
@@ -122,7 +121,8 @@ def run_job(project_dir, args):
     else:
         input_job = ""
         keys = mic_fns
-    values = [os.path.splitext(i)[0] + "_autopick.star" for i in keys]
+    ext = ".box" if filament else ".star"
+    values = [os.path.splitext(i)[0] + "_autopick" + ext for i in keys]
     mic_dict = {k: v for k, v in zip(keys, values) if k not in done_mics}
 
     for mic in mic_dict:
@@ -162,9 +162,9 @@ def run_job(project_dir, args):
     if filament:
         args_dict.update({
             '--filament': "",
-            '--filament_width': fil_width,
             '--box_distance': box_dist,
-            '--minimum_number_boxes': min_boxes
+            '--minimum_number_boxes': min_boxes,
+            '--directional_method': 'PREDICTED'
         })
         args_dict.pop('--distance')
 
@@ -184,13 +184,13 @@ def run_job(project_dir, args):
 
     # Moving output star files for Relion to use
     table_coords = Table(columns=['rlnMicrographName', 'rlnMicrographCoordinates'])
-    star_dir = "STAR_START_END" if filament else "STAR"
+    star_dir = "EMAN_HELIX_SEGMENTED" if filament else "STAR"
     with open(DONE_MICS, "a+") as f, open("autopick.star", "w") as mics_star:
         for mic in mic_dict:
             f.write("%s\n" % mic)
             mic_base = os.path.basename(mic)
             os.remove(mic)  # clean up symlink
-            coord_cryolo = os.path.splitext(mic_base)[0] + ".star"
+            coord_cryolo = os.path.splitext(mic_base)[0] + ext
             coord_cryolo = getPath(job_dir, "output", star_dir, coord_cryolo)
             coord_relion = mic_dict[mic]
             if os.path.exists(coord_cryolo):
@@ -237,48 +237,59 @@ def run_job(project_dir, args):
         # calculate diameter, original (boxSize) and downsampled (boxSizeSmall) box
         optics = Table(fileName=getPath(in_mics), tableName='optics')
         angpix = float(optics[0].rlnMicrographPixelSize)
-        # use + 20% for diameter
-        diam = math.ceil(estim_sizepx * angpix * 1.2)
-        # use +30% for box size, make it even
-        boxSize = 1.3 * estim_sizepx
-        boxSize = math.ceil(boxSize / 2.) * 2
 
-        # from relion_it.py script
-        # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
-        boxSizeSmall = None
-        for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
-                    360, 384, 400, 420, 450, 480, 512, 640, 768,
-                    896, 1024):
-            # Don't go larger than the original box
-            if box > boxSize:
-                boxSizeSmall = boxSize
-                break
-            # If Nyquist freq. is better than 8.5 A, use this
-            # downscaled box, otherwise continue to next size up
-            small_box_angpix = angpix * boxSize / box
-            if small_box_angpix < 4.25:
-                boxSizeSmall = box
-                break
+        if filament:
+            # box size = 1.5x tube diam
+            diam = 0.66 * box_size
+        else:
+            # use + 20% for diameter
+            diam = math.ceil(estim_sizepx * angpix * 1.2)
+            # use +30% for box size, make it even
+            boxSize = 1.3 * estim_sizepx
+            boxSize = math.ceil(boxSize / 2.) * 2
 
-        print("\nSuggested parameters:\n\tDiameter (A): %d\n\tBox size (px): %d\n"
-              "\tBox size binned (px): %d" % (diam, boxSize, boxSizeSmall))
+            # from relion_it.py script
+            # Authors: Sjors H.W. Scheres, Takanori Nakane & Colin M. Palmer
+            boxSizeSmall = None
+            for box in (48, 64, 96, 128, 160, 192, 256, 288, 300, 320,
+                        360, 384, 400, 420, 450, 480, 512, 640, 768,
+                        896, 1024):
+                # Don't go larger than the original box
+                if box > boxSize:
+                    boxSizeSmall = boxSize
+                    break
+                # If Nyquist freq. is better than 7.5 A, use this
+                # downscaled box, otherwise continue to next size up
+                small_box_angpix = angpix * boxSize / box
+                if small_box_angpix < 3.75:
+                    boxSizeSmall = box
+                    break
 
-        # output all params into a star file
-        tableCryolo = Table(columns=['rlnParticleDiameter',
-                                     'rlnOriginalImageSize',
-                                     'rlnImageSize'])
-        tableCryolo.addRow(diam, boxSize, boxSizeSmall)
-        with open(outputFn, "w") as f:
-            tableCryolo.writeStar(f, tableName='picker')
+            print("\nSuggested parameters:\n\tDiameter (A): %d\n\tBox size (px): %d\n"
+                  "\tBox size binned (px): %d" % (diam, boxSize, boxSizeSmall))
+
+            # output all params into a star file
+            tableCryolo = Table(columns=['rlnParticleDiameter',
+                                         'rlnOriginalImageSize',
+                                         'rlnImageSize'])
+            tableCryolo.addRow(diam, boxSize, boxSizeSmall)
+            with open(outputFn, "w") as f:
+                tableCryolo.writeStar(f, tableName='picker')
 
         # create .gui_manualpickjob.star for easy display
         starString = """
 # version 30001
+
 data_job
-_rlnJobType                             3
+
+_rlnJobTypeLabel             relion.manualpick%s
 _rlnJobIsContinue                       0
+_rlnJobIsTomo                           0
+
 # version 30001
+
 data_joboptions_values
+
 loop_
 _rlnJobOptionVariable #1
 _rlnJobOptionValue #2
@@ -288,6 +299,7 @@ blue_value          0
 color_label rlnParticleSelectZScore
   diameter         %d
   do_color         No
+do_fom_threshold         No
   do_queue         No
 do_startend        No
   fn_color         ""
@@ -296,6 +308,7 @@ do_startend        No
    lowpass         20
   micscale        0.2
 min_dedicated       1
+minimum_pick_fom          0
 other_args         ""
       qsub       qsub
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
@@ -304,8 +317,9 @@ qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh
 sigma_contrast      3
  white_val          0
 """
+        label = ".helical" if filament else ""
         with open(getPath(".gui_manualpickjob.star"), "w") as f:
-            f.write(starString % (angpix, diam))
+            f.write(starString % (label, angpix, diam))
 
     # remove output dir
     if os.path.isdir("output"):
@@ -330,7 +344,6 @@ External job for calling cryolo within Relion 4.0. Run it in the Relion project 
     parser.add_argument("--threshold", help="Threshold for picking (default = 0.3)", type=float, default=0.3)
     parser.add_argument("--model", help="Cryolo training model (if not specified general model is used)", default="None")
     parser.add_argument("--filament", help='Enable filament mode', default=False, action='store_true')
-    parser.add_argument("--fw", dest="filament_width", help='[FILAMENT MODE] Filament width (in pixel)', type=int, default=None)
     parser.add_argument("--bd", dest="box_distance", help='[FILAMENT MODE] Distance in pixel between two boxes', type=int, default=None)
     parser.add_argument("--mn", dest="minimum_number_boxes", help='[FILAMENT MODE] Minimum number of boxes per filament', type=int, default=None)
     parser.add_argument("--denoise", help="Denoise with JANNI instead of lowpass filtering", default=False, action='store_true')
@@ -348,8 +361,8 @@ External job for calling cryolo within Relion 4.0. Run it in the Relion project 
         exit(1)
 
     if args.filament:
-        if None in [args.filament_width, args.box_distance, args.minimum_number_boxes]:
-            print("Error: --fw, --bd, --mn are required in filament mode!")
+        if None in [args.box_size, args.box_distance, args.minimum_number_boxes]:
+            print("Error: --box_size, --bd, --mn are required in filament mode!")
             exit(1)
 
     project_dir = os.getcwd()
