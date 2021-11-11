@@ -188,7 +188,7 @@ def run_job(args):
         table_output.writeStar(f, tableName="pipeline_output_edges")
 
     # Register output nodes in .Nodes/
-    os.makedirs(os.path.join(".Nodes", "MicrographsCoords", job_dir))
+    os.makedirs(os.path.join(".Nodes", "MicrographsCoords", job_dir), exist_ok=True)
     open(os.path.join(".Nodes", "MicrographsCoords", job_dir, "autopick.star"), "w").close()
 
     outputFn = os.path.join(job_dir, "output_for_relion.star")
@@ -288,10 +288,6 @@ sigma_contrast      3
         label = ".helical" if filament else ""
         with open(".gui_manualpickjob.star", "w") as f:
             f.write(starString % (label, angpix, diam))
-
-    # remove output dir
-    #if os.path.isdir(os.path.join(job_dir, "output")):
-    #    shutil.rmtree(os.path.join(job_dir, "output"))
 
     end = time.time()
     diff = end - start
