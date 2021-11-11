@@ -35,21 +35,19 @@ import time
 from glob import glob
 import subprocess
 import math
-from emtable import Table  # requires pip install emtable
+from emtable import Table  # run "pip3 install --user emtable" for system python
 
 
-RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
-RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-DONE_MICS = "done_mics.txt"
 CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_GEN_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
+SCRATCH_DIR = "/ssd"  # SSD scratch space for filtered mics, can be None
 DEBUG = 0
 
 
-def run_job(project_dir, args):
+def run_job(args):
     start = time.time()
     in_mics = args.in_mics
     job_dir = args.out_dir
@@ -65,24 +63,31 @@ def run_job(project_dir, args):
     gpus = args.gpu
     threads = args.threads
 
-    getPath = lambda *arglist: os.path.join(project_dir, *arglist)
+    if SCRATCH_DIR is not None:
+        filtered_dir = os.path.join(SCRATCH_DIR, "filtered_tmp")
+    else:
+        filtered_dir = "%s/filtered_tmp/" % job_dir
 
     if model == "None":
         model = CRYOLO_GEN_MODEL if not denoise else CRYOLO_GEN_JANNI_MODEL
     else:
-        model = getPath(model)
+        model = os.path.abspath(model)
 
     # Making a cryolo config file
-    json_dict = {"model": {
-        "architecture": "PhosaurusNet",
-        "input_size": 1024,
-        "max_box_per_image": 600,
-        "filter": [
-            0.1,
-            "filtered_tmp/"
-        ]
-    }}
-
+    json_dict = {
+        "model": {
+            "architecture": "PhosaurusNet",
+            "input_size": 1024,
+            "max_box_per_image": 600,
+            "filter": [
+                0.1,
+                filtered_dir
+            ]
+        },
+        "other": {
+            "log_path": "%s/logs/" % job_dir
+        }
+    }
     if box_size:  # is not 0
         json_dict["model"]["anchors"] = [int(box_size), int(box_size)]
         if not filament:
@@ -92,70 +97,30 @@ def run_job(project_dir, args):
             CRYOLO_JANNI_MODEL,
             24,
             3,
-            "filtered_tmp/"
+            filtered_dir
         ]
 
     if DEBUG:
         print("Using following config: ", json_dict)
 
-    with open("config_cryolo.json", "w") as json_file:
+    with open(os.path.join(job_dir, "config_cryolo.json"), "w") as json_file:
         json.dump(json_dict, json_file, indent=4)
 
-    # Reading the micrographs star file from relion
-    mictable = Table(fileName=getPath(in_mics), tableName='micrographs')
-
-    # Arranging files for cryolo: making symlinks for mics
-    done_mics = []
-    mic_dirs = []
-    if os.path.exists(DONE_MICS):
-        with open(DONE_MICS, "r") as f:
-            done_mics.extend(f.read().splitlines())
-    if DEBUG:
-        print("Current done_mics: ", done_mics)
-
+    # Reading the micrographs star file from Relion
+    mictable = Table(fileName=in_mics, tableName='micrographs')
     mic_fns = mictable.getColumnValues("rlnMicrographName")
-    mic_ext = os.path.splitext(mic_fns[0])[1]
-    if "job" in mic_fns[0].split("/")[1]:  # remove JobType/jobXXX
-        input_job = "/".join(mic_fns[0].split("/")[:2])
-        keys = ["/".join(i.split("/")[2:]) for i in mic_fns]
-    else:
-        input_job = ""
-        keys = mic_fns
-    ext = ".box" if filament else ".star"
-    values = [os.path.splitext(i)[0] + "_autopick" + ext for i in keys]
-    mic_dict = {k: v for k, v in zip(keys, values) if k not in done_mics}
-
-    for mic in mic_dict:
-        if DEBUG:
-            print("Processing mic: ", mic)
-        mic_dir = os.path.dirname(mic)
-        # create folder for micrograph links for cryolo job
-        if not os.path.isdir(mic_dir):
-            os.makedirs(mic_dir)
-        if mic_dir not in mic_dirs:
-            mic_dirs.append(mic_dir)
-            if DEBUG:
-                print("Added folder %s to the mic_dirs" % mic_dir)
-        inputfn = getPath(input_job, mic)
-        outfn = getPath(job_dir, mic)
-        os.symlink(inputfn, outfn)
-        if DEBUG:
-            print("Link %s --> %s" % (inputfn, outfn))
-
-    if len(mic_dict.keys()) == 0:
-        print("All mics picked! Nothing to do.")
-        open(RELION_JOB_SUCCESS_FILENAME, "w").close()
-        exit(0)
 
     # Launching cryolo
     args_dict = {
-        '--conf': "config_cryolo.json",
-        '--output': 'output',
+        '--conf': os.path.join(job_dir, "config_cryolo.json"),
+        '--input': in_mics,
+        '--output': os.path.join(job_dir, 'output'),
         '--weights': model,
         '--gpu': gpus.replace(',', ' '),
         '--threshold': thresh,
         '--distance': distance,
         '--cleanup': "",
+        '--skip': "",
         '--num_cpu': -1 if threads == 1 else threads
     }
 
@@ -170,10 +135,6 @@ def run_job(project_dir, args):
 
     cmd = "%s && %s " % (CONDA_ENV, CRYOLO_PREDICT)
     cmd += " ".join(['%s %s' % (k, v) for k, v in args_dict.items()])
-    cmd += " --input "
-    for i in mic_dirs:
-        if len(glob("%s/*%s" % (i, mic_ext))):  # skip folders with no mics
-            cmd += "%s/ " % i
 
     print("Running command:\n{}".format(cmd))
     proc = subprocess.Popen(cmd, shell=True)
@@ -185,23 +146,27 @@ def run_job(project_dir, args):
     # Moving output star files for Relion to use
     table_coords = Table(columns=['rlnMicrographName', 'rlnMicrographCoordinates'])
     star_dir = "EMAN_HELIX_SEGMENTED" if filament else "STAR"
-    with open(DONE_MICS, "a+") as f, open("autopick.star", "w") as mics_star:
-        for mic in mic_dict:
-            f.write("%s\n" % mic)
+    ext = ".box" if filament else ".star"
+    with open(os.path.join(job_dir, "autopick.star"), "w") as mics_star:
+        for mic in mic_fns:
             mic_base = os.path.basename(mic)
-            os.remove(mic)  # clean up symlink
+            mic_dir = os.path.dirname(mic)
+            if len(mic_dir.split("/")) > 1 and "job" in mic_dir.split("/")[1]:  # remove JobType/jobXXX
+                mic_dir = "/".join(mic_dir.split("/")[2:])
+            os.makedirs(os.path.join(job_dir, mic_dir), exist_ok=True)
             coord_cryolo = os.path.splitext(mic_base)[0] + ext
-            coord_cryolo = getPath(job_dir, "output", star_dir, coord_cryolo)
-            coord_relion = mic_dict[mic]
+            coord_cryolo = os.path.join(job_dir, "output", star_dir, coord_cryolo)
+            coord_relion = os.path.splitext(mic_base)[0] + "_autopick" + ext
+            coord_relion = os.path.join(job_dir, mic_dir, coord_relion)
             if os.path.exists(coord_cryolo):
-                os.rename(coord_cryolo, getPath(job_dir, coord_relion))
-                table_coords.addRow(os.path.join(input_job, mic), os.path.join(job_dir, coord_relion))
+                os.rename(coord_cryolo, coord_relion)
+                table_coords.addRow(mic, coord_relion)
                 if DEBUG:
-                    print("Moved %s to %s" % (coord_cryolo, getPath(job_dir, coord_relion)))
+                    print("Moved %s to %s" % (coord_cryolo, coord_relion))
         table_coords.writeStar(mics_star, tableName='coordinate_files')
 
-    # Required output job_pipeline.star file
-    pipeline_fn = getPath(job_dir, "job_pipeline.star")
+    # Required output to mini pipeline job_pipeline.star file
+    pipeline_fn = os.path.join(job_dir, "job_pipeline.star")
     table_gen = Table(columns=['rlnPipeLineJobCounter'])
     table_gen.addRow(2)
     table_proc = Table(columns=['rlnPipeLineProcessName', 'rlnPipeLineProcessAlias',
@@ -222,11 +187,14 @@ def run_job(project_dir, args):
         table_input.writeStar(f, tableName="pipeline_input_edges")
         table_output.writeStar(f, tableName="pipeline_output_edges")
 
-    outputFn = getPath(job_dir, "output_for_relion.star")
+    # Register output nodes in .Nodes/
+    os.makedirs(os.path.join(".Nodes", "MicrographsCoords", job_dir))
+    open(os.path.join(".Nodes", "MicrographsCoords", job_dir, "autopick.star"), "w").close()
+
+    outputFn = os.path.join(job_dir, "output_for_relion.star")
     if not os.path.exists(outputFn):
         # get estimated box size
-        summaryfn = getPath(job_dir, "output/DISTR",
-                            'size_distribution_summary*.txt')
+        summaryfn = os.path.join(job_dir, "output/DISTR", 'size_distribution_summary*.txt')
         with open(glob(summaryfn)[0]) as f:
             for line in f:
                 if line.startswith("MEAN,"):
@@ -235,7 +203,7 @@ def run_job(project_dir, args):
         print("\ncrYOLO estimated box size %d px" % estim_sizepx)
 
         # calculate diameter, original (boxSize) and downsampled (boxSizeSmall) box
-        optics = Table(fileName=getPath(in_mics), tableName='optics')
+        optics = Table(fileName=in_mics, tableName='optics')
         angpix = float(optics[0].rlnMicrographPixelSize)
 
         if filament:
@@ -318,12 +286,12 @@ sigma_contrast      3
  white_val          0
 """
         label = ".helical" if filament else ""
-        with open(getPath(".gui_manualpickjob.star"), "w") as f:
+        with open(".gui_manualpickjob.star", "w") as f:
             f.write(starString % (label, angpix, diam))
 
     # remove output dir
-    if os.path.isdir("output"):
-        shutil.rmtree("output")
+    #if os.path.isdir(os.path.join(job_dir, "output")):
+    #    shutil.rmtree(os.path.join(job_dir, "output"))
 
     end = time.time()
     diff = end - start
@@ -333,7 +301,7 @@ sigma_contrast      3
 def main():
     """Change to the job working directory, then call run_job()"""
     help = """
-External job for calling cryolo within Relion 4.0. Run it in the Relion project directory, e.g.:
+External job for calling crYOLO 1.8+ within Relion 4.0. Run it in the Relion project directory, e.g.:
     external_job_cryolo.py --o External/cryolo_picking --in_mics CtfFind/job004/micrographs_ctf.star
 """
     parser = argparse.ArgumentParser(usage=help)
@@ -365,15 +333,16 @@ External job for calling cryolo within Relion 4.0. Run it in the Relion project 
             print("Error: --box_size, --bd, --mn are required in filament mode!")
             exit(1)
 
-    project_dir = os.getcwd()
     os.makedirs(args.out_dir, exist_ok=True)
-    os.chdir(args.out_dir)
+    RELION_JOB_FAILURE_FILENAME = os.path.join(args.out_dir, "RELION_JOB_EXIT_FAILURE")
+    RELION_JOB_SUCCESS_FILENAME = os.path.join(args.out_dir, "RELION_JOB_EXIT_SUCCESS")
+
     if os.path.isfile(RELION_JOB_FAILURE_FILENAME):
         os.remove(RELION_JOB_FAILURE_FILENAME)
     if os.path.isfile(RELION_JOB_SUCCESS_FILENAME):
         os.remove(RELION_JOB_SUCCESS_FILENAME)
     try:
-        run_job(project_dir, args)
+        run_job(args)
     except:
         open(RELION_JOB_FAILURE_FILENAME, "w").close()
         raise

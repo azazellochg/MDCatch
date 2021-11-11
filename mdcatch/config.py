@@ -38,7 +38,7 @@ BATCH_SIZE = 50  # number of movies to process in batches
 
 # path to folder with EPU sessions or folder with SerialEM mdoc files
 # in SerialEM case movies and mdocs are expected in the same folder
-METADATA_PATH = "/mnt/MetaData/Krios1/EPU"
+METADATA_PATH = "/mnt/MetaData"
 
 # path where Relion projects are created
 PROJECT_PATH = "/cephfs"
