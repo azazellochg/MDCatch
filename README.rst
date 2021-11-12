@@ -99,7 +99,7 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://relion.readthedocs.io/en/release-4.0/>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO 1.8.0 <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
 
 Relion and/or Scipion should be available from your shell **PATH**. You also need to define the following variables:
 

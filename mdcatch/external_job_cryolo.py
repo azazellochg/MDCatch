@@ -30,7 +30,6 @@ Sjors H.W. Scheres, Takanori Nakane, Colin M. Palmer, Donovan Webb"""
 import argparse
 import json
 import os
-import shutil
 import time
 from glob import glob
 import subprocess
@@ -43,7 +42,7 @@ CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_GEN_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
-SCRATCH_DIR = "/ssd"  # SSD scratch space for filtered mics, can be None
+SCRATCH_DIR = os.getenv("RELION_SCRATCH_DIR", None)  # SSD scratch space for filtered mics, can be None
 DEBUG = 0
 
 
@@ -121,6 +120,7 @@ def run_job(args):
         '--distance': distance,
         '--cleanup': "",
         '--skip': "",
+        '--write_empty': "",
         '--num_cpu': -1 if threads == 1 else threads
     }
 
