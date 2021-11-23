@@ -278,8 +278,7 @@ The test only checks if the parsers are working correctly using files from *test
 How to cite
 -----------
 
-Dari Kimanius, Liyi Dong, Grigory Sharov, Takanori Nakane, Sjors H.W. Scheres. New tools for automated cryo-EM single-particle analysis in RELION-4.0.
-bioRxiv 2021.09.30.462538; doi: https://doi.org/10.1101/2021.09.30.462538
+Kimanius D, Dong L, Sharov G, Nakane T, Scheres SHW. New tools for automated cryo-EM single-particle analysis in RELION-4.0 [published online ahead of print, 2021 Nov 16]. Biochem J. 2021; BCJ20210708. doi:10.1042/BCJ20210708
 
 Feedback
 --------
