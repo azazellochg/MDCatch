@@ -32,17 +32,17 @@ import json
 import os
 import time
 import subprocess
-from emtable import Table  # requires pip install emtable
+from emtable import Table  # run "pip3 install --user emtable" for system python
 
-RELION_JOB_FAILURE_FILENAME = "RELION_JOB_EXIT_FAILURE"
-RELION_JOB_SUCCESS_FILENAME = "RELION_JOB_EXIT_SUCCESS"
-CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.7.7"
+
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8"
 CRYOLO_TRAIN = "cryolo_train.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_janni_20190703.h5"
 TUNE_MODEL = "fine_tuned_model.h5"
 IMG_FOLDER = "train_image"
 ANNOT_FOLDER = "train_annot"
+SCRATCH_DIR = os.getenv("RELION_SCRATCH_DIR", None)  # SSD scratch space for filtered mics, can be None
 DEBUG = 0
 
 
@@ -54,6 +54,11 @@ def run_job(project_dir, args):
     gpus = args.gpu
 
     getPath = lambda *arglist: os.path.join(project_dir, *arglist)
+
+    if SCRATCH_DIR is not None:
+        filtered_dir = os.path.join(SCRATCH_DIR, "filtered_tmp")
+    else:
+        filtered_dir = "%s/filtered_tmp/" % job_dir
 
     # Create folder structure for cryolo
     os.mkdir(IMG_FOLDER)
@@ -72,10 +77,9 @@ def run_job(project_dir, args):
             "input_size": 1024,
             "max_box_per_image": 600,
             "anchors": [box_size, box_size],
-            "norm": "STANDARD",
             "filter": [
                 0.1,
-                "filtered_tmp/"
+                filtered_dir
             ]
         },
         "train": {
@@ -167,7 +171,7 @@ def run_job(project_dir, args):
                                 'rlnPipeLineProcessTypeLabel', 'rlnPipeLineProcessStatusLabel'])
     table_proc.addRow(job_dir, 'None', 'relion.external', 'Running')
     table_nodes = Table(columns=['rlnPipeLineNodeName', 'rlnPipeLineNodeTypeLabel'])
-    table_nodes.addRow(in_parts, "relion.ParticleStar")
+    table_nodes.addRow(in_parts, "ParticlesData.star.relion")
     table_input = Table(columns=['rlnPipeLineEdgeFromNode', 'rlnPipeLineEdgeProcess'])
     table_input.addRow(in_parts, job_dir)
 
@@ -185,7 +189,7 @@ def run_job(project_dir, args):
 def main():
     """Change to the job working directory, then call run_job()"""
     help = """
-External job for calling cryolo fine-tune training within Relion 4.0. Run it in the Relion project directory, e.g.:
+External job for calling crYOLO fine-tune training within Relion 4.0. Run it in the Relion project directory, e.g.:
     external_job_cryolo_train.py --o External/cryolo_training --in_parts Select/job004/particles.star
 """
     parser = argparse.ArgumentParser(usage=help)
@@ -208,6 +212,9 @@ External job for calling cryolo fine-tune training within Relion 4.0. Run it in 
 
     project_dir = os.getcwd()
     os.makedirs(args.out_dir, exist_ok=True)
+    RELION_JOB_FAILURE_FILENAME = os.path.join(args.out_dir, "RELION_JOB_EXIT_FAILURE")
+    RELION_JOB_SUCCESS_FILENAME = os.path.join(args.out_dir, "RELION_JOB_EXIT_SUCCESS")
+
     os.chdir(args.out_dir)
     if os.path.isfile(RELION_JOB_FAILURE_FILENAME):
         os.remove(RELION_JOB_FAILURE_FILENAME)

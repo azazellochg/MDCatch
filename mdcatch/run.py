@@ -100,18 +100,21 @@ class Page1(QWizardPage):
         label_pipeline = QLabel('Run pipeline in')
         label_picker = QLabel('Particle picker')
         label_model = QLabel('Trained model for picking')
-        label_diam = QLabel('Particle size (A)')
-        label_sym = QLabel('Symmetry')
-        label_3d = QLabel('Run 3D steps?')
+        label_mode = QLabel('Data processing type')
+        self.label_diam = QLabel('Particle size (A)')
+        self.label_sym = QLabel('Symmetry')
+        self.label_filament_width = QLabel('Filament width (A)')
+        self.label_filament_width.setVisible(False)
 
         vbox.addWidget(label_soft, alignment=Qt.Alignment())
         vbox.addWidget(label_path, alignment=Qt.Alignment())
         vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
         vbox.addWidget(label_picker, alignment=Qt.Alignment())
         vbox.addWidget(label_model, alignment=Qt.Alignment())
-        vbox.addWidget(label_diam, alignment=Qt.Alignment())
-        vbox.addWidget(label_sym, alignment=Qt.Alignment())
-        vbox.addWidget(label_3d, alignment=Qt.Alignment())
+        vbox.addWidget(label_mode, alignment=Qt.Alignment())
+        vbox.addWidget(self.label_diam, alignment=Qt.Alignment())
+        vbox.addWidget(self.label_sym, alignment=Qt.Alignment())
+        vbox.addWidget(self.label_filament_width, alignment=Qt.Alignment())
 
         return vbox
 
@@ -170,9 +173,9 @@ class Page1(QWizardPage):
         hbox_picker.setAlignment(Qt.AlignLeft)
         btgroup_picker = QButtonGroup()
 
-        self.button_cryolo = self.addRadioButton("crYOLO", default=DEF_PICKER == "Cryolo")
+        self.button_cryolo = self.addRadioButton("Cryolo", default=DEF_PICKER == "Cryolo")
         self.button_topaz = self.addRadioButton("Topaz", default=DEF_PICKER == "Topaz")
-        self.button_log = self.addRadioButton("LoG", default=DEF_PICKER == "Log")
+        self.button_log = self.addRadioButton("Log", default=DEF_PICKER == "Log")
         btgroup_picker.addButton(self.button_cryolo)
         btgroup_picker.addButton(self.button_topaz)
         btgroup_picker.addButton(self.button_log)
@@ -190,12 +193,27 @@ class Page1(QWizardPage):
         self.modelPath.setToolTip(help_message2)
 
         button_browse = QPushButton('Browse')
-        button_browse.setToolTip(help_message)
+        button_browse.setToolTip(help_message2)
         button_browse.clicked.connect(lambda: self.browseFileSlot(self.modelPath))
 
         hbox_model.addWidget(self.modelPath, alignment=Qt.Alignment())
         hbox_model.addWidget(button_browse, alignment=Qt.Alignment())
         grid.addLayout(hbox_model)
+
+        # mode
+        hbox_mode = QHBoxLayout()
+        hbox_mode.setAlignment(Qt.AlignLeft)
+        btgroup_mode = QButtonGroup()
+
+        self.button_spa = self.addRadioButton("SPA", default=True)
+        self.button_helical = self.addRadioButton("Helical", default=False)
+
+        btgroup_mode.addButton(self.button_spa)
+        btgroup_mode.addButton(self.button_helical)
+        btgroup_mode.buttonClicked.connect(lambda: self.updMode(btgroup_mode))
+        hbox_mode.addWidget(self.button_spa, alignment=Qt.Alignment())
+        hbox_mode.addWidget(self.button_helical, alignment=Qt.Alignment())
+        grid.addLayout(hbox_mode)
 
         # size box
         hbox_diam = QHBoxLayout()
@@ -216,13 +234,6 @@ class Page1(QWizardPage):
         hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
         grid.addLayout(hbox_sym)
 
-        # run 3D steps?
-        hbox_3d = QHBoxLayout()
-        hbox_3d.setAlignment(Qt.AlignLeft)
-        self.do_3d = QCheckBox()
-        hbox_3d.addWidget(self.do_3d, alignment=Qt.Alignment())
-        grid.addLayout(hbox_3d)
-
         return grid
 
     def updSoftware(self, btgroup):
@@ -236,7 +247,16 @@ class Page1(QWizardPage):
     def updPicker(self, btgroup):
         bt = btgroup.checkedButton()
         App.model.picker = bt.text()
-        App.model.size = self.spbox_diam.value()
+
+    def updMode(self, btgroup):
+        bt = btgroup.checkedButton()
+        btValue = bt.text()
+        App.model.mode = btValue
+
+        self.label_diam.setVisible(btValue == 'SPA')
+        self.label_sym.setVisible(btValue == 'SPA')
+        self.symm.setVisible(btValue == 'SPA')
+        self.label_filament_width.setVisible(btValue == 'Helical')
 
     def browseFolderSlot(self, var):
         """ Called when "Browse" is pressed. """
@@ -269,9 +289,17 @@ class Page1(QWizardPage):
     def validatePage(self):
         """ Executed when Next is pressed.
         Returns True or False. """
-        App.model.symmetry = self.symm.text()
         App.model.size = self.spbox_diam.value()
-        App.model.run3dsteps = self.do_3d.isChecked()
+
+        if App.model.mode == 'SPA':
+            App.model.symmetry = self.symm.text()
+        else:  # helical
+            if App.model.picker != 'Cryolo':
+                App.showDialog("ERROR", "Only crYOLO picker is supported for helical mode")
+                return False
+            if App.model.pickerModel is None:
+                App.showDialog("ERROR", "Helical picking requires a pre-trained crYOLO model")
+                return False
 
         if App.model.mdPath is None:
             App.model.mdPath = METADATA_PATH
@@ -280,7 +308,9 @@ class Page1(QWizardPage):
         App.model.user = (username, uid)
 
         if DEBUG:
-            print("\n\nInput params: ", sorted(App.model.__dict__.items()))
+            print("\n\nInput params: ")
+            for k, v in sorted(App.model.__dict__.items()):
+                print(k, v)
 
         prog = App.model.software
         fnList = App.model.guessFn(prog)
@@ -425,20 +455,23 @@ class Page2(QWizardPage):
         """ Widgets at row 1, col 0. """
         groupBox = QGroupBox("Recommended options")
 
+        tube = QLabel("Tube diameter (A)")
+        tube.setVisible(App.model.mode == 'Helical')
         box = QLabel("Box size (px)")
         mask = QLabel("Mask size (px)")
         box2 = QLabel("Downscale to (px)")
 
+        self.tube = self.addLine(50, 4, Qt.AlignRight)
+        self.tube.setVisible(App.model.mode == 'Helical')
         self.box = self.addLine(50, 4, Qt.AlignRight)
         self.mask = self.addLine(50, 4, Qt.AlignRight)
         self.box_bin = self.addLine(50, 4, Qt.AlignRight)
 
         vbox = QGridLayout()
-        for num, i in enumerate([box, mask, box2]):
+        for num, i in enumerate([tube, box, mask, box2]):
             vbox.addWidget(i, num, 0)
 
-        for num, i in enumerate([self.box, self.mask,
-                                 self.box_bin]):
+        for num, i in enumerate([self.tube, self.box, self.mask, self.box_bin]):
             vbox.addWidget(i, num, 1)
 
         groupBox.setLayout(vbox)
@@ -451,9 +484,13 @@ class Page2(QWizardPage):
         acqDict['PtclSize'] = size
         App.model.calcBox()
         self.mainLayout.addWidget(self.group3(), 1, 0)
+
         self.box.setText(acqDict['BoxSize'])
         self.mask.setText(acqDict['MaskSize'])
         self.box_bin.setText(acqDict['BoxSizeSmall'])
+
+        if App.model.mode == 'Helical':
+            self.tube.setText(acqDict['TubeDiam'])
 
     def onFinish(self):
         """ Finish is pressed, we need to update all editable vars. """
@@ -468,6 +505,11 @@ class Page2(QWizardPage):
             'Picker': App.model.picker,
             'Symmetry': App.model.symmetry
         })
+
+        if App.model.mode == 'Helical':
+            App.model.acqDict.update({
+                'TubeDiam': self.tube.text()
+            })
 
         print("\nFinal parameters:\n")
         for k, v in sorted(App.model.acqDict.items()):
