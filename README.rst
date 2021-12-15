@@ -99,9 +99,9 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://relion.readthedocs.io/en/release-4.0/>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO 1.8.0 <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO 1.8.0+ <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
 
-Relion and/or Scipion should be available from your shell **PATH**. You also need to define the following variables:
+Relion and/or Scipion should be available from your shell **PATH**. For Relion's schemes you also need to define the following variables:
 
 .. code-block:: bash
 
@@ -134,7 +134,6 @@ Important points to mention:
 
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
     * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
-    * Relion schemes use **/ssd** as the scratch (SSD) folder, you might want to change this
     * Relion schemes use two GPUs: 0-1
 
 Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
@@ -168,16 +167,16 @@ The app can be run interactively via GUI or can be started in the background.
 GUI mode
 ########
 
-  1. find and parse the first metadata file, getting all acquisition metadata
-  2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
-  3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
-  4. save found acquisition params in a text file (e.g. ``EPU_session_params``), save Relion params in ``relion_it_options.py``
-  5. modify existing Relion Schemes/Scipion template, copy them to the project folder then launch Relion/Scipion on-the-fly processing
+1. find and parse the first metadata file, getting all acquisition metadata
+2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
+3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
+4. save found acquisition params in a text file (e.g. ``EPU_session_params``), save Relion params in ``relion_it_options.py``
+5. modify existing Relion Schemes/Scipion template, copy them to the project folder then launch Relion/Scipion on-the-fly processing
 
 Daemon mode
 ###########
 
-From version 0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
+From MDCatch v0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
 Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
 
 Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PARTICLE_SIZES, DEF_PREFIX, METATADA_PATH, BATCH_SIZE.
@@ -207,7 +206,7 @@ In case of SerialEM, the movies and metadata (mdoc file) are expected to be in t
 SPA vs Helical mode
 ###################
 
-From version 2.2 onwards crYOLO picker can be run in helical mode (crYOLO v1.8.0+ required). Instead of a particle size, user provides the filament width. A pre-trained crYOLO model is also required.
+From MDCatch v2.2 onwards crYOLO picker can be run in helical mode (crYOLO v1.8.0+ required). Instead of a particle size, user provides the filament width. A pre-trained crYOLO model is also required.
 The suggested parameters in this case are:
 
     - tube diameter = 1.2 x filament width
@@ -237,7 +236,7 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schemes description</a></summary>
 
-There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is available in 3 variants: cryolo, topaz and log. Both schemes launched at the same time and will run for 12 hours
+There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is available in 3 variants: cryolo, topaz and log. Both schemes launched at the same time and will run for 18 hours
 
 1. The *prep* scheme includes 3 jobs that run in a loop, processing batches of 50 movies each time:
 
@@ -254,7 +253,7 @@ There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is avail
     c) particle extraction
     d) 2D classification with 50 classes
     e) auto-selection of good 2D classes (thr=0.35)
-    f) 3D initial model if number of good particles from e) is > 1500
+    f) 3D initial model if number of good particles from e) is > 5000
     g) 3D refinement
 
 The last four steps are always executed as new jobs (not overwriting previous results).
