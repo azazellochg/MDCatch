@@ -4,6 +4,7 @@
     3) use scratch SSD for filtered mics
     4) use --skip and --write_empty to skip done mics
     5) register output in .Nodes for Relion GUI
+    6) watch mode deprecated
 2.2b1: Helical picking mode added
 2.1.1:
     - Fix: Falcon 4 non-EER movies case now works

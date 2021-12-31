@@ -21,7 +21,6 @@ Dependencies are installed by pip automatically:
  * pyqt5 (GUI)
  * mrcfile (to parse MRC header)
  * tifffile (to parse TIF header)
- * watchdog (watch a folder when running in daemon mode)
  * emtable (STAR file parser)
 
 .. raw:: html
@@ -79,10 +78,9 @@ Screenshots
 Running
 -------
 
-To run with a GUI simply type **mdcatch**.
-If you want to run in daemon mode, run **mdcatch --watch** (see the details in the user guide below)
+To run simply type **mdcatch**.
 
-.. important:: Make sure the dose per frame is correct! The reported dose is measured directly from an image (at the camera level), so it is usually lower due to sample thickness, obj. aperture and energy filtering. If you are using EER, the reported dose is per EER frame! EER movies will be fractionated such that final frames will have 1 e/A\ :sup:`2`.
+.. important:: Make sure the detected dose per frame is correct! The reported dose is measured directly from an image (at the camera level), so it is usually lower due to sample thickness, obj. aperture and energy filtering. If you are using EER, the reported dose is per EER frame! EER movies will be fractionated such that final frames will have 1 e/A\ :sup:`2`.
 
 User guide
 ----------
@@ -99,7 +97,7 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://relion.readthedocs.io/en/release-4.0/>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `Topaz <https://github.com/tbepler/topaz>`_ or `crYOLO 1.8.0+ <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ or/and `crYOLO 1.8.0+ <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
 
 Relion and/or Scipion should be available from your shell **PATH**. For Relion's schemes you also need to define the following variables:
 
@@ -110,7 +108,7 @@ Relion and/or Scipion should be available from your shell **PATH**. For Relion's
     export RELION_TOPAZ_EXECUTABLE=/home/gsharov/soft/topaz
     export RELION_PYTHON=/home/gsharov/soft/miniconda3/envs/topaz-0.2.4/bin/python  # is used by Relion's PyTorch for 2D cls sorting
 
-*/home/gsharov/soft/topaz* is a bash script like this:
+*/home/gsharov/soft/topaz* is a bash script like below, that activates topaz environment:
 
 .. code-block:: bash
 
@@ -127,7 +125,7 @@ raw movies folder. In our case both storage systems are mounted via NFSv4.
    <details>
    <summary><a>Configuration</a></summary>
 
-Most of the configuration is done in **config.py**. As explained in the next section, the app can run in either interactive (GUI) or daemon mode.
+Most of the configuration is done in **config.py**.
 For the very first time it is useful to set **DEBUG=1** to see additional output and make sure it all works as expected.
 
 Important points to mention:
@@ -162,27 +160,15 @@ Below is an example of the folders setup on our server. Data points to movies st
    <details>
    <summary><a>Working principle</a></summary>
 
-The app can be run interactively via GUI or can be started in the background.
 
-GUI mode
-########
+Running steps
+#############
 
 1. find and parse the first metadata file, getting all acquisition metadata
 2. create a Relion/Scipion project folder ``username_microscope_date_time`` inside PROJECT_PATH (or inside Scipion default projects folder)
 3. create symlink for movies folder; copy gain reference, defects file, MTF into the project folder
 4. save found acquisition params in a text file (e.g. ``EPU_session_params``), save Relion params in ``relion_it_options.py``
 5. modify existing Relion Schemes/Scipion template, copy them to the project folder then launch Relion/Scipion on-the-fly processing
-
-Daemon mode
-###########
-
-From MDCatch v0.9.7 onwards it's possible to run the app in fully automatic mode. It will run in the background recursively watching for new directories (directory name should start with PREFIX, e.g. lmb_username_myEpuSession) inside METADATA_PATH.
-Once an xml/mrc (EPU) or a mdoc/tif (SerialEM) file is created in such folder, the default pipeline will launch. All subsequent steps are equivalent to the GUI mode.
-
-Make sure you have set in **config.py**: DEF_SOFTWARE, DEF_PIPELINE, DEF_PICKER, DEF_PARTICLE_SIZES, DEF_PREFIX, METATADA_PATH, BATCH_SIZE.
-
-You could setup a daily cron job for **mdcatch --watch** that starts only if mdcatch and Relion/Scipion are not already running.
-This prevents launching pre-processing on the data twice and/or concurrently.
 
 Metadata formats
 ################

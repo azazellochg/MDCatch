@@ -532,17 +532,12 @@ class Page2(QWizardPage):
 
 
 def main():
-    """ Create GUI app or start watchdog. """
+    """ Create GUI app. """
     args = sys.argv
-    help = "Usage: mdcatch [--watch]\nBy default starts a GUI, "\
-           "use '--watch' for daemon mode. It will watch METADATA_PATH folder."
+    help = "Usage: mdcatch"
     if len(args) > 1:
         if args[1] in ['-h', '--help']:
             print(help)
-        elif args[1] == '--watch':
-            from .watcher import WatchDog
-            watch = WatchDog()
-            watch.start_daemon(METADATA_PATH)
         else:
             print("Unrecognized arguments.\n%s" % help)
     else:
