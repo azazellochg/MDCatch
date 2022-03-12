@@ -16,7 +16,7 @@ _rlnSchemeFloatVariableValue #2
 _rlnSchemeFloatVariableResetValue #3 
 current_nr_mics     0.000000     0.000000 
 prev_nr_mics     0.000000     0.000000 
-maxtime_hr    8.000000    8.000000
+maxtime_hr    18.000000    18.000000
 wait_sec   60.000000   60.000000
 current_nr_parts      0.000000     0.000000 
 min_nr_parts_3d 5000.000   5000.000

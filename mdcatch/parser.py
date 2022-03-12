@@ -190,7 +190,7 @@ class Parser:
                         if not EPU_MOVIES_DICT[model].endswith(".mrc"):
                             movieDir = movieDir.replace("_EER.eer", ".mrc")
 
-            if wait:  # in daemon mode wait for movie folder to appear
+            if wait:  # FIXME: in daemon mode wait for movie folder to appear
                 while True:
                     if not os.path.exists(movieBaseDir):
                         print("Movie folder %s not found, waiting for 60 s.." % movieBaseDir)

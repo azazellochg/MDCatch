@@ -31,7 +31,6 @@ DEBUG = 0
 DEF_PIPELINE = "Relion"  # default pipeline: Relion or Scipion
 DEF_SOFTWARE = "EPU"  # default software: EPU or SerialEM
 DEF_PICKER = "Cryolo"  # default particle picker: Cryolo or Topaz or Log
-DEF_PREFIX = "lmb_"  # found metadata folder name should start with this prefix (only for daemon mode)
 DEF_PARTICLE_SIZE = 180  # default size in Angstroms
 DEF_SYMMETRY = "C1"
 BATCH_SIZE = 50  # number of movies to process in batches

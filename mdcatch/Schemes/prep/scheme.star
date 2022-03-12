@@ -16,7 +16,7 @@ _rlnSchemeFloatVariableName #1
 _rlnSchemeFloatVariableValue #2
 _rlnSchemeFloatVariableResetValue #3
 do_at_most   15.000000   15.000000
-maxtime_hr   12.000000   12.000000
+maxtime_hr   18.000000   18.000000
   wait_sec   0.000000   0.000000 
  
 
