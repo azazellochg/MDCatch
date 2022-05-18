@@ -239,7 +239,7 @@ There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is avail
     c) particle extraction
     d) 2D classification with 50 classes
     e) auto-selection of good 2D classes (thr=0.35)
-    f) 3D initial model if number of good particles from e) is > 5000
+    f) 3D initial model if number of good particles from previous step is > 5000
     g) 3D refinement
 
 The last four steps are always executed as new jobs (not overwriting previous results).

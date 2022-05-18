@@ -37,7 +37,7 @@ import math
 from emtable import Table  # run "pip3 install --user emtable" for system python
 
 
-CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8.2"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_GEN_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
