@@ -39,27 +39,15 @@ Dependencies are installed by pip automatically:
    <details>
    <summary><a>Install from sources</a></summary>
 
-You have two options:
+Create conda env (requires miniconda3 installed):
 
-    a) create python virtualenv:
+.. code-block:: python
 
-        .. code-block:: python
-
-            python3 -m venv mdcatch
-            source mdcatch/bin/activate
-            git clone https://github.com/azazellochg/MDCatch.git
-            cd MDCatch
-            pip install -e .
-
-    b) create conda virtualenv (requires miniconda3 installed):
-
-        .. code-block:: python
-
-            conda create -n mdcatch python=3
-            conda activate mdcatch
-            git clone https://github.com/azazellochg/MDCatch.git
-            cd MDCatch
-            pip install -e .
+    conda create -n mdcatch python=3
+    conda activate mdcatch
+    git clone https://github.com/azazellochg/MDCatch.git
+    cd MDCatch
+    pip install -e .
 
 .. raw:: html
 
@@ -80,7 +68,7 @@ Running
 
 To run simply type **mdcatch**.
 
-.. important:: Make sure the detected dose per frame is correct! The reported dose is measured directly from an image (at the camera level), so it is usually lower due to sample thickness, obj. aperture and energy filtering. If you are using EER, the reported dose is per EER frame! EER movies will be fractionated such that final frames will have 1 e/A\ :sup:`2`.
+.. important:: Make sure the detected dose per frame is correct! The reported dose is obtained from an image (at the camera level), so it can differ due to sample thickness, obj. aperture and energy filtering. If you are collecting EER data, the reported dose is per EER frame! EER movies will be fractionated such that final frames will have 1 e/A\ :sup:`2`.
 
 User guide
 ----------
@@ -97,7 +85,7 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://relion.readthedocs.io/en/release-4.0/>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `Topaz <https://github.com/tbepler/topaz>`_ or/and `crYOLO 1.8.0+ <https://cryolo.readthedocs.io/>`_ (installed in a conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ or/and `crYOLO 1.8.0+ <https://cryolo.readthedocs.io/>`_ (installed in a separate conda environment)
 
 Relion and/or Scipion should be available from your shell **PATH**. For Relion's schemes you also need to define the following variables:
 
@@ -116,7 +104,9 @@ Relion and/or Scipion should be available from your shell **PATH**. For Relion's
     source /home/gsharov/soft/miniconda3/bin/activate topaz-0.2.4
     topaz $@
 
-Also, this server needs access to both EPU session folder (with metadata files) and
+If you are using crYOLO, you need to edit a few variables at the top of *external_job_cryolo.py* file. This script can also be used completely independently from MDCatch.
+
+Additionally, this server needs access to both EPU session folder (with metadata files) and
 raw movies folder. In our case both storage systems are mounted via NFSv4.
 
 .. raw:: html
@@ -222,7 +212,7 @@ Scipion project will be created in the default Scipion projects folder.
    <details>
    <summary><a>Relion schemes description</a></summary>
 
-There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is available in 3 variants: cryolo, topaz and log. Both schemes launched at the same time and will run for 18 hours
+There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). The latter is available in 3 variants: cryolo, topaz and log. Both schemes launched at the same time and will run for 18 hours
 
 1. The *prep* scheme includes 3 jobs that run in a loop, processing batches of 50 movies each time:
 
@@ -236,7 +226,7 @@ There are two schemes: *prep* and *proc-cryolo* (or *proc-topaz*). Proc is avail
 
     a) micrograph selection (CTF resolution < 6A)
     b) particle picking: Cryolo (proc-cryolo) or Topaz/Logpicker (proc-topaz)
-    c) particle extraction
+    c) binned particles extraction
     d) 2D classification with 50 classes
     e) auto-selection of good 2D classes (thr=0.35)
     f) 3D initial model if number of good particles from previous step is > 5000
@@ -263,7 +253,7 @@ The test only checks if the parsers are working correctly using files from *test
 How to cite
 -----------
 
-Kimanius D, Dong L, Sharov G, Nakane T, Scheres SHW. New tools for automated cryo-EM single-particle analysis in RELION-4.0 [published online ahead of print, 2021 Nov 16]. Biochem J. 2021; BCJ20210708. doi:10.1042/BCJ20210708
+Kimanius D, Dong L, Sharov G, Nakane T, Scheres SHW. New tools for automated cryo-EM single-particle analysis in RELION-4.0. Biochem J. 2021, 478(24), p. 4169-4185. doi:10.1042/BCJ20210708
 
 Feedback
 --------

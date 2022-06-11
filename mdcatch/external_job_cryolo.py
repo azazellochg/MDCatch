@@ -34,7 +34,7 @@ import time
 from glob import glob
 import subprocess
 import math
-from emtable import Table  # run "pip3 install --user emtable" for system python
+from emtable import Table  # run "pip install --user emtable" for system python
 
 
 CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8.2"
