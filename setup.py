@@ -50,9 +50,9 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3'
     ],
-    keywords='cryo-em python qt5 epu serialem',
+    keywords='cryo-em python qt6 epu serialem',
     packages=find_packages(),
-    install_requires=['pyqt5', 'mrcfile', 'tifffile', 'emtable'],
+    install_requires=['pyqt6', 'mrcfile', 'tifffile', 'emtable'],
     entry_points={'console_scripts': ['mdcatch=mdcatch.run:main']},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/MDCatch/issues',

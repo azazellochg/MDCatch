@@ -27,13 +27,13 @@
 
 import os
 import sys
-from PyQt5.QtWidgets import (QGridLayout, QLabel, QMessageBox,
+from PyQt6.QtWidgets import (QGridLayout, QLabel, QMessageBox,
                              QHBoxLayout, QVBoxLayout, QRadioButton,
                              QPushButton, QWizard, QGroupBox,
                              QSizePolicy, QLineEdit, QFileDialog,
                              QCheckBox, QApplication, QWizardPage,
                              QButtonGroup, QSpinBox)
-from PyQt5.QtCore import Qt
+from PyQt6.QtCore import Qt
 
 from . import __version__
 from .config import *
@@ -47,7 +47,7 @@ class App(QWizard):
     model = Parser()
 
     def __init__(self, parent=None):
-        super(App, self).__init__(parent, flags=Qt.WindowFlags())
+        super(App, self).__init__(parent)
         self.title = 'MDCatch v%s - metadata parser' % __version__
         self.width = 640
         self.height = 320
@@ -59,11 +59,11 @@ class App(QWizard):
         self.addPage(self.page1)
         self.page2 = Page2()
         self.addPage(self.page2)
-        self.button(QWizard.BackButton).clicked.connect(self.page1.reset)
-        self.button(QWizard.FinishButton).clicked.connect(self.page2.onFinish)
+        self.button(QWizard.WizardButton.BackButton).clicked.connect(self.page1.reset)
+        self.button(QWizard.WizardButton.FinishButton).clicked.connect(self.page2.onFinish)
         self.setWindowTitle(self.title)
         # remove Help button from the window
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
         self.resize(self.width, self.height)
 
     @staticmethod
@@ -71,15 +71,15 @@ class App(QWizard):
         """ Dialog message with a warning or an error. """
         msg = QMessageBox()
         if mtype == 'error':
-            msg.setIcon(QMessageBox.Critical)
+            msg.setIcon(QMessageBox.Icon.Critical)
         else:
-            msg.setIcon(QMessageBox.Information)
+            msg.setIcon(QMessageBox.Icon.Information)
         msg.setWindowTitle(title)
         msg.setText(text)
         if extra is not None:
             msg.setDetailedText(extra)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg.exec()
 
 
 class Page1(QWizardPage):
@@ -106,15 +106,15 @@ class Page1(QWizardPage):
         self.label_filament_width = QLabel('Filament width (A)')
         self.label_filament_width.setVisible(False)
 
-        vbox.addWidget(label_soft, alignment=Qt.Alignment())
-        vbox.addWidget(label_path, alignment=Qt.Alignment())
-        vbox.addWidget(label_pipeline, alignment=Qt.Alignment())
-        vbox.addWidget(label_picker, alignment=Qt.Alignment())
-        vbox.addWidget(label_model, alignment=Qt.Alignment())
-        vbox.addWidget(label_mode, alignment=Qt.Alignment())
-        vbox.addWidget(self.label_diam, alignment=Qt.Alignment())
-        vbox.addWidget(self.label_sym, alignment=Qt.Alignment())
-        vbox.addWidget(self.label_filament_width, alignment=Qt.Alignment())
+        vbox.addWidget(label_soft)
+        vbox.addWidget(label_path)
+        vbox.addWidget(label_pipeline)
+        vbox.addWidget(label_picker)
+        vbox.addWidget(label_model)
+        vbox.addWidget(label_mode)
+        vbox.addWidget(self.label_diam)
+        vbox.addWidget(self.label_sym)
+        vbox.addWidget(self.label_filament_width)
 
         return vbox
 
@@ -124,7 +124,7 @@ class Page1(QWizardPage):
 
         # software type
         hbox_soft = QHBoxLayout()
-        hbox_soft.setAlignment(Qt.AlignLeft)
+        hbox_soft.setAlignment(Qt.AlignmentFlag.AlignLeft)
         btgroup_soft = QButtonGroup()
 
         button_epu = self.addRadioButton("EPU", default=DEF_SOFTWARE == "EPU")
@@ -133,8 +133,8 @@ class Page1(QWizardPage):
         btgroup_soft.addButton(button_epu)
         btgroup_soft.addButton(button_sem)
         btgroup_soft.buttonClicked.connect(lambda: self.updSoftware(btgroup_soft))
-        hbox_soft.addWidget(button_epu, alignment=Qt.Alignment())
-        hbox_soft.addWidget(button_sem, alignment=Qt.Alignment())
+        hbox_soft.addWidget(button_epu)
+        hbox_soft.addWidget(button_sem)
         grid.addLayout(hbox_soft)
 
         # path box
@@ -149,13 +149,13 @@ class Page1(QWizardPage):
         button_browse.setToolTip(help_message)
         button_browse.clicked.connect(lambda: self.browseFolderSlot(self.rawPath))
 
-        hbox_path.addWidget(self.rawPath, alignment=Qt.Alignment())
-        hbox_path.addWidget(button_browse, alignment=Qt.Alignment())
+        hbox_path.addWidget(self.rawPath)
+        hbox_path.addWidget(button_browse)
         grid.addLayout(hbox_path)
 
         # pipeline
         hbox_pipeline = QHBoxLayout()
-        hbox_pipeline.setAlignment(Qt.AlignLeft)
+        hbox_pipeline.setAlignment(Qt.AlignmentFlag.AlignLeft)
         btgroup_pipeline = QButtonGroup()
 
         button_relion = self.addRadioButton("Relion", default=DEF_PIPELINE == "Relion")
@@ -164,13 +164,13 @@ class Page1(QWizardPage):
         btgroup_pipeline.addButton(button_relion)
         btgroup_pipeline.addButton(button_scipion)
         btgroup_pipeline.buttonClicked.connect(lambda: self.updPipeline(btgroup_pipeline))
-        hbox_pipeline.addWidget(button_relion, alignment=Qt.Alignment())
-        hbox_pipeline.addWidget(button_scipion, alignment=Qt.Alignment())
+        hbox_pipeline.addWidget(button_relion)
+        hbox_pipeline.addWidget(button_scipion)
         grid.addLayout(hbox_pipeline)
 
         # particle picker
         hbox_picker = QHBoxLayout()
-        hbox_picker.setAlignment(Qt.AlignLeft)
+        hbox_picker.setAlignment(Qt.AlignmentFlag.AlignLeft)
         btgroup_picker = QButtonGroup()
 
         self.button_cryolo = self.addRadioButton("Cryolo", default=DEF_PICKER == "Cryolo")
@@ -180,9 +180,9 @@ class Page1(QWizardPage):
         btgroup_picker.addButton(self.button_topaz)
         btgroup_picker.addButton(self.button_log)
         btgroup_picker.buttonClicked.connect(lambda: self.updPicker(btgroup_picker))
-        hbox_picker.addWidget(self.button_cryolo, alignment=Qt.Alignment())
-        hbox_picker.addWidget(self.button_topaz, alignment=Qt.Alignment())
-        hbox_picker.addWidget(self.button_log, alignment=Qt.Alignment())
+        hbox_picker.addWidget(self.button_cryolo)
+        hbox_picker.addWidget(self.button_topaz)
+        hbox_picker.addWidget(self.button_log)
         grid.addLayout(hbox_picker)
 
         # picker model box
@@ -196,13 +196,13 @@ class Page1(QWizardPage):
         button_browse.setToolTip(help_message2)
         button_browse.clicked.connect(lambda: self.browseFileSlot(self.modelPath))
 
-        hbox_model.addWidget(self.modelPath, alignment=Qt.Alignment())
-        hbox_model.addWidget(button_browse, alignment=Qt.Alignment())
+        hbox_model.addWidget(self.modelPath)
+        hbox_model.addWidget(button_browse)
         grid.addLayout(hbox_model)
 
         # mode
         hbox_mode = QHBoxLayout()
-        hbox_mode.setAlignment(Qt.AlignLeft)
+        hbox_mode.setAlignment(Qt.AlignmentFlag.AlignLeft)
         btgroup_mode = QButtonGroup()
 
         self.button_spa = self.addRadioButton("SPA", default=True)
@@ -211,8 +211,8 @@ class Page1(QWizardPage):
         btgroup_mode.addButton(self.button_spa)
         btgroup_mode.addButton(self.button_helical)
         btgroup_mode.buttonClicked.connect(lambda: self.updMode(btgroup_mode))
-        hbox_mode.addWidget(self.button_spa, alignment=Qt.Alignment())
-        hbox_mode.addWidget(self.button_helical, alignment=Qt.Alignment())
+        hbox_mode.addWidget(self.button_spa)
+        hbox_mode.addWidget(self.button_helical)
         grid.addLayout(hbox_mode)
 
         # size box
@@ -222,7 +222,7 @@ class Page1(QWizardPage):
         self.spbox_diam.setValue(DEF_PARTICLE_SIZE)
         self.spbox_diam.setFixedSize(60, 25)
         hbox_diam.addWidget(self.spbox_diam)
-        hbox_diam.setAlignment(Qt.AlignLeft)
+        hbox_diam.setAlignment(Qt.AlignmentFlag.AlignLeft)
         grid.addLayout(hbox_diam)
 
         # symmetry box
@@ -231,7 +231,7 @@ class Page1(QWizardPage):
         self.symm.setMinimumWidth(60)
         self.symm.setMaximumWidth(60)
         self.symm.setText(DEF_SYMMETRY)
-        hbox_sym.addWidget(self.symm, alignment=Qt.AlignLeft)
+        hbox_sym.addWidget(self.symm, alignment=Qt.AlignmentFlag.AlignLeft)
         grid.addLayout(hbox_sym)
 
         return grid
@@ -263,7 +263,7 @@ class Page1(QWizardPage):
         folder = METADATA_PATH if var.text() is None else var.text()
         path = QFileDialog.getExistingDirectory(self, "Select Directory",
                                                 folder,
-                                                options=QFileDialog.ShowDirsOnly)
+                                                options=QFileDialog.Option.ShowDirsOnly)
         if path:
             self.refreshPath(path)
 
@@ -337,7 +337,7 @@ class Page1(QWizardPage):
         if default:
             rb.setChecked(True)
 
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         rb.setSizePolicy(sizePolicy)
         return rb
 
@@ -405,7 +405,7 @@ class Page2(QWizardPage):
         self.kv = QLabel()
         self.cs = QLabel()
         self.vpp = QCheckBox()
-        self.px = self.addLine(50, 5, Qt.AlignRight)
+        self.px = self.addLine(50, 5, Qt.AlignmentFlag.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name, kv, cs, px, vpp]):
@@ -435,7 +435,7 @@ class Page2(QWizardPage):
         self.frames = QLabel()
         self.gain = QLabel()
         self.defects = QLabel()
-        self.dosepf = self.addLine(50, 5, Qt.AlignRight)
+        self.dosepf = self.addLine(50, 5, Qt.AlignmentFlag.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([name, mode, time, frames,
@@ -461,11 +461,11 @@ class Page2(QWizardPage):
         mask = QLabel("Mask size (px)")
         box2 = QLabel("Downscale to (px)")
 
-        self.tube = self.addLine(50, 4, Qt.AlignRight)
+        self.tube = self.addLine(50, 4, Qt.AlignmentFlag.AlignRight)
         self.tube.setVisible(App.model.mode == 'Helical')
-        self.box = self.addLine(50, 4, Qt.AlignRight)
-        self.mask = self.addLine(50, 4, Qt.AlignRight)
-        self.box_bin = self.addLine(50, 4, Qt.AlignRight)
+        self.box = self.addLine(50, 4, Qt.AlignmentFlag.AlignRight)
+        self.mask = self.addLine(50, 4, Qt.AlignmentFlag.AlignRight)
+        self.box_bin = self.addLine(50, 4, Qt.AlignmentFlag.AlignRight)
 
         vbox = QGridLayout()
         for num, i in enumerate([tube, box, mask, box2]):
@@ -545,4 +545,4 @@ def main():
         app.setStyle('Fusion')
         wizard = App()
         wizard.show()
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

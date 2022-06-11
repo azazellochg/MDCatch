@@ -18,7 +18,7 @@ You can install either using pip (recommended) or from sources.
 Dependencies are installed by pip automatically:
 
  * python3
- * pyqt5 (GUI)
+ * pyqt6 (GUI)
  * mrcfile (to parse MRC header)
  * tifffile (to parse TIF header)
  * emtable (STAR file parser)
@@ -55,7 +55,7 @@ You have two options:
 
         .. code-block:: python
 
-            conda create -n mdcatch python=3.8
+            conda create -n mdcatch python=3
             conda activate mdcatch
             git clone https://github.com/azazellochg/MDCatch.git
             cd MDCatch
