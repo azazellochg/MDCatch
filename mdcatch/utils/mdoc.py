@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # **************************************************************************
 # *
 # * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk) [1]
@@ -81,4 +80,3 @@ def parseMdoc(fn):
             print("%s = %s" % (k, v))
 
     return acqDict
-

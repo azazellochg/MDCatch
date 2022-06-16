@@ -148,7 +148,7 @@ class Parser:
                 self.acqDict['BoxSizeSmall'] = str(box)
                 break
 
-    def guessDataDir(self, wait=False, testmode=False):
+    def guessDataDir(self, testmode=False):
         """ Guess folder name with movies, gain and defects files. """
         movieDir, gainFn, defFn = 'None', 'None', 'None'
         camera = self.acqDict['Detector']
@@ -190,17 +190,8 @@ class Parser:
                         if not EPU_MOVIES_DICT[model].endswith(".mrc"):
                             movieDir = movieDir.replace("_EER.eer", ".mrc")
 
-            if wait:  # FIXME: in daemon mode wait for movie folder to appear
-                while True:
-                    if not os.path.exists(movieBaseDir):
-                        print("Movie folder %s not found, waiting for 60 s.." % movieBaseDir)
-                        time.sleep(60)
-                    else:
-                        print("Movie folder found! Continuing..")
-                        break
-            else:  # GUI mode
-                if not os.path.exists(movieBaseDir) and not testmode:
-                    raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
+            if not os.path.exists(movieBaseDir) and not testmode:
+                raise FileNotFoundError("Movie folder %s does not exist!" % movieBaseDir)
 
         else:  # SerialEM
             movieDir = os.path.join(self.mdPath, PATTERN_SEM_MOVIES)
