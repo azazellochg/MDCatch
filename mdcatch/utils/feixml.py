@@ -26,6 +26,8 @@
 
 """ This script parses FEI EPU xml file. """
 
+import os
+import sys
 import math
 import xml.etree.ElementTree as ET
 
@@ -139,3 +141,12 @@ def parseXml(fn):
         acqDict[key] = str(acqDict[key])
 
     return acqDict
+
+
+def main():
+    if len(sys.argv) == 2:
+        result = parseXml(sys.argv[1])
+        for k, v in sorted(result.items()):
+            print("%s = %s" % (k, v))
+    else:
+        raise ValueError(f"Unrecognized input, please use: {os.path.basename(sys.argv[0])} filename")

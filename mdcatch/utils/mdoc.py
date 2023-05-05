@@ -26,6 +26,8 @@
 
 """ This script parses mdoc files from SerialEM. """
 
+import os
+import sys
 import re
 
 from ..config import DEBUG, SERIALEM_PARAMS, SCOPE_DICT
@@ -80,3 +82,12 @@ def parseMdoc(fn):
             print("%s = %s" % (k, v))
 
     return acqDict
+
+
+def main():
+    if len(sys.argv) == 2:
+        result = parseMdoc(sys.argv[1])
+        for k, v in sorted(result.items()):
+            print("%s = %s" % (k, v))
+    else:
+        raise ValueError(f"Unrecognized input, please use: {os.path.basename(sys.argv[0])} filename")

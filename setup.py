@@ -53,7 +53,13 @@ setup(
     keywords='cryo-em python qt6 epu serialem',
     packages=find_packages(),
     install_requires=['pyqt6', 'mrcfile', 'tifffile', 'emtable'],
-    entry_points={'console_scripts': ['mdcatch=mdcatch.run:main']},
+    entry_points={'console_scripts': [
+        'mdcatch=mdcatch.run:main',
+        'parse-mrc=mdcatch.utils.feimrc:main',
+        'parse-xml=mdcatch.utils.feixml:main',
+        'parse-tif=mdcatch.utils.tiff:main',
+        'parse-mdoc=mdcatch.utils.mdoc:main'
+    ]},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/MDCatch/issues',
         'Source': 'https://github.com/azazellochg/MDCatch',

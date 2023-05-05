@@ -250,6 +250,16 @@ The test only checks if the parsers are working correctly using files from *test
 
    </details>
 
+Extras
+------
+
+The MDCatch package provides extra command-line scripts to parse MRC, XML, MDOC or TIF file headers. Simply use one of the commands below followed by a filename:
+
+* parse-mrc filename.mrc
+* parse-xml filename.xml
+* parse-mdoc filename.mdoc
+* parse-tif filename.tiff
+
 How to cite
 -----------
 
