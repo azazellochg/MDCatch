@@ -72,12 +72,12 @@ def parseXml(fn):
         except:
             pass
 
-    if acqDict['MicroscopeID'] in SCOPE_DICT:
+    if acqDict.get('MicroscopeID', None) in SCOPE_DICT:
         acqDict['Cs'] = SCOPE_DICT[acqDict['MicroscopeID']][1]
 
-    acqDict['BeamSize'] = float(acqDict['BeamSize']) * math.pow(10, 6)
-    acqDict['Voltage'] = int(acqDict['Voltage']) // 1000
-    acqDict['Binning'] = int(acqDict['Binning'])
+    acqDict['BeamSize'] = float(acqDict.get('BeamSize', 0)) * math.pow(10, 6)
+    acqDict['Voltage'] = int(acqDict.get('Voltage', 0)) // 1000
+    acqDict['Binning'] = int(acqDict.get('Binning', 0))
 
     # get cameraSpecificInput: ElectronCountingEnabled, SuperResolutionFactor etc.
     customDict = dict()
@@ -89,14 +89,14 @@ def parseXml(fn):
     # check if counting/super-res is enabled
     sr = 1.0
     acqDict['Mode'] = 'Linear'
-    if customDict['ElectronCountingEnabled'] == 'true':
+    if customDict.get('ElectronCountingEnabled', "false") == 'true':
         sr = float(customDict['SuperResolutionFactor'])  # 1 - counting, 2 - super-res
         acqDict['Mode'] = 'Counting' if sr == 1.0 else 'Super-resolution'
 
     # EPU's pixel size refers to a physical pixel, which is already multiplied by Binning factor
-    acqDict['PixelSpacing'] = float(acqDict['PixelSpacing']) * math.pow(10, 10) / sr
+    acqDict['PixelSpacing'] = float(acqDict.get('PixelSpacing', 0)) * math.pow(10, 10) / sr
 
-    if acqDict['Detector'] == 'EF-CCD':
+    if acqDict.get('Detector', None) == 'EF-CCD':
         elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}NumberOffractions"
         acqDict['NumSubFrames'] = root.find(elem.format(**nspace)).text
     else:
