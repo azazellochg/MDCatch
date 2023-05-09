@@ -1,5 +1,6 @@
 2.5:
     - added cmd scripts to parse metadata files
+    - fix microscope id parsing from mdoc
 2.4:
     - upgrade to PyQt6
 2.3: fix the crash due to zero wait time in prep scheme

@@ -109,7 +109,6 @@ PATTERN_SEM = "*.tif.mdoc"
 
 # Which SerialEM mdoc variables to parse
 SERIALEM_PARAMS = [
-    'T',  # Microscope ID
     'Voltage',
     'Magnification',
     'ExposureDose',
@@ -118,7 +117,7 @@ SERIALEM_PARAMS = [
     'Binning',
     'TargetDefocus',
     'NumSubFrames',
-    # 'DateTime',
+    'DateTime',
     'DefectFile',
     'GainReference'
 ]

@@ -33,7 +33,7 @@ import re
 from ..config import DEBUG, SERIALEM_PARAMS, SCOPE_DICT
 
 
-REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>(.*))"
+REGEX_MDOC_VAR = "(?P<var>[a-zA-Z0-9]+?) = (?P<value>.*)"
 
 
 def parseMdoc(fn):
@@ -42,26 +42,25 @@ def parseMdoc(fn):
 
     with open(fn, 'r') as fname:
         regex = re.compile(REGEX_MDOC_VAR)
-
+        scope_id = None
         for line in fname:
-            match = regex.match(line)
-            if match and match.groupdict()['var'] in SERIALEM_PARAMS:
-                key = match.groupdict()['var']
-                acqDict[key] = match.groupdict()['value'].strip()
+            if "[T = SerialEM" in line:
+                match = re.search("D[0-9]{3,10}", line)
+                scope_id = match.group().replace('D', '')
+            else:
+                match = regex.match(line)
+                if match and match.groupdict()['var'] in SERIALEM_PARAMS:
+                    key = match.groupdict()['var']
+                    acqDict[key] = match.groupdict()['value'].strip()
 
-    # rename a few keys to match EPU
-    # T = SerialEM: Acquired on Titan Krios D3593
-    match = re.search("D[0-9]{3,10}", acqDict['T'])
-    if match:
-        value = match.group().replace('D', '')
-        acqDict['MicroscopeID'] = value
-        acqDict.pop('T')
-        if value in SCOPE_DICT:
-            acqDict['Cs'] = str(SCOPE_DICT[value][1])
+    if scope_id is not None:
+        acqDict['MicroscopeID'] = scope_id
+        if scope_id in SCOPE_DICT:
+            acqDict['Cs'] = str(SCOPE_DICT[scope_id][1])
     else:
         print("ERROR: Could not detect MicroscopeID (D####) from mdoc!\n"
               "Make sure you have e.g. the following line in the mdoc:\n"
-              "T = SerialEM: Acquired on Titan Krios D3593")
+              "[T = SerialEM: Acquired on Titan Krios D3593]")
         exit(1)
 
     if 'ExposureDose' in acqDict:
