@@ -51,7 +51,7 @@
         "runName": null,
         "runMode": 0,
         "sumFrame0": 1,
-        "sumFrameN": 24,
+        "sumFrameN": 0,
         "doDW": true,
         "saveNonDW": false,
         "savePSsum": true,

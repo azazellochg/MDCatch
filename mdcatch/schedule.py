@@ -122,6 +122,9 @@ def setupRelion(paramDict):
             'prep__motioncorr__eer_grouping': eer_group
         })
 
+    if paramDict['Detector'] in ["K2", "K3"]:
+        mapDict.update({'prep__motioncorr__patch_x': 7})
+
     prjName = getPrjName(paramDict)
     prjPath = os.path.join(paramDict['PrjPath'], prjName)
     os.mkdir(prjPath)
@@ -318,6 +321,8 @@ def setupScipion(paramDict):
     movieProt["binFactor"] = bin
     movieProt["groupFrames"] = group_frames
     movieProt["defectFile"] = (prjPath + "/" + os.path.basename(defect)) if defect else ""
+    if paramDict['Detector'] in ["K2", "K3"]:
+        movieProt['patchX'] = 7
 
     # ctffind
     ctfProt = protocolsList[protNames["CistemProtCTFFind"]]

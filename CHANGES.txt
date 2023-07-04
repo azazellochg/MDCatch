@@ -1,3 +1,11 @@
+2.5:
+    - fix Falcon 4(i) EER case: parse frame rate and gain reference name from xml
+    - add EF-Falcon camera type
+    - update cryolo version
+    - added cmd scripts to parse metadata files
+    - fix microscope id parsing from mdoc
+    - remove skip_gridding param (#58)
+    - set 7x5 patches for Gatan detectors (#59)
 2.4:
     - upgrade to PyQt6
 2.3: fix the crash due to zero wait time in prep scheme

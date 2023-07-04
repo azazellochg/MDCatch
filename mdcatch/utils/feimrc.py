@@ -26,6 +26,8 @@
 
 """ This script parses MRC 2014 FEI1/FEI2 file header. """
 
+import os
+import sys
 import mrcfile
 import math
 
@@ -36,7 +38,7 @@ def parseMrc(fn):
     acqDict = {}
     with mrcfile.open(fn, header_only=True) as mrc:
         main = mrc.header
-        ext = mrc.extended_header
+        ext = mrc.indexed_extended_header
 
     for item in main.dtype.names:
         acqDict[item] = main[item]
@@ -97,3 +99,12 @@ def _standardizeDict(acqDict):
         stdDict[key] = str(stdDict[key])
 
     return stdDict
+
+
+def main():
+    if len(sys.argv) == 2:
+        result = parseMrc(sys.argv[1])
+        for k, v in sorted(result.items()):
+            print("%s = %s" % (k, v))
+    else:
+        raise ValueError(f"Unrecognized input, please use: {os.path.basename(sys.argv[0])} filename")

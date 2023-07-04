@@ -185,7 +185,7 @@ class Parser:
                 # Falcon 4 EER gain reference
                 if model == "Falcon4":
                     if self.acqDict['Mode'] == "EER":
-                        gainFn = GAIN_DICT[model]
+                        gainFn = os.path.join(GAIN_DICT[model], self.acqDict['GainReference'])
                     else:  # MRC
                         if not EPU_MOVIES_DICT[model].endswith(".mrc"):
                             movieDir = movieDir.replace("_EER.eer", ".mrc")
