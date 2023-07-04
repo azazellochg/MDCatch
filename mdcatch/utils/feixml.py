@@ -115,8 +115,13 @@ def parseXml(fn):
         customDict[k.text] = v.text
 
     if 'Detectors[BM-Falcon].EerGainReference' in customDict:
-        acqDict['NumSubFrames'] = int(int(float(acqDict['ExposureTime']) * 248.6943) * 31 / 32)
+        acqDict['NumSubFrames'] = int(int(float(acqDict['ExposureTime']) * float(customDict['Detectors[BM-Falcon].FrameRate'])) * 31 / 32)
         acqDict['Mode'] = "EER"
+        acqDict['GainReference'] = os.path.basename(customDict['Detectors[BM-Falcon].EerGainReference'])
+    elif 'Detectors[EF-Falcon].EerGainReference' in customDict:
+        acqDict['NumSubFrames'] = int(int(float(acqDict['ExposureTime']) * float(customDict['Detectors[EF-Falcon].FrameRate'])) * 31 / 32)
+        acqDict['Mode'] = "EER"
+        acqDict['GainReference'] = os.path.basename(customDict['Detectors[EF-Falcon].EerGainReference'])
     if 'AppliedDefocus' in customDict:
         acqDict['AppliedDefocus'] = float(customDict['AppliedDefocus']) * math.pow(10, 6)
     if 'Dose' in customDict:

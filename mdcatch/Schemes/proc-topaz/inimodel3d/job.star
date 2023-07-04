@@ -36,7 +36,6 @@ particle_diameter        200
 qsubscript /public/EM/RELION/relion/bin/relion_qsub.csh 
  queuename    openmpi 
 scratch_dir       $RELION_SCRATCH_DIR
-skip_gridding        Yes 
   sym_name         C1
    tau_fudge          4
    use_gpu        Yes 

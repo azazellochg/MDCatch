@@ -43,10 +43,10 @@ METADATA_PATH = "/mnt/MetaData"
 PROJECT_PATH = "/cephfs"
 
 # Folder with Relion 4 template schemes
-SCHEMES_PATH = "/home/gsharov/soft/MDCatch-dev/mdcatch/Schemes"
+SCHEMES_PATH = "/home/gsharov/soft/MDCatch/mdcatch/Schemes"
 
 # Scipion 3 template
-JSON_TEMPLATE = "/home/gsharov/soft/MDCatch-dev/mdcatch/template.json"
+JSON_TEMPLATE = "/home/gsharov/soft/MDCatch/mdcatch/template.json"
 
 # main dictionary
 # instrumentID: [name, Cs, TFS camera, Gatan camera]
@@ -54,6 +54,7 @@ SCOPE_DICT = {
     '3299': ['Krios1', 2.7, 'Falcon3', 'K3'],
     '3413': ['Krios2', 2.7, 'Falcon4', 'K2'],
     '3593': ['Krios3', 2.7, 'Falcon3', 'K3'],
+    '4248': ['Krios4', 2.7, 'Falcon4', None],
     '9952833': ['Glacios', 2.7, 'Falcon3', None]
 }
 
@@ -71,8 +72,9 @@ EPU_MOVIES_DICT = {
 GAIN_DICT = {
     'K2': "FoilHole_*_Data_*-gain-ref.MRC",
     'K3': "FoilHole_*_Data_*_gain.tiff",
-    # Falcon 4 EER gain is not copied by EPU, so we need to provide a full path
-    'Falcon4': "/home/gsharov/20210128_135200_EER_GainReference.gain"
+    # HACK: Falcon 4 EER gain is not copied by EPU, so we need to provide a full path
+    # to a folder with gain files. Filenames should match the names from EPU xml file.
+    'Falcon4': "/home/gsharov/"
 }
 
 # Which EPU session files to parse for metadata (default is xml)
@@ -95,7 +97,8 @@ MTF_DICT = {
 # scope and camera names should match SCOPE_DICT
 MOVIE_PATH_DICT = {
     'EF-CCD': '/mnt/Data/%s/%s/',
-    'BM-Falcon': '/mnt/Data/%s/%s/'
+    'BM-Falcon': '/mnt/Data/%s/%s/',
+    'EF-Falcon': '/mnt/Data/%s/%s/'
 }
 
 ###############################################################################

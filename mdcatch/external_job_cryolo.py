@@ -37,7 +37,7 @@ import math
 from emtable import Table  # run "pip install --user emtable" for system python
 
 
-CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.8.2"
+CONDA_ENV = ". /home/gsharov/rc/conda.rc && conda activate cryolo-1.9.3"
 CRYOLO_PREDICT = "cryolo_predict.py"
 CRYOLO_GEN_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_N63_c17.h5"
 CRYOLO_GEN_JANNI_MODEL = "/home/gsharov/soft/cryolo/gmodel_phosnet_202005_nn_N63_c17.h5"
@@ -297,7 +297,7 @@ sigma_contrast      3
 def main():
     """Change to the job working directory, then call run_job()"""
     help = """
-External job for calling crYOLO 1.8+ within Relion 4.0. Run it in the Relion project directory, e.g.:
+External job for calling crYOLO 1.9+ within Relion 4.0. Run it in the Relion project directory, e.g.:
     external_job_cryolo.py --o External/cryolo_picking --in_mics CtfFind/job004/micrographs_ctf.star
 """
     parser = argparse.ArgumentParser(usage=help)

@@ -17,7 +17,7 @@ You can install either using pip (recommended) or from sources.
 
 Dependencies are installed by pip automatically:
 
- * python3
+ * python
  * pyqt6 (GUI)
  * mrcfile (to parse MRC header)
  * tifffile (to parse TIF header)
@@ -56,10 +56,10 @@ Create conda env (requires miniconda3 installed):
 Screenshots
 -----------
 
-.. image:: https://user-images.githubusercontent.com/6952870/139845150-d1aa465c-98cd-4a11-8c84-df099fbeb397.png
+.. image:: https://github.com/azazellochg/MDCatch/assets/6952870/621deb21-bec7-478e-8b89-61659765a383
    :width: 640 px
 
-.. image:: https://user-images.githubusercontent.com/6952870/139845338-4ee9b0be-0a94-41ee-8710-f730b71f1177.png
+.. image:: https://github.com/azazellochg/MDCatch/assets/6952870/3d7475e5-7c34-42b9-b317-4662482c6c30
    :width: 640 px
 
 
@@ -85,7 +85,7 @@ The server requires the following software installed:
 
     - `RELION 4.0 <https://relion.readthedocs.io/en/release-4.0/>`_ or/and `Scipion 3 <http://scipion.i2pc.es/>`_
     - `CTFFIND4 <https://grigoriefflab.umassmed.edu/ctffind4>`_
-    - `Topaz <https://github.com/tbepler/topaz>`_ or/and `crYOLO 1.8.0+ <https://cryolo.readthedocs.io/>`_ (installed in a separate conda environment)
+    - `Topaz <https://github.com/tbepler/topaz>`_ or/and `crYOLO 1.9+ <https://cryolo.readthedocs.io/>`_ (installed in a separate conda environment)
 
 Relion and/or Scipion should be available from your shell **PATH**. For Relion's schemes you also need to define the following variables:
 
@@ -121,7 +121,7 @@ For the very first time it is useful to set **DEBUG=1** to see additional output
 Important points to mention:
 
     * camera names in the SCOPE_DICT must match the names in EPU_MOVIES_DICT, GAIN_DICT and MTF_DICT
-    * since in EPU Falcon cameras are called "BM-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
+    * since in EPU Falcon cameras are called "BM-Falcon" or "EF-Falcon" and Gatan cameras are called "EF-CCD", MOVIE_PATH_DICT keys should not be changed, only the values
     * Relion schemes use two GPUs: 0-1
 
 Below is an example of the folders setup on our server. Data points to movies storage, while Metadata is for EPU sessions.
@@ -130,19 +130,24 @@ Below is an example of the folders setup on our server. Data points to movies st
 
     /mnt
     ├── Data
-    │   ├── Krios1
-    │   │   ├── Falcon3
-    │   │   └── K2 (with DoseFractions folder inside)
-    │   ├── Krios2
-    │   │   ├── Falcon4
-    │   │   └── K2 (with DoseFractions folder inside)
-    │   └── Krios3
-    │       ├── Falcon3
-    │       └── K3 (with DoseFractions folder inside)
+    │     ├── Krios1
+    │     │     ├── Falcon3
+    │     │     └── K3 (with DoseFractions folder inside)
+    │     ├── Krios2
+    │     │     ├── Falcon4
+    │     │     └── K2 (with DoseFractions folder inside)
+    │     ├── Krios3
+    │     │     ├── Falcon3
+    │     │     └── K3 (with DoseFractions folder inside)
+    │     ├── Krios4
+    │     │     └── Falcon4
+    │     └── Glacios
+    │           └── Falcon3
     └── MetaData
         ├── Krios1
         ├── Krios2
-        └── Krios3
+        ├── Krios3
+        └── Krios4
 
 .. raw:: html
 
@@ -182,7 +187,7 @@ In case of SerialEM, the movies and metadata (mdoc file) are expected to be in t
 SPA vs Helical mode
 ###################
 
-From MDCatch v2.2 onwards crYOLO picker can be run in helical mode (crYOLO v1.8.0+ required). Instead of a particle size, user provides the filament width. A pre-trained crYOLO model is also required.
+From MDCatch v2.2 onwards crYOLO picker can be run in helical mode (crYOLO v1.9+ required). Instead of a particle size, user provides the filament width. A pre-trained crYOLO model is also required.
 The suggested parameters in this case are:
 
     - tube diameter = 1.2 x filament width
@@ -268,4 +273,4 @@ Kimanius D, Dong L, Sharov G, Nakane T, Scheres SHW. New tools for automated cry
 Feedback
 --------
 
-Please report bugs and suggestions for improvements as a `Github issue <https://github.com/azazellochg/MDCatch/issues/new/choose>`_.
+Please report bugs and suggestions for improvements as a `Github issue <https://github.com/azazellochg/MDCatch/issues/new>`_.
